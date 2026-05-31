@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Night overrides for API 28+. Mirrors values-v28 (keeps windowLayoutInDisplayCutoutMode) plus
+     the dark-mode yellow-on-black palette. The night qualifier outranks v28, so without this file a
+     plain values-night theme would drop the cutout handling on API 28+. -->
+<resources>
+
+    <style name="AppDark" parent="@style/Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="colorAccent">@color/color_accent</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:colorForeground">#FFFFFF00</item>
+        <item name="colorBackgroundFloating">#FF000000</item>
+        <item name="android:colorBackgroundFloating">#FF000000</item>
+        <item name="android:colorBackground">#FF000000</item>
+        <item name="android:windowBackground">#FF000000</item>
+    </style>
+
+    <style name="AppLight" parent="@style/Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="colorAccent">@color/color_accent</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:colorForeground">#FFFFFF00</item>
+        <item name="colorBackgroundFloating">#FF000000</item>
+        <item name="android:colorBackgroundFloating">#FF000000</item>
+        <item name="android:colorBackground">#FF000000</item>
+        <item name="android:windowBackground">#FF000000</item>
+    </style>
+
+</resources>

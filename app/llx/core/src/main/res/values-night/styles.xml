@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark (night) appearance overrides. Light mode is unaffected (res/values/styles.xml).
+     Menus read ?android:colorForeground (text + icons) -> yellow, and their background comes from
+     BOTH the framework ?android:colorBackgroundFloating (bubble container) and the AppCompat
+     ?colorBackgroundFloating (bubble items) -> override both to black. The "red" accent/heading
+     colour is brightened to orange in values-night/colors.xml. -->
+<resources>
+
+    <style name="AppDark" parent="@style/Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="colorAccent">@color/color_accent</item>
+        <item name="android:colorForeground">#FFFFFF00</item>
+        <item name="colorBackgroundFloating">#FF000000</item>
+        <item name="android:colorBackgroundFloating">#FF000000</item>
+        <item name="android:colorBackground">#FF000000</item>
+        <item name="android:windowBackground">#FF000000</item>
+    </style>
+
+    <style name="AppLight" parent="@style/Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="colorAccent">@color/color_accent</item>
+        <item name="android:colorForeground">#FFFFFF00</item>
+        <item name="colorBackgroundFloating">#FF000000</item>
+        <item name="android:colorBackgroundFloating">#FF000000</item>
+        <item name="android:colorBackground">#FF000000</item>
+        <item name="android:windowBackground">#FF000000</item>
+    </style>
+
+</resources>

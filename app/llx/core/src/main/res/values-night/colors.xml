@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark-mode accent: the deep orange-red #ff5722 used for menu heading lines (@color/color_primary)
+     and heading text (colorAccent) is too dark on black, so brighten it to orange in night mode.
+     Light mode keeps #ff5722 (res/values/styles.xml). -->
+<resources>
+    <color name="color_primary">#FFFFA500</color>
+    <color name="color_accent">#FFFFA500</color>
+</resources>
