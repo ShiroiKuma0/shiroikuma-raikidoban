@@ -53,6 +53,7 @@ public class GlobalConfig extends JsonLoader {
     public static final int HIDE_FLOATING_DESKTOP = 43;
     public static final int OPEN_HIERARCHY_SCREEN = 44;
     public static final int SHOW_APP_SHORTCUTS = 45;
+    public static final int REINIT_TASKER_WIDGETS = 46;
     public int version = 1;
     public EventAction homeKey = new EventAction(GO_HOME_ZOOM_TO_ORIGIN, null);
     public EventAction menuKey = new EventAction(SHOW_HIDE_APP_MENU_STATUS_BAR, null);

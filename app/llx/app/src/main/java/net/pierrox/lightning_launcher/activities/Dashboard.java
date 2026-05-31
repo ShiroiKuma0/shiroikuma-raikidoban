@@ -814,6 +814,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         mScreen.resume();
 
         updateLightningLiveWallpaperVisibility();
+
+        maybeOfferTaskerReinit();
     }
 
     @Override
@@ -4020,6 +4022,48 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         mTaskerReinitQueue = list;
         mTaskerReinitIndex = 0;
         processNextTaskerWidget();
+    }
+
+    private static boolean sTaskerAutoOfferChecked = false;
+
+    /** Once per launch, if any named Tasker widget has a dead appWidgetId (the post-restore /
+     * post-crash state), offer a one-tap reinitialization. */
+    private void maybeOfferTaskerReinit() {
+        if (getClass() != Dashboard.class || sTaskerAutoOfferChecked) {
+            return;
+        }
+        sTaskerAutoOfferChecked = true;
+        AppWidgetManager awm = AppWidgetManager.getInstance(this);
+        boolean anyDead = false;
+        for (Page page : LLApp.get().getAppEngine().getPageManager().getLoadedPages()) {
+            if (page == null || page.items == null) {
+                continue;
+            }
+            for (Item it : page.items) {
+                if (net.pierrox.lightning_launcher.util.TaskerWidgets.hasStoredName(it)
+                        && awm.getAppWidgetInfo(((Widget) it).getAppWidgetId()) == null) {
+                    anyDead = true;
+                    break;
+                }
+            }
+            if (anyDead) {
+                break;
+            }
+        }
+        if (!anyDead) {
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.tasker_reinit_offer_title)
+                .setMessage(R.string.tasker_reinit_offer_msg)
+                .setPositiveButton(R.string.mi_reinit_tasker_widgets, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        reinitTaskerWidgets();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     /** Warn that the accessibility auto-fill service is required, and offer to open its settings. */
@@ -7642,6 +7686,10 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
 
                 case GlobalConfig.SHOW_APP_SHORTCUTS:
                     showAppShortcuts(itemView);
+                    break;
+
+                case GlobalConfig.REINIT_TASKER_WIDGETS:
+                    reinitTaskerWidgets();
                     break;
 
                 case GlobalConfig.SEARCH:

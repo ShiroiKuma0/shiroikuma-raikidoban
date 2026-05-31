@@ -91,6 +91,8 @@
 <string name="tasker_a11y_required_title">Accessibility needed</string>
 <string name="tasker_a11y_required_msg">Reinitializing fills the Tasker name into each widget\'s config automatically, which needs the \"%s\" accessibility service. Enable it, then run Reinitialize again.</string>
 <string name="tasker_a11y_open_settings">Open Accessibility settings</string>
+<string name="tasker_reinit_offer_title">Reinitialize Tasker widgets?</string>
+<string name="tasker_reinit_offer_msg">Some Tasker widgets need reinitializing after the restart or restore. Do it now?</string>
 <string name="mi_move_out_of_folder">Move out of folder</string>
     <string name="first_use_title">Welcome!</string>
     <string name="first_use_message">Lightning Launcher is a lightweight and extremely customizable home screen replacement for Android.\n\nYou are now running in normal mode, meaning that some advanced options are hidden. Switch to expert mode to access all features and options (General settings).\n\nLL is now preparing the list of apps once and for all.\n\nThank you for reading and using LL!</string>
