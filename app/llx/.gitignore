@@ -1,6 +1,7 @@
 .gradle
 .idea
 build
+.cxx
 captures
 local.properties
 .DS_Store

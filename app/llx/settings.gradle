@@ -10,10 +10,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        jcenter()
     }
 }
 
 rootProject.name = "Lightning Launcher"
 
-include ':app', ':core', ':plugin-api'
+include ':app', ':core', ':plugin-api', ':lsvg'

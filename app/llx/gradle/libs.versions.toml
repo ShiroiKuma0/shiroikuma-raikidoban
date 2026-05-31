@@ -6,7 +6,6 @@ parceler_version = "1.1.12"
 koin_version = "3.5.0"
 
 [libraries]
-lsvg = { module = "net.pierrox.android:lsvg", version = "1.0" }
 
 remoter = { module = "com.josesamuel:remoter-annotations", version.ref = "remoter_version" }
 remoter-compiler = { module = "com.josesamuel:remoter", version.ref = "remoter_version" }

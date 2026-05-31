@@ -1,0 +1,21 @@
+// Vendored copy of net.pierrox.android:lsvg:1.0 (https://github.com/pierrehebert/lsvg,
+// Apache-2.0). The original artifact was only ever published on jcenter, which has shut
+// down, so it can no longer be resolved as a remote dependency. The library is pure
+// framework Java with no external dependencies, so it is built here as a local module.
+plugins {
+    alias(libs.plugins.androlib)
+}
+
+android {
+    namespace 'net.pierrox.android.lsvg'
+    compileSdk 33
+
+    defaultConfig {
+        minSdk 26
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
