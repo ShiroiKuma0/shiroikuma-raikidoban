@@ -248,6 +248,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     private static final int REQUEST_PICK_CUSTOM_ICON = 18;
     private static final int REQUEST_SCRIPT_CROP_IMAGE = 19;
     private static final int REQUEST_EDIT_LAUNCH_ACTION = 20;
+    private static final int REQUEST_TASKER_REINIT_CONFIGURE = 201;
     private static final String BROADCAST_ACTION_DISPLAY_PAGE = LLApp.LL_PKG_NAME + ".ACTION_DISPLAY_PAGE";
     private static final String BROADCAST_ACTION_RELOAD = LLApp.LLX_PKG_NAME + ".ACTION_RELOAD";
     private static final int BUBBLE_MODE_NONE = 0;
@@ -978,6 +979,12 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_TASKER_REINIT_CONFIGURE) {
+            // a Tasker widget config dialog finished (OK or back) -> move to the next one
+            mTaskerReinitIndex++;
+            processNextTaskerWidget();
+            return;
+        }
         if (requestCode < REQUEST_FROM_CUSTOMIZE_VIEW) {
             if (resultCode == RESULT_OK) {
                 ItemLayout il = mScreen.getTargetOrTopmostItemLayout();
@@ -1586,6 +1593,22 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             case R.id.mi_widget_options:
                 mModifyingWidget = targetItem;
                 ((Widget) targetItem).onConfigure(this);
+                break;
+
+            case R.id.mi_set_tasker_widget_name:
+                setTaskerWidgetName((Widget) targetItem);
+                break;
+
+            case R.id.mi_reinit_tasker_widgets:
+                reinitTaskerWidgets();
+                break;
+
+            case R.id.mi_tasker_a11y_settings:
+                try {
+                    startActivity(new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                } catch (Exception e) {
+                    // pass
+                }
                 break;
 
             case R.id.mi_ef_edit_layout:
@@ -3926,6 +3949,166 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         mBubbleContent.addView(view);
     }
 
+    // ---- Tasker Widget V2 re-initialization (see util/TaskerWidgets + .claude/skills/build-apk) ----
+    private java.util.ArrayList<Widget> mTaskerReinitQueue;
+    private int mTaskerReinitIndex;
+
+    /** Prompt for / edit the Tasker name stored on a widget item. Captured once here, then kept on
+     * the item (tag) so it survives Lightning backups; the re-init flow uses it after a restore. */
+    private void setTaskerWidgetName(final Widget w) {
+        final EditText edit = new EditText(this);
+        String current = net.pierrox.lightning_launcher.util.TaskerWidgets.getStoredName(w);
+        if (current != null) {
+            edit.setText(current);
+            edit.setSelection(current.length());
+        }
+        FrameLayout fl = new FrameLayout(this);
+        fl.setPadding(30, 10, 30, 10);
+        fl.addView(edit);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.mi_set_tasker_widget_name)
+                .setMessage(R.string.tasker_widget_name_title)
+                .setView(fl)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        net.pierrox.lightning_launcher.util.TaskerWidgets.setStoredName(w, edit.getText().toString());
+                        w.notifyChanged();
+                        LLApp.get().getAppEngine().saveData();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    /** Collect every named Tasker widget on the loaded desktops, then sequentially re-bind (if its
+     * appWidgetId died on restore) and re-open each one's Tasker config with its name on the clipboard. */
+    public void reinitTaskerWidgets() {
+        // Auto-fill needs the accessibility service; if it's off, warn and route to its settings
+        // instead of silently falling back to manual paste.
+        if (!net.pierrox.lightning_launcher.util.TaskerWidgetAccessibilityService.isConnected()) {
+            promptEnableTaskerAccessibility();
+            return;
+        }
+        java.util.ArrayList<Widget> list = new java.util.ArrayList<>();
+        // Scan ALL pages (every desktop and folder), not just the ones currently loaded, so a single
+        // run covers Tasker widgets across all desktops.
+        String[] pageNames = FileUtils.getPagesDir(LLApp.get().getAppEngine().getBaseDir()).list();
+        if (pageNames != null) {
+            for (String pageName : pageNames) {
+                int pageId;
+                try {
+                    pageId = Integer.parseInt(pageName);
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+                Page page = LLApp.get().getAppEngine().getOrLoadPage(pageId);
+                if (page == null || page.items == null) {
+                    continue;
+                }
+                for (Item it : page.items) {
+                    if (net.pierrox.lightning_launcher.util.TaskerWidgets.hasStoredName(it)) {
+                        list.add((Widget) it);
+                    }
+                }
+            }
+        }
+        if (list.isEmpty()) {
+            Toast.makeText(this, R.string.tasker_reinit_none, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        mTaskerReinitQueue = list;
+        mTaskerReinitIndex = 0;
+        processNextTaskerWidget();
+    }
+
+    /** Warn that the accessibility auto-fill service is required, and offer to open its settings. */
+    private void promptEnableTaskerAccessibility() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.tasker_a11y_required_title)
+                .setMessage(getString(R.string.tasker_a11y_required_msg, getString(R.string.tasker_a11y_label)))
+                .setPositiveButton(R.string.tasker_a11y_open_settings, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        try {
+                            startActivity(new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                        } catch (Exception e) {
+                            // pass
+                        }
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void processNextTaskerWidget() {
+        if (mTaskerReinitQueue == null) {
+            return;
+        }
+        AppWidgetManager awm = AppWidgetManager.getInstance(this);
+        while (mTaskerReinitIndex < mTaskerReinitQueue.size()) {
+            Widget w = mTaskerReinitQueue.get(mTaskerReinitIndex);
+            // after a restore the saved appWidgetId is dead -> rebind to a fresh one first
+            if (awm.getAppWidgetInfo(w.getAppWidgetId()) == null && !rebindTaskerWidget(w)) {
+                mTaskerReinitIndex++;
+                continue;
+            }
+            Intent intent = w.getConfigureIntent();
+            if (intent == null) {
+                mTaskerReinitIndex++;
+                continue;
+            }
+            String name = net.pierrox.lightning_launcher.util.TaskerWidgets.getStoredName(w);
+            // Auto-fill via the accessibility service if the user enabled it; the clipboard copy
+            // (and the paste toast below) stay as the fallback when it is off.
+            net.pierrox.lightning_launcher.util.TaskerWidgetAccessibilityService.arm(name);
+            android.content.ClipboardManager cm = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            if (cm != null && name != null) {
+                cm.setPrimaryClip(android.content.ClipData.newPlainText(getString(R.string.tasker_widget_name_title), name));
+            }
+            if (!net.pierrox.lightning_launcher.util.TaskerWidgetAccessibilityService.isConnected()) {
+                Toast.makeText(this, getString(R.string.tasker_reinit_paste, name), Toast.LENGTH_LONG).show();
+            }
+            try {
+                startActivityForResult(intent, REQUEST_TASKER_REINIT_CONFIGURE);
+                return;
+            } catch (Exception e) {
+                mTaskerReinitIndex++;
+            }
+        }
+        mTaskerReinitQueue = null;
+        net.pierrox.lightning_launcher.util.TaskerWidgetAccessibilityService.disarm();
+        LLApp.get().getAppEngine().saveData();
+        Toast.makeText(this, R.string.tasker_reinit_done, Toast.LENGTH_SHORT).show();
+    }
+
+    /** Re-bind a widget whose appWidgetId is no longer valid (post-restore) to its saved provider,
+     * allocating a fresh appWidgetId. @return true if it is now bound. */
+    private boolean rebindTaskerWidget(Widget w) {
+        ComponentName cn = w.getComponentName();
+        if (cn == null || sBindAppWidgetIdIfAllowed == null) {
+            return false;
+        }
+        int old_id = w.getAppWidgetId();
+        int new_id = LLApp.get().getAppWidgetHost().allocateAppWidgetId();
+        boolean ok;
+        try {
+            ok = (Boolean) sBindAppWidgetIdIfAllowed.invoke(AppWidgetManager.getInstance(this), new_id, cn);
+        } catch (Exception e) {
+            ok = false;
+        }
+        if (ok) {
+            if (old_id != Widget.NO_APP_WIDGET_ID) {
+                LLApp.get().getAppWidgetHost().deleteAppWidgetId(old_id);
+            }
+            w.setAppWidgetId(new_id);
+            w.notifyChanged();
+            return true;
+        }
+        LLApp.get().getAppWidgetHost().deleteAppWidgetId(new_id);
+        return false;
+    }
+
     protected View addBubbleItem(int id, int title) {
         return addBubbleItem(id, getString(title));
     }
@@ -4111,6 +4294,12 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 boolean has_widget_options = item_class == Widget.class && ((Widget) item).hasConfigurationScreen();
                 if (has_widget_options)
                     addBubbleItem(R.id.mi_widget_options, R.string.mi_widget_options);
+
+                if (net.pierrox.lightning_launcher.util.TaskerWidgets.isTaskerWidgetV2(item)) {
+                    addBubbleItem(R.id.mi_set_tasker_widget_name, R.string.mi_set_tasker_widget_name);
+                    addBubbleItem(R.id.mi_reinit_tasker_widgets, R.string.mi_reinit_tasker_widgets);
+                    addBubbleItem(R.id.mi_tasker_a11y_settings, R.string.mi_tasker_a11y_settings);
+                }
 
                 String pkg = Utils.getPackageNameForItem(item);
                 if (pkg != null) {

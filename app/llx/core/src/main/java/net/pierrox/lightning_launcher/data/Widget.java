@@ -90,14 +90,26 @@ public class Widget extends Item {
         return app_widget_info != null && app_widget_info.configure != null;
     }
 
-    public void onConfigure(Context context) {
+    /**
+     * @return an intent that opens this widget's configuration activity (e.g. Tasker's Widget V2
+     * config screen), or null if the widget has no configuration screen / no valid appWidgetId.
+     * Callers can start it with startActivityForResult to detect when the user finishes.
+     */
+    public Intent getConfigureIntent() {
         AppWidgetManager app_widget_manager = AppWidgetManager.getInstance(LLApp.get());
         AppWidgetProviderInfo app_widget_info = app_widget_manager.getAppWidgetInfo(mAppWidgetId);
         if (app_widget_info != null && app_widget_info.configure != null) {
             Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
             intent.setComponent(app_widget_info.configure);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+            return intent;
+        }
+        return null;
+    }
 
+    public void onConfigure(Context context) {
+        Intent intent = getConfigureIntent();
+        if (intent != null) {
             try {
                 context.startActivity(intent);
             } catch (Exception e) {
