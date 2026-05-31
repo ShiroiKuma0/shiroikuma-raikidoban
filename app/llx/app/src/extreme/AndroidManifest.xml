@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
-    <uses-permission android:name="com.android.vending.BILLING" />
 
     <permission android:name="net.pierrox.lightning_launcher.lwp_key" android:label="lwp" android:protectionLevel="signature"/>
 
