@@ -111,4 +111,5 @@ dependencies {
     implementation libs.androidx.appcomat
     implementation libs.androidx.material
     implementation libs.androidx.preference
+    implementation libs.androidx.documentfile
 }

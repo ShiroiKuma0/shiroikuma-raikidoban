@@ -52,6 +52,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
@@ -79,18 +80,26 @@ public class BackupRestoreTool {
     private static final String ZIP_DIR_FONTS = "fonts";
 
     public static Exception backup(BackupConfig backup_config) {
-        FileUtils.LL_EXT_DIR.mkdirs();
-
         LightningEngine engine = LLApp.get().getAppEngine();
         engine.saveData();
 
         Exception result = null;
-        File file = new File(backup_config.pathTo);
-        FileOutputStream fos = null;
+        // When uriTo is set the backup is written through the Storage Access Framework; the
+        // legacy pathTo is only used as a fallback (and no longer works under scoped storage).
+        File file = backup_config.uriTo == null ? new File(backup_config.pathTo) : null;
+        OutputStream os = null;
         ZipOutputStream zos = null;
         try {
-            fos = new FileOutputStream(file);
-            zos = new ZipOutputStream(fos);
+            if (backup_config.uriTo != null) {
+                os = backup_config.context.getContentResolver().openOutputStream(backup_config.uriTo);
+                if (os == null) {
+                    throw new IOException("Unable to open backup destination " + backup_config.uriTo);
+                }
+            } else {
+                FileUtils.LL_EXT_DIR.mkdirs();
+                os = new FileOutputStream(file);
+            }
+            zos = new ZipOutputStream(os);
 
             zos.putNextEntry(new ZipEntry(ZIP_FILE_VERSION));
             zos.write(String.valueOf(BACKUP_VERSION).getBytes());
@@ -133,9 +142,9 @@ public class BackupRestoreTool {
             // ensure the stream is flushed and and closed before to say this is ok (even if done in finally)
             zos.flush();
             zos.close();
-            fos.close();
+            os.close();
             zos = null;
-            fos = null;
+            os = null;
             result = null;
         } catch (IOException e) {
             e.printStackTrace();
@@ -145,13 +154,14 @@ public class BackupRestoreTool {
                 zos.close();
             } catch (IOException e) {
             }
-            if (fos != null) try {
-                fos.close();
+            if (os != null) try {
+                os.close();
             } catch (IOException e) {
             }
         }
 
-        if (result != null) {
+        // For SAF destinations (uriTo) the caller is responsible for deleting the partial document.
+        if (result != null && file != null) {
             file.delete();
         }
 
@@ -670,6 +680,7 @@ public class BackupRestoreTool {
         public Context context;
         public String pathFrom;
         public String pathTo;
+        public Uri uriTo;
         public boolean includeWidgetsData;
         public boolean includeWallpaper;
         public boolean includeFonts;

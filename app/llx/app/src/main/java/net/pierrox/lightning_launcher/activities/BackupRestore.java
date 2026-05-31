@@ -40,6 +40,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
@@ -51,6 +53,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.documentfile.provider.DocumentFile;
+
 import net.pierrox.lightning_launcher.API;
 import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.data.BackupRestoreTool;
@@ -58,22 +62,20 @@ import net.pierrox.lightning_launcher.data.FileUtils;
 import net.pierrox.lightning_launcher.data.Folder;
 import net.pierrox.lightning_launcher.data.Item;
 import net.pierrox.lightning_launcher.data.Page;
-import net.pierrox.lightning_launcher.util.FileProvider;
+import net.pierrox.lightning_launcher.util.BackupFolder;
 import net.pierrox.lightning_launcher_extreme.R;
 
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 
@@ -88,18 +90,38 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
     private static final int REQUEST_SELECT_PAGES_FOR_EXPORT = 1;
     private static final int REQUEST_SELECT_FILE_TO_IMPORT = 2;
     private static final int REQUEST_SELECT_FILE_TO_LOAD = 3;
+    private static final int REQUEST_PICK_FOLDER = 4;
+
+    private static final int MENU_PICK_FOLDER = 100;
+
+    // name dialog modes
+    private static final int MODE_BACKUP = 0;
+    private static final int MODE_TEMPLATE = 1;
+    private static final int MODE_RENAME = 2;
+
+    // value of mPendingExport when no export is waiting for a folder to be picked
+    private static final int PENDING_NONE = -1;
 
     private ListView mListView;
     private TextView mEmptyView;
 
-    private boolean mSelectArchiveNameForBackup;
-    private String mArchiveName;
+    // The configured backup folder (SAF tree) and its current content. Single source for the list.
+    private DocumentFile mArchiveDir;
+    private final ArrayList<DocumentFile> mArchives = new ArrayList<>();
+
+    private int mNameDialogMode = MODE_BACKUP;
+    private int mPendingExport = PENDING_NONE;
+    private String mPendingExportName;
+
+    // currently selected in-folder archive (long press / tap / rename / delete target)
+    private DocumentFile mSelected;
+
+    // ad-hoc restore (file picked outside the configured folder, or opened via ACTION_VIEW)
     private Uri mArchiveUri;
+    private String mArchiveName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.backup_restore);
@@ -123,22 +145,24 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         mListView.setOnItemLongClickListener(this);
 
         mEmptyView = findViewById(R.id.empty);
-        mEmptyView.setText(R.string.no_backup_archive);
 
         loadArchivesList();
-
-        // WORKAROUND to allow restoring (still no backup)
-//        checkPermissions(
-//                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
-//                new int[]{R.string.pr_r1, R.string.pr_r2},
-//                REQUEST_PERMISSION_BASE);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (areAllPermissionsGranted(grantResults, R.string.pr_f1)) {
-            loadArchivesList();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(0, MENU_PICK_FOLDER, 0, R.string.backup_folder_select)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == MENU_PICK_FOLDER) {
+            pickFolder(PENDING_NONE);
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -148,37 +172,43 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         Intent intent = getIntent();
         if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             intent.setAction(Intent.ACTION_MAIN);
-            loadArchive(intent.getData(), null);
+            confirmRestore(intent.getData(), null);
         }
     }
 
     private void loadArchivesList() {
-        File[] archives = FileUtils.LL_EXT_DIR.listFiles(new FileFilter() {
+        mArchives.clear();
+        mArchiveDir = BackupFolder.getDir(this);
+
+        if (mArchiveDir == null) {
+            mEmptyView.setText(R.string.backup_folder_none);
+            mEmptyView.setVisibility(View.VISIBLE);
+            mListView.setVisibility(View.GONE);
+            return;
+        }
+
+        for (DocumentFile f : mArchiveDir.listFiles()) {
+            if (f.isFile()) {
+                mArchives.add(f);
+            }
+        }
+        Collections.sort(mArchives, new Comparator<DocumentFile>() {
             @Override
-            public boolean accept(File file) {
-                return !file.isDirectory();
+            public int compare(DocumentFile a, DocumentFile b) {
+                return Long.compare(b.lastModified(), a.lastModified());
             }
         });
-        if (archives == null || archives.length == 0) {
+
+        if (mArchives.isEmpty()) {
+            mEmptyView.setText(R.string.no_backup_archive);
             mEmptyView.setVisibility(View.VISIBLE);
             mListView.setVisibility(View.GONE);
         } else {
-            Arrays.sort(archives, new Comparator<File>() {
-                @Override
-                public int compare(File file1, File file2) {
-                    long a = file1.lastModified();
-                    long b = file2.lastModified();
-                    if (a < b) return 1;
-                    if (a > b) return -1;
-                    return 0;
-                }
-            });
-            String[] archives_names = new String[archives.length];
-            for (int i = 0; i < archives.length; i++) {
-                archives_names[i] = archives[i].getName();
+            String[] names = new String[mArchives.size()];
+            for (int i = 0; i < names.length; i++) {
+                names[i] = mArchives.get(i).getName();
             }
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, archives_names);
-            mListView.setAdapter(adapter);
+            mListView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, names));
             mEmptyView.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
         }
@@ -188,7 +218,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.backup:
-                exportArchive(true);
+                exportArchive(MODE_BACKUP);
                 break;
 
             case R.id.import_:
@@ -196,7 +226,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 break;
 
             case R.id.export:
-                exportArchive(false);
+                exportArchive(MODE_TEMPLATE);
                 break;
         }
     }
@@ -213,6 +243,15 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 return true;
         }
         return false;
+    }
+
+    private void pickFolder(int pendingExport) {
+        mPendingExport = pendingExport;
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        startActivityForResult(intent, REQUEST_PICK_FOLDER);
     }
 
     @Override
@@ -239,7 +278,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 final String archive_name;
                 if (mArchiveName == null) {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm");
-                    archive_name = getString(mSelectArchiveNameForBackup ? R.string.backup_d : R.string.tmpl_fn) + "-" + sdf.format(new Date()) + ".lla";
+                    archive_name = getString(mNameDialogMode == MODE_TEMPLATE ? R.string.tmpl_fn : R.string.backup_d) + "-" + sdf.format(new Date()) + ".lla";
                 } else {
                     archive_name = mArchiveName;
                 }
@@ -254,17 +293,20 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String name = edit_text.getText().toString().trim();
-                        String archive_path = FileUtils.LL_EXT_DIR + "/" + name;
-                        File old_archive_file = mArchiveName == null ? null : new File(FileUtils.LL_EXT_DIR + "/" + mArchiveName);
-                        if (old_archive_file != null && old_archive_file.exists()) {
-                            old_archive_file.renameTo(new File(archive_path));
-                            loadArchivesList();
+                        if (mNameDialogMode == MODE_RENAME) {
+                            if (mSelected != null && mSelected.renameTo(name)) {
+                                loadArchivesList();
+                            }
+                        } else if (mNameDialogMode == MODE_TEMPLATE) {
+                            // defer document creation until the desktops have been picked
+                            mPendingExportName = name;
+                            selectDesktopsToExport();
                         } else {
-                            if (mSelectArchiveNameForBackup) {
-                                new BackupTask().execute(archive_path);
+                            DocumentFile doc = BackupFolder.createDoc(BackupRestore.this, name);
+                            if (doc == null) {
+                                Toast.makeText(BackupRestore.this, R.string.backup_folder_lost, Toast.LENGTH_LONG).show();
                             } else {
-                                mArchiveName = FileUtils.LL_EXT_DIR + "/" + name;
-                                selectDesktopsToExport();
+                                new BackupTask(doc).execute();
                             }
                         }
                     }
@@ -273,24 +315,14 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 return builder.create();
 
             case DIALOG_CONFIRM_RESTORE:
-                if (mArchiveName != null || mArchiveUri != null) {
+                if (mArchiveUri != null) {
                     builder = new AlertDialog.Builder(this);
                     builder.setTitle(R.string.br_rc);
                     builder.setMessage(mArchiveName == null ? getNameForUri(mArchiveUri) : mArchiveName);
                     builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            if (mArchiveName == null) {
-                                new RestoreTask(mArchiveUri).execute();
-                            } else {
-                                String path;
-                                if (!mArchiveName.startsWith("/")) {
-                                    path = FileUtils.LL_EXT_DIR + "/" + mArchiveName;
-                                } else {
-                                    path = mArchiveName;
-                                }
-                                new RestoreTask(path).execute();
-                            }
+                            new RestoreTask(mArchiveUri).execute();
                         }
                     });
                     builder.setNegativeButton(android.R.string.cancel, null);
@@ -299,14 +331,16 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 break;
 
             case DIALOG_CONFIRM_DELETE:
-                if (mArchiveName != null) {
+                if (mSelected != null) {
                     builder = new AlertDialog.Builder(this);
                     builder.setTitle(R.string.br_dc);
-                    builder.setMessage(mArchiveName);
+                    builder.setMessage(mSelected.getName());
                     builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            new File(FileUtils.LL_EXT_DIR + "/" + mArchiveName).delete();
+                            if (mSelected != null) {
+                                mSelected.delete();
+                            }
                             loadArchivesList();
                         }
                     });
@@ -316,38 +350,51 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 break;
 
             case DIALOG_SELECT_BACKUP_ACTION:
-                if (mArchiveName != null) {
+                if (mSelected != null) {
                     builder = new AlertDialog.Builder(this);
                     builder.setTitle(R.string.br_a);
                     builder.setItems(new String[]{getString(R.string.br_ob), getString(R.string.br_ot), getString(R.string.br_r), getString(R.string.br_s), getString(R.string.br_d)}, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
+                            if (mSelected == null) {
+                                return;
+                            }
                             switch (i) {
                                 case 0:
-                                    new BackupTask().execute(FileUtils.LL_EXT_DIR + "/" + mArchiveName);
+                                    // overwrite backup: re-create the document with the same name
+                                    DocumentFile doc = BackupFolder.createDoc(BackupRestore.this, mSelected.getName());
+                                    if (doc == null) {
+                                        Toast.makeText(BackupRestore.this, R.string.backup_folder_lost, Toast.LENGTH_LONG).show();
+                                    } else {
+                                        new BackupTask(doc).execute();
+                                    }
                                     break;
 
                                 case 1:
-                                    mArchiveName = FileUtils.LL_EXT_DIR + "/" + mArchiveName;
+                                    // overwrite template: the document is (re)created after the desktops are picked
+                                    mPendingExportName = mSelected.getName();
                                     selectDesktopsToExport();
                                     break;
 
                                 case 2:
+                                    mArchiveName = mSelected.getName();
+                                    mNameDialogMode = MODE_RENAME;
                                     try {
                                         removeDialog(DIALOG_SELECT_ARCHIVE_NAME);
                                     } catch (Exception e) {
                                     }
                                     showDialog(DIALOG_SELECT_ARCHIVE_NAME);
                                     break;
+
                                 case 3:
                                     Intent shareIntent = new Intent();
                                     shareIntent.setAction(Intent.ACTION_SEND);
-                                    Uri uri = FileProvider.getUriForFile(new File(FileUtils.LL_EXT_DIR + "/" + mArchiveName));
-                                    shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                                    shareIntent.putExtra(Intent.EXTRA_STREAM, mSelected.getUri());
                                     shareIntent.setType("application/zip");
                                     shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                                     startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.br_s)));
                                     break;
+
                                 case 4:
                                     try {
                                         removeDialog(DIALOG_CONFIRM_DELETE);
@@ -369,10 +416,13 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        loadArchive(null, adapterView.getAdapter().getItem(i).toString());
+        if (i >= 0 && i < mArchives.size()) {
+            DocumentFile f = mArchives.get(i);
+            confirmRestore(f.getUri(), f.getName());
+        }
     }
 
-    private void loadArchive(Uri archiveUri, String archiveName) {
+    private void confirmRestore(Uri archiveUri, String archiveName) {
         mArchiveUri = archiveUri;
         mArchiveName = archiveName;
         try {
@@ -384,8 +434,14 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
     @Override
     public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-        mArchiveName = adapterView.getAdapter().getItem(i).toString();
-        showDialog(DIALOG_SELECT_BACKUP_ACTION);
+        if (i >= 0 && i < mArchives.size()) {
+            mSelected = mArchives.get(i);
+            try {
+                removeDialog(DIALOG_SELECT_BACKUP_ACTION);
+            } catch (Exception e) {
+            }
+            showDialog(DIALOG_SELECT_BACKUP_ACTION);
+        }
         return true;
     }
 
@@ -403,7 +459,15 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 all_pages.add(Integer.valueOf(Page.APP_DRAWER_PAGE));
                 all_pages.add(Integer.valueOf(Page.USER_MENU_PAGE));
 
-                doExportTemplate(mArchiveName, all_pages);
+                DocumentFile target = mPendingExportName == null ? null : BackupFolder.createDoc(this, mPendingExportName);
+                mPendingExportName = null;
+                if (target == null) {
+                    Toast.makeText(this, R.string.backup_folder_lost, Toast.LENGTH_LONG).show();
+                } else {
+                    doExportTemplate(target, all_pages);
+                }
+            } else {
+                mPendingExportName = null;
             }
         } else if (requestCode == REQUEST_SELECT_FILE_TO_IMPORT) {
             if (resultCode == RESULT_OK) {
@@ -411,7 +475,17 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
             }
         } else if (requestCode == REQUEST_SELECT_FILE_TO_LOAD) {
             if (resultCode == RESULT_OK) {
-                loadArchive(data.getData(), null);
+                confirmRestore(data.getData(), null);
+            }
+        } else if (requestCode == REQUEST_PICK_FOLDER) {
+            int pending = mPendingExport;
+            mPendingExport = PENDING_NONE;
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                BackupFolder.setTreeUri(this, data.getData());
+                loadArchivesList();
+                if (pending != PENDING_NONE) {
+                    exportArchive(pending);
+                }
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -429,9 +503,16 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         }
     }
 
-
-    private void exportArchive(boolean for_backup) {
-        mSelectArchiveNameForBackup = for_backup;
+    /**
+     * Start a backup ({@link #MODE_BACKUP}) or a template export ({@link #MODE_TEMPLATE}). If no
+     * backup folder is configured yet, prompt for one first and resume once it has been picked.
+     */
+    private void exportArchive(int mode) {
+        if (BackupFolder.getDir(this) == null) {
+            pickFolder(mode);
+            return;
+        }
+        mNameDialogMode = mode;
         mArchiveName = null;
         try {
             removeDialog(DIALOG_SELECT_ARCHIVE_NAME);
@@ -447,7 +528,8 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         startActivityForResult(intent, REQUEST_SELECT_PAGES_FOR_EXPORT);
     }
 
-    private void doExportTemplate(final String backup_path, final ArrayList<Integer> included_pages) {
+    @SuppressLint("StaticFieldLeak")
+    private void doExportTemplate(final DocumentFile target, final ArrayList<Integer> included_pages) {
         Rect r = new Rect();
         getWindow().getDecorView().getWindowVisibleDisplayFrame(r);
         final int sb_height = r.top;
@@ -476,7 +558,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 } catch (PackageManager.NameNotFoundException e) {
                     // pass
                 }
-                backup_config.pathTo = backup_path;
+                backup_config.uriTo = target.getUri();
                 backup_config.includeWidgetsData = true;
                 backup_config.includeWallpaper = true;
                 backup_config.includeFonts = true;
@@ -484,8 +566,11 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 backup_config.statusBarHeight = sb_height;
                 backup_config.pagesToInclude = included_pages;
 
-
-                return BackupRestoreTool.backup(backup_config) == null;
+                Exception exception = BackupRestoreTool.backup(backup_config);
+                if (exception != null) {
+                    target.delete();
+                }
+                return exception == null;
             }
 
             @Override
@@ -498,9 +583,10 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
     }
 
     /**
-     * Request the user to pick an archive.
+     * Request the user to pick an external file.
      *
-     * @param only_load true to directly load the archive without first importing it in the LL_EXT_DIR directory.
+     * @param only_load true to directly restore the file, false to first copy it into the
+     *                  configured backup folder (so it is kept alongside the other archives).
      */
     private void selectFileToLoadOrImport(boolean only_load) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -511,7 +597,12 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
     @SuppressLint("StaticFieldLeak")
     private void importFile(final Uri uri) {
-        new AsyncTask<Void, Void, File>() {
+        if (BackupFolder.getDir(this) == null) {
+            // no folder to copy into: just restore the picked file directly
+            confirmRestore(uri, null);
+            return;
+        }
+        new AsyncTask<Void, Void, DocumentFile>() {
             private ProgressDialog mDialog;
 
             @Override
@@ -523,21 +614,23 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
             }
 
             @Override
-            protected File doInBackground(Void... voids) {
+            protected DocumentFile doInBackground(Void... voids) {
                 InputStream is = null;
-                FileOutputStream os = null;
-                File outFile = null;
+                OutputStream os = null;
+                DocumentFile target = null;
                 try {
                     String name = getNameForUri(uri);
-                    outFile = new File(FileUtils.LL_EXT_DIR, name);
-
+                    target = BackupFolder.createDoc(BackupRestore.this, name);
+                    if (target == null) {
+                        return null;
+                    }
                     is = getContentResolver().openInputStream(uri);
-                    os = new FileOutputStream(outFile);
+                    os = getContentResolver().openOutputStream(target.getUri());
                     FileUtils.copyStream(is, os);
-                    return outFile;
+                    return target;
                 } catch (IOException e) {
-                    if (outFile != null) {
-                        outFile.delete();
+                    if (target != null) {
+                        target.delete();
                     }
                     return null;
                 } finally {
@@ -553,11 +646,11 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
             }
 
             @Override
-            protected void onPostExecute(File outFile) {
+            protected void onPostExecute(DocumentFile target) {
                 mDialog.dismiss();
-                if (outFile != null) {
+                if (target != null) {
                     loadArchivesList();
-                    loadArchive(null, outFile.getName());
+                    confirmRestore(target.getUri(), target.getName());
                 } else {
                     Toast.makeText(BackupRestore.this, R.string.import_e, Toast.LENGTH_SHORT).show();
                 }
@@ -574,7 +667,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                     name = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
                 }
             } finally {
-                cursor.close();
+                if (cursor != null) cursor.close();
             }
         }
         if (name == null) {
@@ -583,8 +676,13 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         return name;
     }
 
-    private class BackupTask extends AsyncTask<String, Void, Exception> {
-        private String mBackupFilePath;
+    @SuppressLint("StaticFieldLeak")
+    private class BackupTask extends AsyncTask<Void, Void, Exception> {
+        private final DocumentFile mTarget;
+
+        private BackupTask(DocumentFile target) {
+            mTarget = target;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -592,9 +690,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         }
 
         @Override
-        protected Exception doInBackground(String... params) {
-            mBackupFilePath = params[0];
-
+        protected Exception doInBackground(Void... params) {
             BackupRestoreTool.BackupConfig backup_config = new BackupRestoreTool.BackupConfig();
 
             backup_config.context = BackupRestore.this;
@@ -606,7 +702,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
             } catch (PackageManager.NameNotFoundException e) {
                 // pass
             }
-            backup_config.pathTo = mBackupFilePath;
+            backup_config.uriTo = mTarget.getUri();
             backup_config.includeWidgetsData = true;
             backup_config.includeWallpaper = true;
             backup_config.includeFonts = true;
@@ -618,7 +714,11 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         protected void onPostExecute(Exception result) {
             removeDialog(DIALOG_BACKUP_IN_PROGRESS);
 
+            String name = mTarget.getName();
+
             if (result != null) {
+                mTarget.delete();
+
                 Writer out = new StringWriter(1000);
 
                 PrintWriter printWriter = new PrintWriter(out);
@@ -632,19 +732,15 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 email_intent.setType("message/rfc822");
                 startActivity(Intent.createChooser(email_intent, "Backup error, please send a bug report by email"));
             }
-            String msg = (result == null ? getString(R.string.backup_done, mBackupFilePath) : getString(R.string.backup_error));
+            String msg = (result == null ? getString(R.string.backup_done, name) : getString(R.string.backup_error));
             Toast.makeText(BackupRestore.this, msg, Toast.LENGTH_LONG).show();
 
             loadArchivesList();
         }
     }
 
-    private class RestoreTask extends AsyncTask<String, Void, Integer> {
+    private class RestoreTask extends AsyncTask<Void, Void, Integer> {
         private final Uri mUri;
-
-        private RestoreTask(String path) {
-            mUri = Uri.fromFile(new File(path));
-        }
 
         private RestoreTask(Uri uri) {
             mUri = uri;
@@ -656,7 +752,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         }
 
         @Override
-        protected Integer doInBackground(String... params) {
+        protected Integer doInBackground(Void... params) {
             BackupRestoreTool.RestoreConfig restore_config = new BackupRestoreTool.RestoreConfig();
 
             InputStream is = null;

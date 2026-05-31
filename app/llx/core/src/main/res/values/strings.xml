@@ -466,6 +466,9 @@
 <string name="backup_done">Backup saved to:\n%s</string>
 <string name="backup_error">Backup error, please check that there is enough storage space on the sdcard</string>
 <string name="restore_error">Restore error, please check that the backup archive is valid and can be read</string>
+<string name="backup_folder_select">Select backup folder</string>
+<string name="backup_folder_none">No backup folder selected.\nUse the menu to choose where backups are stored.</string>
+<string name="backup_folder_lost">The backup folder is no longer accessible. Please select it again.</string>
 
 <string name="confirm_delete">Do you really want to delete this desktop?\nThis cannot be undone.</string>
 

@@ -58,9 +58,12 @@ import android.widget.Toast;
 import net.pierrox.lightning_launcher.API;
 import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.configuration.GlobalConfig;
+import androidx.documentfile.provider.DocumentFile;
+
 import net.pierrox.lightning_launcher.data.BackupRestoreTool;
 import net.pierrox.lightning_launcher.data.FileUtils;
 import net.pierrox.lightning_launcher.data.Item;
+import net.pierrox.lightning_launcher.util.BackupFolder;
 import net.pierrox.lightning_launcher.data.Page;
 import net.pierrox.lightning_launcher.data.PageProcessor;
 import net.pierrox.lightning_launcher.data.Utils;
@@ -423,26 +426,31 @@ public class ApplyTemplate extends ResourceWrapperActivity {
                 Context context = ApplyTemplate.this;
                 if (mBackupFirst) {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm");
-                    String backup_name = sdf.format(new Date());
-                    String backup_path = FileUtils.LL_EXT_DIR + "/" + getString(R.string.backup_d) + "-" + backup_name;
+                    String backup_name = getString(R.string.backup_d) + "-" + sdf.format(new Date()) + ".lla";
+                    DocumentFile backup_doc = BackupFolder.createDoc(context, backup_name);
 
-                    BackupRestoreTool.BackupConfig backup_config = new BackupRestoreTool.BackupConfig();
+                    // Only create the safety backup when a backup folder is configured; without
+                    // one there is no writable destination under scoped storage.
+                    if (backup_doc != null) {
+                        BackupRestoreTool.BackupConfig backup_config = new BackupRestoreTool.BackupConfig();
 
-                    backup_config.context = context;
-                    backup_config.pathFrom = mAppBaseDir.getAbsolutePath();
-                    backup_config.pathTo = backup_path;
-                    backup_config.includeWidgetsData = true;
-                    backup_config.includeWallpaper = true;
-                    backup_config.includeFonts = true;
+                        backup_config.context = context;
+                        backup_config.pathFrom = mAppBaseDir.getAbsolutePath();
+                        backup_config.uriTo = backup_doc.getUri();
+                        backup_config.includeWidgetsData = true;
+                        backup_config.includeWallpaper = true;
+                        backup_config.includeFonts = true;
 
 
-                    Exception exception = BackupRestoreTool.backup(backup_config);
-                    if (exception != null) {
-                        exception.printStackTrace();
-                        return 1;
+                        Exception exception = BackupRestoreTool.backup(backup_config);
+                        if (exception != null) {
+                            exception.printStackTrace();
+                            backup_doc.delete();
+                            return 1;
+                        }
+
+                        publishProgress(true);
                     }
-
-                    publishProgress(true);
                 }
 
                 BackupRestoreTool.RestoreConfig restore_config = new BackupRestoreTool.RestoreConfig();
