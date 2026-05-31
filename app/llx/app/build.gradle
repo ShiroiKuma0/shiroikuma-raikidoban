@@ -3,19 +3,21 @@ plugins {
     alias(libs.plugins.kotlin)
 }
 
-def appendVersionNameVersionCode(variant, defaultConfig) {
-    variant.outputs.all { output ->
-        if (output.zipAlign) {
-            def file = output.outputFile
-            def fileName = file.name.replace(".apk", "-" + defaultConfig.versionCode + ".apk")
-            fileName = fileName.replace("app", "lightning_launcher")
-            output.outputFileName = fileName
-        }
+// Versioning — see .claude/skills/build-apk/SKILL.md.
+// VERSION_NAME is the semver triplet (e.g. "14.3.0"); BUILD_NUMBER is the per-build "+N" counter
+// (0 = a published build, with no "+N" suffix). The buildApk task bumps BUILD_NUMBER after each
+// successful build.
+def versionTriplet = project.property("VERSION_NAME").toString()
+def buildNumber = project.property("BUILD_NUMBER").toString().toInteger()
+def forkVersionName = buildNumber == 0 ? versionTriplet : "${versionTriplet}+${buildNumber}"
+// versionCode for the 14.3 line: base 3300000 (LightningLauncher's legacy code 330 for 14.3, *10000)
+// + patch*10000 + the build counter. e.g. 14.3.0+1 -> 3300001, 14.3.1 -> 3310000, 14.3.1+1 -> 3310001.
+// If major.minor ever moves off 14.3, update the 3300000 base.
+def forkVersionCode = 3300000 + (versionTriplet.tokenize('.')[2].toInteger() * 10000) + buildNumber
 
-//        def file = output.packageApplication.file
-//        def fileName = file.name.replace(".apk", "-" + defaultConfig.versionCode + ".apk")
-//        fileName = fileName.replace("app", "lightning_launcher")
-//        output.packageApplication.outputFileName = fileName
+def renameApkOutput(variant, forkVersionName) {
+    variant.outputs.all { output ->
+        output.outputFileName = "shiroikuma-raikidoban_${forkVersionName}_arm64-v8a.apk"
     }
 }
 
@@ -49,13 +51,17 @@ android {
     compileSdk 33
 
     defaultConfig {
-        versionCode 330
-        versionName "14.3 (6de3540)"
+        versionCode forkVersionCode
+        versionName forkVersionName
         buildConfigField "boolean", "IS_BETA", "false" //  change in core too
         buildConfigField "boolean", "HAS_UEC", "false"
 
         minSdk 26
         targetSdk 33
+
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
     }
 
 //    dexOptions {
@@ -73,7 +79,7 @@ android {
             proguardFiles 'proguard.cfg'
 
             applicationVariants.all { variant ->
-                appendVersionNameVersionCode(variant, defaultConfig)
+                renameApkOutput(variant, forkVersionName)
             }
         }
     }
@@ -83,7 +89,7 @@ android {
     productFlavors {
         extreme {
             manifestPlaceholders += [app_name: "LLAppExtreme"]
-            applicationId "net.pierrox.lightning_launcher_extreme"
+            applicationId "shiroikuma.raikidoban"
             dimension "version"
         }
     }
@@ -112,4 +118,32 @@ dependencies {
     implementation libs.androidx.material
     implementation libs.androidx.preference
     implementation libs.androidx.documentfile
+}
+
+// Build the (debug-signed) APK, copy it to ~/tmp under the release filename, and bump BUILD_NUMBER.
+// See .claude/skills/build-apk/SKILL.md.
+tasks.register("buildApk") {
+    description = "Assemble the debug APK, copy it to ~/tmp, and auto-increment BUILD_NUMBER"
+    dependsOn("assembleExtremeDebug")
+    doLast {
+        def apkName = "shiroikuma-raikidoban_${forkVersionName}_arm64-v8a.apk"
+        def outputDir = layout.buildDirectory.dir("outputs/apk/extreme/debug").get().asFile
+        def apk = outputDir.listFiles()?.find { it.name.endsWith(".apk") }
+        if (apk != null) {
+            def targetDir = new File(System.getProperty("user.home"), "tmp")
+            targetDir.mkdirs()
+            def targetFile = new File(targetDir, apkName)
+            targetFile.bytes = apk.bytes
+            println("[1;36m>>> ~/tmp/${apkName}[0m")
+        } else {
+            throw new GradleException("No APK found in ${outputDir}")
+        }
+
+        // Auto-increment BUILD_NUMBER for the next build (consumed only on success).
+        def propsFile = rootProject.file("gradle.properties")
+        def current = project.property("BUILD_NUMBER").toString().toInteger()
+        def next = current + 1
+        propsFile.text = propsFile.text.replace("BUILD_NUMBER=${current}", "BUILD_NUMBER=${next}")
+        println("[1;36m>>> BUILD_NUMBER bumped to ${next}[0m")
+    }
 }

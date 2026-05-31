@@ -39,7 +39,7 @@ import net.pierrox.lightning_launcher.data.FileUtils;
 
 /** A bare minimum provider to prevent exposng file uris */
 public class FileProvider extends ContentProvider {
-	public static final Uri CONTENT_URI=Uri.parse("content://net.pierrox.lightning_launcher.files/");
+	public static final Uri CONTENT_URI=Uri.parse("content://shiroikuma.raikidoban.files/");
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {

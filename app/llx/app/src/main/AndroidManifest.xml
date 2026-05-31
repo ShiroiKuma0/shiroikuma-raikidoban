@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    android:sharedUserId="net.pierrox.lightning_launcher" >
+    android:sharedUserId="shiroikuma.raikidoban" >
 
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
@@ -31,7 +31,7 @@
     <uses-permission android:name="net.dinglisch.android.tasker.PERMISSION_RUN_TASKS"/>
 
     <permission
-            android:name="net.pierrox.lightning_launcher.USE_SCRIPT_SERVICE"
+            android:name="shiroikuma.raikidoban.USE_SCRIPT_SERVICE"
             android:protectionLevel="dangerous"
             android:label="@string/permission_label"
             android:description="@string/permission_description"/>
@@ -123,7 +123,7 @@
 
  		<provider
  			android:name="net.pierrox.lightning_launcher.util.FileProvider"
- 			android:authorities="net.pierrox.lightning_launcher.files"
+ 			android:authorities="shiroikuma.raikidoban.files"
  			android:exported="true"
             android:grantUriPermissions="true"/>
 
@@ -398,7 +398,7 @@
         </activity>
 
         <service android:name="net.pierrox.lightning_launcher.util.ScriptService"
-                 android:permission="net.pierrox.lightning_launcher.USE_SCRIPT_SERVICE"
+                 android:permission="shiroikuma.raikidoban.USE_SCRIPT_SERVICE"
                  android:exported="true"/>
 
 	</application>

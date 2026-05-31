@@ -50,7 +50,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 public class ApiProvider extends ContentProvider {
-	public static final Uri CONTENT_URI=Uri.parse("content://net.pierrox.lightning_launcher_extreme.api/");
+	public static final Uri CONTENT_URI=Uri.parse("content://shiroikuma.raikidoban.api/");
 	public static final String PREVIEW_FILE="screenshot.jpg";
 	
 	private static final String PATH_PREVIEW = "preview";
