@@ -54,7 +54,7 @@ Derived in `app/build.gradle`:
    ```
    `buildApk` runs `assembleExtremeDebug`, copies the APK to `~/tmp/<apk name>`, and increments `BUILD_NUMBER` in `gradle.properties`. It prints `>>> ~/tmp/<apk name>` and `>>> BUILD_NUMBER bumped to <n>`. Confirm `BUILD SUCCESSFUL`. (Network is needed on a cold cache for Gradle/deps; this may require running outside the sandbox.)
 
-3. **Always ask** (via AskUserQuestion) whether to **adb push** the APK to the phone — every build, no assuming. The ONLY action ever offered is the `adb push` to `/sdcard/tmp`; **never** offer to `adb install`, deploy, or launch the app — the user installs and tests it on-device themselves. Options: "Yes, adb push" / "No".
+3. **Always ask first — hard gate, every single build.** After a successful build the very next action MUST be an AskUserQuestion: "adb push the APK to /sdcard/tmp?" with options "Yes, adb push" / "No". Do **NOT** run `adb push` (or anything else on the device) until the user picks "Yes" — never auto-push, even though adb access is available and even mid-flow on a fix iteration. The ONLY action ever offered is the `adb push` to `/sdcard/tmp`; **never** offer to `adb install`, deploy, or launch — the user installs and tests it themselves.
 
 4. **If yes, adb push it yourself** (`adb` is at `/usr/bin/adb`):
    - `adb devices` — confirm a device is connected.
