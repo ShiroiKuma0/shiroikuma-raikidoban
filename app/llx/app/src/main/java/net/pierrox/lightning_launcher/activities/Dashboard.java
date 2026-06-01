@@ -80,6 +80,7 @@ import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -93,6 +94,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -3146,15 +3148,54 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     }
 
     // item==null: add, item!=null: replace
-    private void selectShortcutForAddOrPick(Item item) {
+    private void selectShortcutForAddOrPick(final Item item) {
         mTmpItem = item;
-        Intent i = new Intent(Intent.ACTION_PICK_ACTIVITY);
-        i.putExtra(Intent.EXTRA_INTENT, new Intent(Intent.ACTION_CREATE_SHORTCUT));
-        i.putExtra(Intent.EXTRA_TITLE, getString(R.string.tools_pick_shortcut));
-        try {
-            startActivityForResult(i, item == null ? REQUEST_SELECT_SHORTCUT_FOR_ADD1 : REQUEST_SELECT_SHORTCUT_FOR_PICK1);
-        } catch (Exception e) {
-        }
+
+        // The framework ACTION_PICK_ACTIVITY chooser is drawn by another process, so it can't follow
+        // our night theme (it shows up white-on-grey). Replace it with an in-app dialog that inherits
+        // the yellow-on-black look, then feed the chosen component back through the existing ADD1/PICK1
+        // result handlers exactly as if ACTION_PICK_ACTIVITY had returned it.
+        final PackageManager pm = getPackageManager();
+        final List<ResolveInfo> shortcuts = pm.queryIntentActivities(new Intent(Intent.ACTION_CREATE_SHORTCUT), 0);
+        // Tasker is the #1 choice -> pin it to the top; everything else follows alphabetically.
+        final ResolveInfo.DisplayNameComparator nameComparator = new ResolveInfo.DisplayNameComparator(pm);
+        Collections.sort(shortcuts, new Comparator<ResolveInfo>() {
+            @Override
+            public int compare(ResolveInfo a, ResolveInfo b) {
+                boolean aTasker = net.pierrox.lightning_launcher.util.TaskerWidgets.TASKER_PACKAGE.equals(a.activityInfo.packageName);
+                boolean bTasker = net.pierrox.lightning_launcher.util.TaskerWidgets.TASKER_PACKAGE.equals(b.activityInfo.packageName);
+                if (aTasker != bTasker) {
+                    return aTasker ? -1 : 1;
+                }
+                return nameComparator.compare(a, b);
+            }
+        });
+
+        final LayoutInflater inflater = getLayoutInflater();
+        ArrayAdapter<ResolveInfo> adapter = new ArrayAdapter<ResolveInfo>(this, R.layout.shortcut_picker_item, R.id.label, shortcuts) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View v = convertView != null ? convertView : inflater.inflate(R.layout.shortcut_picker_item, parent, false);
+                ResolveInfo ri = shortcuts.get(position);
+                ((TextView) v.findViewById(R.id.label)).setText(ri.loadLabel(pm));
+                ((ImageView) v.findViewById(R.id.icon)).setImageDrawable(ri.loadIcon(pm));
+                return v;
+            }
+        };
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.tools_pick_shortcut)
+                .setAdapter(adapter, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ResolveInfo ri = shortcuts.get(which);
+                        Intent chosen = new Intent(Intent.ACTION_CREATE_SHORTCUT);
+                        chosen.setComponent(new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name));
+                        onActivityResult(item == null ? REQUEST_SELECT_SHORTCUT_FOR_ADD1 : REQUEST_SELECT_SHORTCUT_FOR_PICK1, RESULT_OK, chosen);
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private void editShortcutLaunchAction(Shortcut shortcut) {
