@@ -16,6 +16,7 @@
 	<item type="id" name="mi_hide_unhide" />
 	<item type="id" name="mi_actions" />
 	<item type="id" name="mi_gesture_actions" />
+	<item type="id" name="mi_fold_matrix" />
 	<item type="id" name="mi_fold_migrate" />
 	<item type="id" name="mi_app_details" />
 	<item type="id" name="mi_app_store" />

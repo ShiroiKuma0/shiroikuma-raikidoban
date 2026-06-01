@@ -14,6 +14,14 @@
     <string name="acd_cat_lifecycle">ライフサイクル</string>
     <string name="acd_clear_title">アクションを消去しますか？</string>
     <string name="acd_clear_warn">「%1$s」のアクションを削除しますか？デフォルトに戻り、元に戻せません。</string>
+    <string name="fm_menu">折りたたみ配置…</string>
+    <string name="fm_title">折りたたみ配置</string>
+    <string name="fm_row">段 %1$d</string>
+    <string name="fm_width_unset">幅未設定</string>
+    <string name="fm_rebuild">名前から再構築</string>
+    <string name="fm_set_home">ホームに設定</string>
+    <string name="fm_remove">グリッドから削除</string>
+    <string name="fm_drag_hint">デスクトップを長押しでドラッグ、タップで操作。</string>
     <string name="fm_migrate">ネイティブ折りたたみへ移行…</string>
     <string name="fm_migrate_confirm">バックアップしてからネイティブの折りたたみ制御に切り替えますか？各デスクトップの Tasker 折りたたみチェックと手動スワイプは消去されます（バックアップから復元可能）。完了後、Tasker の折りたたみプロファイルを無効にしてください。</string>
     <string name="fm_migrating">移行中…</string>

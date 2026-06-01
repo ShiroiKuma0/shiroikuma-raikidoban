@@ -1105,6 +1105,14 @@
     <string name="acd_cat_lifecycle">Lifecycle</string>
     <string name="acd_clear_title">Clear action?</string>
     <string name="acd_clear_warn">Remove the action for %1$s? It will revert to the default and cannot be undone.</string>
+    <string name="fm_menu">Fold matrix…</string>
+    <string name="fm_title">Fold matrix</string>
+    <string name="fm_row">Row %1$d</string>
+    <string name="fm_width_unset">width not set</string>
+    <string name="fm_rebuild">Rebuild from names</string>
+    <string name="fm_set_home">Set as home</string>
+    <string name="fm_remove">Remove from grid</string>
+    <string name="fm_drag_hint">Long-press a desktop to drag it; tap for options.</string>
     <string name="fm_migrate">Native fold cutover…</string>
     <string name="fm_migrate_confirm">Back up, then switch to native fold control? Your per-desktop Tasker on-load fold checks and hand-wired swipes will be cleared (reversible from the backup). Afterwards, disable your Tasker fold profile.</string>
     <string name="fm_migrating">Migrating…</string>

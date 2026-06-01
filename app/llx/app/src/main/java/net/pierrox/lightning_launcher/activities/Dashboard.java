@@ -796,6 +796,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     public void onResume() {
         super.onResume();
 
+        mFoldGrid = null; // re-read the fold matrix; it may have been edited in FoldMatrixActivity
+
         if (mPausedBecauseOfLaunch || mNewIntent) {
             ItemConfig.LaunchAnimation launchAnimation;
             if (mPausedBecauseOfLaunch) {
@@ -1874,6 +1876,10 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
 
             case R.id.mi_gesture_actions:
                 openActionsOverview(targetItem, targetItemLayout);
+                break;
+
+            case R.id.mi_fold_matrix:
+                startActivity(new Intent(this, FoldMatrixActivity.class));
                 break;
 
             case R.id.mi_fold_migrate:
@@ -5014,6 +5020,9 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 addBubbleItem(R.id.mi_s, R.string.mi_s);
             }
             addBubbleItem(R.id.mi_gesture_actions, R.string.acd_actions);
+            if (!foldGrid().isEmpty()) {
+                addBubbleItem(R.id.mi_fold_matrix, R.string.fm_menu);
+            }
             if (!foldGrid().isEmpty() && !foldGrid().migrated) {
                 addBubbleItem(R.id.mi_fold_migrate, R.string.fm_migrate);
             }
@@ -5025,6 +5034,9 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 addBubbleItem(R.id.mi_s, R.string.mi_s);
             }
             addBubbleItem(R.id.mi_gesture_actions, R.string.acd_actions);
+            if (!foldGrid().isEmpty()) {
+                addBubbleItem(R.id.mi_fold_matrix, R.string.fm_menu);
+            }
             if (!foldGrid().isEmpty() && !foldGrid().migrated) {
                 addBubbleItem(R.id.mi_fold_migrate, R.string.fm_migrate);
             }

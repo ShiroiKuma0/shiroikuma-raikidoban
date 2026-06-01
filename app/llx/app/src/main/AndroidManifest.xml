@@ -233,6 +233,12 @@
             android:excludeFromRecents="true"
             android:configChanges="keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
 
+        <activity
+            android:name="net.pierrox.lightning_launcher.activities.FoldMatrixActivity"
+            android:excludeFromRecents="true"
+            android:theme="@style/AppLight"
+            android:configChanges="keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
+
         <activity android:name="net.pierrox.lightning_launcher.activities.EventActionSetup"
                   android:configChanges="keyboardHidden|orientation|screenSize"/>
 
