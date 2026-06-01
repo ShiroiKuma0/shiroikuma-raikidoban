@@ -1094,6 +1094,17 @@
     <string name="st_p">Paste the style</string>
     <string name="st_d">Style copied, now use \'Paste the style\' to replicate it.</string>
     <string name="mi_actions">Actions…</string>
+    <string name="acd_actions">Gestures…</string>
+    <string name="acd_actions_title">Gesture actions</string>
+    <string name="acd_none">(none)</string>
+    <string name="acd_default_suffix">%1$s (default)</string>
+    <string name="acd_tasker_prefix">Tasker: %1$s</string>
+    <string name="acd_cat_keys">Keys</string>
+    <string name="acd_cat_touch">Touch &amp; swipe</string>
+    <string name="acd_cat_screen">Screen &amp; orientation</string>
+    <string name="acd_cat_lifecycle">Lifecycle</string>
+    <string name="acd_clear_title">Clear action?</string>
+    <string name="acd_clear_warn">Remove the action for %1$s? It will revert to the default and cannot be undone.</string>
     <string name="nois">No option</string>
     <string name="lightning">Lightning</string>
     <string name="folder">Folder</string>

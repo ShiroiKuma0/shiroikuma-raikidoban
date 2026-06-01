@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Japanese (ja) strings for the gesture-actions overview. The external language pack
+     (net.pierrox.lightning_launcher.lp.jp) does not contain these new keys, so the app resolves them
+     through its own base resources, which follow the device locale (ja-*). acd_tasker_prefix is left to
+     the English default ("Tasker: %1$s") on purpose. -->
+<resources>
+    <string name="acd_actions">ジェスチャー</string>
+    <string name="acd_actions_title">ジェスチャー</string>
+    <string name="acd_none">（なし）</string>
+    <string name="acd_default_suffix">%1$s（デフォルト）</string>
+    <string name="acd_cat_keys">キー</string>
+    <string name="acd_cat_touch">タッチ・スワイプ</string>
+    <string name="acd_cat_screen">画面・向き</string>
+    <string name="acd_cat_lifecycle">ライフサイクル</string>
+    <string name="acd_clear_title">アクションを消去しますか？</string>
+    <string name="acd_clear_warn">「%1$s」のアクションを削除しますか？デフォルトに戻り、元に戻せません。</string>
+</resources>

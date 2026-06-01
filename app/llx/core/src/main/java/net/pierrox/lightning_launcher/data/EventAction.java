@@ -72,6 +72,12 @@ public class EventAction {
                 case GlobalConfig.LAUNCH_SHORTCUT:
                     try {
                         Intent intent = Intent.parseUri(data, 0);
+                        // Prefer the name captured when the shortcut/Tasker task was picked, so e.g.
+                        // a Tasker task shows "Tasker: <Task>" rather than just the resolved app label.
+                        String label = intent.getStringExtra(LightningIntent.INTENT_EXTRA_SHORTCUT_LABEL);
+                        if (label != null) {
+                            return label;
+                        }
                         PackageManager packageManager = engine.getContext().getPackageManager();
                         ResolveInfo activity = packageManager.resolveActivity(intent, 0);
                         if (activity != null) {

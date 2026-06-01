@@ -54,6 +54,7 @@ import net.pierrox.lightning_launcher.data.Utils;
 import net.pierrox.lightning_launcher.engine.LightningEngine;
 import net.pierrox.lightning_launcher.engine.variable.Variable;
 import net.pierrox.lightning_launcher.script.Script;
+import net.pierrox.lightning_launcher.util.ActionsOverviewDialog;
 import net.pierrox.lightning_launcher.util.ScriptPickerDialog;
 import net.pierrox.lightning_launcher.util.SetVariableDialog;
 import net.pierrox.lightning_launcher_extreme.R;
@@ -428,6 +429,13 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
             if (resultCode == RESULT_OK) {
                 try {
                     Intent i = requestCode == REQUEST_PICK_ACTIVITY ? data : (Intent) data.getParcelableExtra(Intent.EXTRA_SHORTCUT_INTENT);
+                    if (requestCode == REQUEST_PICK_SHORTCUT2 && i != null) {
+                        // Capture the picked shortcut/Tasker task name so it can be shown later.
+                        String label = ActionsOverviewDialog.shortcutLaunchLabel(this, i, data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME));
+                        if (label != null) {
+                            i.putExtra(LightningIntent.INTENT_EXTRA_SHORTCUT_LABEL, label);
+                        }
+                    }
                     mEventActionForPick.data = i.toUri(0);
                     mAdapter.notifyDataSetChanged();
                 } catch (Exception e) {

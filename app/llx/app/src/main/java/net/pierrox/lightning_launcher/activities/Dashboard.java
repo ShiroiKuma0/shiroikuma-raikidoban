@@ -134,6 +134,8 @@ import net.pierrox.lightning_launcher.data.Folder;
 import net.pierrox.lightning_launcher.data.Item;
 import net.pierrox.lightning_launcher.data.JsonLoader;
 import net.pierrox.lightning_launcher.data.LightningIntent;
+import net.pierrox.lightning_launcher.util.ActionsOverviewDialog;
+import net.pierrox.lightning_launcher.util.ScriptPickerDialog;
 import net.pierrox.lightning_launcher.data.Page;
 import net.pierrox.lightning_launcher.data.PageIndicator;
 import net.pierrox.lightning_launcher.data.SavedItemGeometry;
@@ -251,6 +253,11 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     private static final int REQUEST_SCRIPT_CROP_IMAGE = 19;
     private static final int REQUEST_EDIT_LAUNCH_ACTION = 20;
     private static final int REQUEST_TASKER_REINIT_CONFIGURE = 201;
+    // Gesture-actions overview: pick results are handled at the top of onActivityResult.
+    private static final int REQUEST_ACTIONS_PICK_APP = 9101;
+    private static final int REQUEST_ACTIONS_PICK_SHORTCUT = 9102;
+    private static final int REQUEST_ACTIONS_EDIT_FULL = 9103;
+    private static final int REQUEST_ACTIONS_PICK_POSITION = 9104;
     private static final String BROADCAST_ACTION_DISPLAY_PAGE = LLApp.LL_PKG_NAME + ".ACTION_DISPLAY_PAGE";
     private static final String BROADCAST_ACTION_RELOAD = LLApp.LLX_PKG_NAME + ".ACTION_RELOAD";
     private static final int BUBBLE_MODE_NONE = 0;
@@ -379,6 +386,12 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     private int mOldItemAlpha;
     private long mSelectDropFolderStartTime;
     private Item mTmpItem;
+
+    // Gesture-actions overview dialog state (which slot of which page/item is being edited).
+    private ActionsOverviewDialog mActionsOverviewDialog;
+    private ActionsOverviewDialog.Slot mEditingSlot;
+    private Page mActionsTargetPage;
+    private Item mActionsTargetItem;
     private ComponentName mTmpComponentName;
     private int mActivityResultScriptId = Script.NO_ID;
     private String mActivityResultScriptToken;
@@ -989,6 +1002,40 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             processNextTaskerWidget();
             return;
         }
+        if (requestCode == REQUEST_ACTIONS_PICK_APP) {
+            if (resultCode == RESULT_OK && data != null) {
+                applyActionsSlotEdit(new EventAction(GlobalConfig.LAUNCH_APP, data.toUri(0)));
+            }
+            return;
+        }
+        if (requestCode == REQUEST_ACTIONS_PICK_SHORTCUT) {
+            if (resultCode == RESULT_OK && data != null) {
+                Intent launch = data.getParcelableExtra(Intent.EXTRA_SHORTCUT_INTENT);
+                if (launch != null) {
+                    String label = ActionsOverviewDialog.shortcutLaunchLabel(this, launch, data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME));
+                    if (label != null) {
+                        launch.putExtra(LightningIntent.INTENT_EXTRA_SHORTCUT_LABEL, label);
+                    }
+                    applyActionsSlotEdit(new EventAction(GlobalConfig.LAUNCH_SHORTCUT, launch.toUri(0)));
+                }
+            }
+            return;
+        }
+        if (requestCode == REQUEST_ACTIONS_PICK_POSITION) {
+            if (resultCode == RESULT_OK && data != null) {
+                Intent i = data.getParcelableExtra(Intent.EXTRA_SHORTCUT_INTENT);
+                if (i != null) {
+                    applyActionsSlotEdit(new EventAction(GlobalConfig.GO_DESKTOP_POSITION, i.toUri(0)));
+                }
+            }
+            return;
+        }
+        if (requestCode == REQUEST_ACTIONS_EDIT_FULL) {
+            if (resultCode == RESULT_OK) {
+                applyActionsSlotEdit(EventActionSetup.getEventActionFromIntent(data));
+            }
+            return;
+        }
         if (requestCode < REQUEST_FROM_CUSTOMIZE_VIEW) {
             if (resultCode == RESULT_OK) {
                 ItemLayout il = mScreen.getTargetOrTopmostItemLayout();
@@ -1576,6 +1623,10 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             case R.id.mi_actions:
                 close_bubble = false;
                 openBubble(BUBBLE_MODE_ITEM_ACTIONS, targetItemView);
+                break;
+
+            case R.id.mi_gesture_actions:
+                openActionsOverview(targetItem, targetItemLayout);
                 break;
 
             case R.id.mi_remove:
@@ -3147,14 +3198,25 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         startActivityForResult(intent, REQUEST_SELECT_APP_FOR_ADD);
     }
 
+    private interface OnShortcutActivityChosen {
+        void onChosen(Intent chosen);
+    }
+
     // item==null: add, item!=null: replace
     private void selectShortcutForAddOrPick(final Item item) {
         mTmpItem = item;
+        showThemedShortcutPicker(new OnShortcutActivityChosen() {
+            @Override
+            public void onChosen(Intent chosen) {
+                onActivityResult(item == null ? REQUEST_SELECT_SHORTCUT_FOR_ADD1 : REQUEST_SELECT_SHORTCUT_FOR_PICK1, RESULT_OK, chosen);
+            }
+        });
+    }
 
-        // The framework ACTION_PICK_ACTIVITY chooser is drawn by another process, so it can't follow
-        // our night theme (it shows up white-on-grey). Replace it with an in-app dialog that inherits
-        // the yellow-on-black look, then feed the chosen component back through the existing ADD1/PICK1
-        // result handlers exactly as if ACTION_PICK_ACTIVITY had returned it.
+    // The framework ACTION_PICK_ACTIVITY chooser is drawn by another process, so it can't follow our
+    // night theme (it shows up white-on-grey). This in-app dialog inherits the yellow-on-black look and
+    // hands the chosen CREATE_SHORTCUT component back to the caller.
+    private void showThemedShortcutPicker(final OnShortcutActivityChosen onChosen) {
         final PackageManager pm = getPackageManager();
         final List<ResolveInfo> shortcuts = pm.queryIntentActivities(new Intent(Intent.ACTION_CREATE_SHORTCUT), 0);
         // Tasker is the #1 choice -> pin it to the top; everything else follows alphabetically.
@@ -3191,11 +3253,221 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                         ResolveInfo ri = shortcuts.get(which);
                         Intent chosen = new Intent(Intent.ACTION_CREATE_SHORTCUT);
                         chosen.setComponent(new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name));
-                        onActivityResult(item == null ? REQUEST_SELECT_SHORTCUT_FOR_ADD1 : REQUEST_SELECT_SHORTCUT_FOR_PICK1, RESULT_OK, chosen);
+                        onChosen.onChosen(chosen);
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
+    }
+
+    // ---- Gesture-actions overview (long-tap "Gestures…" on a desktop or item) -------------------
+
+    private void openActionsOverview(Item targetItem, ItemLayout targetItemLayout) {
+        List<ActionsOverviewDialog.Slot> slots;
+        if (targetItem != null) {
+            mActionsTargetItem = targetItem;
+            mActionsTargetPage = targetItem.getPage();
+            slots = ActionsOverviewDialog.buildItemSlots(targetItem, mGlobalConfig);
+        } else {
+            Page page = targetItemLayout != null ? targetItemLayout.getPage() : mScreen.getCurrentRootPage();
+            mActionsTargetItem = null;
+            mActionsTargetPage = page;
+            slots = ActionsOverviewDialog.buildPageSlots(page, mGlobalConfig);
+        }
+        mActionsOverviewDialog = new ActionsOverviewDialog(this, mEngine, targetItem, slots, new ActionsOverviewDialog.Callback() {
+            @Override
+            public void onChangeSlot(ActionsOverviewDialog.Slot slot) {
+                onActionsChangeSlot(slot);
+            }
+
+            @Override
+            public void onClearSlot(ActionsOverviewDialog.Slot slot) {
+                onActionsClearSlot(slot);
+            }
+        });
+        mActionsOverviewDialog.show();
+    }
+
+    private void onActionsChangeSlot(ActionsOverviewDialog.Slot slot) {
+        mEditingSlot = slot;
+        // Decide the picker from the EFFECTIVE (resolved/inherited) action, so an already-set action
+        // re-picks directly within its type; the full "Select action" chooser appears only when nothing
+        // is set. Edits are always written to the slot's own field (see applyActionsSlotEdit).
+        EventAction cur = slot.resolved();
+        int a = cur == null ? GlobalConfig.UNSET : cur.action;
+        if (a == GlobalConfig.LAUNCH_ITEM && mActionsTargetItem != null) {
+            // "Launch the item" really runs the item's own target (usually an app). Re-pick that target
+            // directly (app -> app selector, etc.) instead of showing the action chooser, matching how a
+            // LAUNCH_APP gesture behaves.
+            EventAction derived = itemLaunchAsEventAction(mActionsTargetItem);
+            if (derived != null) {
+                cur = derived;
+                a = derived.action;
+            }
+        }
+        if (a == GlobalConfig.UNSET || a == GlobalConfig.NOTHING) {
+            // Nothing set -> the full categorized chooser (auto-opened because the slot is empty).
+            EventActionSetup.startActivityForResult(this, slot.get(), slot.forItem, slot.type, false, REQUEST_ACTIONS_EDIT_FULL);
+        } else if (cur.next != null) {
+            // A chain of actions -> the full editor (direct pickers handle only a single action).
+            EventActionSetup.startActivityForResult(this, cur, slot.forItem, slot.type, false, REQUEST_ACTIONS_EDIT_FULL);
+        } else if (a == GlobalConfig.LAUNCH_APP) {
+            Intent picker = new Intent(this, AppDrawerX.class);
+            picker.setAction(Intent.ACTION_PICK_ACTIVITY);
+            try {
+                startActivityForResult(picker, REQUEST_ACTIONS_PICK_APP);
+            } catch (Exception e) {
+                // pass
+            }
+        } else if (a == GlobalConfig.LAUNCH_SHORTCUT) {
+            pickShortcutForAction(cur);
+        } else if (a == GlobalConfig.RUN_SCRIPT) {
+            new ScriptPickerDialog(this, mEngine, cur.data, Script.TARGET_NONE, new ScriptPickerDialog.OnScriptPickerEvent() {
+                @Override
+                public void onScriptPicked(String id_data, int target) {
+                    applyActionsSlotEdit(new EventAction(GlobalConfig.RUN_SCRIPT, id_data));
+                }
+
+                @Override
+                public void onScriptPickerCanceled() {
+                    // keep the existing value
+                }
+            }).show();
+        } else if (a == GlobalConfig.OPEN_FOLDER) {
+            Utils.createFolderSelectionDialog(this, mEngine, new Utils.OnFolderSelectionDialogDone() {
+                @Override
+                public void onFolderSelected(String name, int page) {
+                    applyActionsSlotEdit(new EventAction(GlobalConfig.OPEN_FOLDER, String.valueOf(page)));
+                }
+
+                @Override
+                public void onNoFolderSelected() {
+                    // keep the existing value
+                }
+            }).show();
+        } else if (a == GlobalConfig.GO_DESKTOP_POSITION) {
+            Intent intent = new Intent(Intent.ACTION_CREATE_SHORTCUT);
+            intent.setClass(this, ScreenManager.class);
+            try {
+                startActivityForResult(intent, REQUEST_ACTIONS_PICK_POSITION);
+            } catch (Exception e) {
+                // pass
+            }
+        } else {
+            // Parameterless actions (go home, previous/next desktop, ...) -> the full editor, where the
+            // action type itself can be changed.
+            EventActionSetup.startActivityForResult(this, cur, slot.forItem, slot.type, false, REQUEST_ACTIONS_EDIT_FULL);
+        }
+    }
+
+    // Resolve what launching an item actually does, as an EventAction (LAUNCH_APP for an app, else
+    // LAUNCH_SHORTCUT, or the decoded action for a Lightning intent such as a folder). Mirrors the
+    // detection in editShortcutLaunchAction. Returns null when it can't be determined.
+    private EventAction itemLaunchAsEventAction(Item item) {
+        if (!(item instanceof Shortcut)) {
+            return null;
+        }
+        Intent intent = ((Shortcut) item).getIntent();
+        if (intent == null) {
+            return null;
+        }
+        if (LLApp.get().isLightningIntent(intent)) {
+            EventAction ea = Utils.decodeEventActionFromLightningIntent(intent);
+            return ea != null ? ea : new EventAction(GlobalConfig.LAUNCH_SHORTCUT, intent.toUri(0));
+        }
+        boolean isApp = false;
+        String uri = intent.toUri(0);
+        Page appDrawerPage = mEngine.getOrLoadPage(Page.APP_DRAWER_PAGE);
+        for (Item it : appDrawerPage.items) {
+            if (it instanceof Shortcut) {
+                Intent i = ((Shortcut) it).getIntent();
+                if (i != null && i.toUri(0).equals(uri)) {
+                    isApp = true;
+                    break;
+                }
+            }
+        }
+        return new EventAction(isApp ? GlobalConfig.LAUNCH_APP : GlobalConfig.LAUNCH_SHORTCUT, intent.toUri(0));
+    }
+
+    // For a shortcut action, jump straight into the originating provider's shortcut creator (so a Tasker
+    // task action re-opens Tasker's task selector) instead of the generic shortcut list.
+    private void pickShortcutForAction(EventAction cur) {
+        String pkg = null;
+        if (cur != null && cur.data != null) {
+            try {
+                Intent i = Intent.parseUri(cur.data, 0);
+                pkg = i.getPackage();
+                if (pkg == null && i.getComponent() != null) {
+                    pkg = i.getComponent().getPackageName();
+                }
+            } catch (Exception e) {
+                // pass
+            }
+        }
+        if (pkg != null) {
+            PackageManager pm = getPackageManager();
+            for (ResolveInfo ri : pm.queryIntentActivities(new Intent(Intent.ACTION_CREATE_SHORTCUT), 0)) {
+                if (pkg.equals(ri.activityInfo.packageName)) {
+                    Intent chosen = new Intent(Intent.ACTION_CREATE_SHORTCUT);
+                    chosen.setComponent(new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name));
+                    try {
+                        startActivityForResult(chosen, REQUEST_ACTIONS_PICK_SHORTCUT);
+                        return;
+                    } catch (Exception e) {
+                        // fall through to the generic picker
+                    }
+                }
+            }
+        }
+        showThemedShortcutPicker(new OnShortcutActivityChosen() {
+            @Override
+            public void onChosen(Intent chosen) {
+                try {
+                    startActivityForResult(chosen, REQUEST_ACTIONS_PICK_SHORTCUT);
+                } catch (Exception e) {
+                    // pass
+                }
+            }
+        });
+    }
+
+    private void onActionsClearSlot(final ActionsOverviewDialog.Slot slot) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.acd_clear_title)
+                .setMessage(getString(R.string.acd_clear_warn, getString(slot.titleRes)))
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        slot.set(EventAction.UNSET());
+                        persistActionsTarget();
+                        if (mActionsOverviewDialog != null) {
+                            mActionsOverviewDialog.refresh();
+                        }
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void applyActionsSlotEdit(EventAction ea) {
+        if (ea == null || mEditingSlot == null) {
+            return;
+        }
+        mEditingSlot.set(ea);
+        persistActionsTarget();
+        if (mActionsOverviewDialog != null) {
+            mActionsOverviewDialog.refresh();
+        }
+        mEditingSlot = null;
+    }
+
+    private void persistActionsTarget() {
+        if (mActionsTargetItem != null) {
+            mActionsTargetItem.getPage().setModified();
+        } else if (mActionsTargetPage != null) {
+            mActionsTargetPage.setModified();
+        }
     }
 
     private void editShortcutLaunchAction(Shortcut shortcut) {
@@ -4364,10 +4636,12 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             addBubbleItem(R.id.mi_edit, R.string.mi_customize);
             addBubbleItem(R.id.mi_position, R.string.mi_position);
             addBubbleItem(R.id.mi_actions, R.string.mi_actions);
+            addBubbleItem(R.id.mi_gesture_actions, R.string.acd_actions);
         } else if (mode == BUBBLE_MODE_ITEM_NO_EM) {
             Page page = item.getPage();
             boolean is_folder_page = page.isFolder();
             boolean is_in_embedded_folder = itemView.getParentItemLayout().getOpenerItemView() instanceof EmbeddedFolderView;
+            addBubbleItem(R.id.mi_gesture_actions, R.string.acd_actions);
             if (is_folder_page && page.id != Page.USER_MENU_PAGE && canMoveOutOfFolder())
                 addBubbleItem(R.id.mi_move_out_of_folder, is_in_embedded_folder ? R.string.mi_mop : R.string.mi_move_out_of_folder);
 
@@ -4488,6 +4762,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             if (mGlobalConfig.runScripts) {
                 addBubbleItem(R.id.mi_s, R.string.mi_s);
             }
+            addBubbleItem(R.id.mi_gesture_actions, R.string.acd_actions);
             addBubbleItem(R.id.mi_dm_customize, R.string.mi_es_settings);
         } else if (mode == BUBBLE_MODE_LIGHTNING_MENU_NO_EM) {
             addBubbleItem(R.id.mi_l, mGlobalConfig.itemLongTap.action == GlobalConfig.NOTHING ? R.string.mi_ul : R.string.mi_l);
@@ -4495,6 +4770,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             if (mGlobalConfig.runScripts) {
                 addBubbleItem(R.id.mi_s, R.string.mi_s);
             }
+            addBubbleItem(R.id.mi_gesture_actions, R.string.acd_actions);
             addBubbleItem(R.id.mi_dm_customize, R.string.mi_es_settings);
         } else if (mode == BUBBLE_MODE_SETTINGS) {
             int text_res_id;
