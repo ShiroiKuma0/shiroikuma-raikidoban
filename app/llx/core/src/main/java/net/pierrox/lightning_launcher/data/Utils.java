@@ -406,6 +406,19 @@ public class Utils {
             ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
             sStandardIconSize = (Integer) getLauncherLargeIconSize.invoke(am, (Object[]) null);
             sLauncherIconDensity = (Integer) getLauncherLargeIconDensity.invoke(am, (Object[]) null);
+
+            // Some foldables report a launcher-icon density far higher than the actual display
+            // density (e.g. 585 dpi vs the 390 dpi display on the Huawei Mate XT unfolded panel).
+            // getLauncherLargeIconSize() is in that inflated density, so every icon ends up ~1.5x
+            // too big and clips. This value is captured once at process start, so the fold state at
+            // startup (restore/cold launch) decides it for the whole session. The icon *box* should
+            // track the real display density; rescale to it. sLauncherIconDensity is left as-is so
+            // high-res icon bitmaps still load crisply and are then drawn down to the box size.
+            // No-op on normal devices where the two densities match.
+            int displayDensityDpi = context.getResources().getDisplayMetrics().densityDpi;
+            if (sLauncherIconDensity > 0 && displayDensityDpi > 0 && sLauncherIconDensity != displayDensityDpi) {
+                sStandardIconSize = Math.round(sStandardIconSize * (float) displayDensityDpi / sLauncherIconDensity);
+            }
         } catch (Exception e) {
             // pass API level 11, 15
         }
