@@ -133,8 +133,14 @@ import net.pierrox.lightning_launcher.data.FileUtils;
 import net.pierrox.lightning_launcher.data.Folder;
 import net.pierrox.lightning_launcher.data.Item;
 import net.pierrox.lightning_launcher.data.JsonLoader;
+import androidx.documentfile.provider.DocumentFile;
+
+import net.pierrox.lightning_launcher.configuration.FoldGrid;
+import net.pierrox.lightning_launcher.data.BackupRestoreTool;
 import net.pierrox.lightning_launcher.data.LightningIntent;
 import net.pierrox.lightning_launcher.util.ActionsOverviewDialog;
+import net.pierrox.lightning_launcher.util.BackupFolder;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.ScriptPickerDialog;
 import net.pierrox.lightning_launcher.data.Page;
 import net.pierrox.lightning_launcher.data.PageIndicator;
@@ -687,6 +693,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             Setup.firstTimeInit(this);
         } else {
             int page = mEngine.readCurrentPage(mGlobalConfig.homeScreen);
+            page = foldTarget(page);
             setPagerPage(page, Screen.PAGE_DIRECTION_HINT_AUTO);
         }
         Intent intent = getIntent();
@@ -1418,6 +1425,246 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         configureSystemBarsPadding(mScreen.getCurrentRootPage().config);
 
         closeBubble();
+
+        onFoldMaybeChanged();
+    }
+
+    // ---- Native fold-aware desktop matrix (see FoldGrid) ----------------------------------------
+    private FoldGrid mFoldGrid;
+
+    // Physical fold-width signature: the smaller dimension of the real display in pixels. Stable per
+    // fold state (unlike smallestScreenWidthDp, which is window-derived and noisy). Mate XT measured:
+    // folded=1008, half=2048, full=2232.
+    private int currentFoldWidth() {
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getRealMetrics(dm);
+        return Math.min(dm.widthPixels, dm.heightPixels);
+    }
+
+    private FoldGrid foldGrid() {
+        if (mFoldGrid == null) {
+            mFoldGrid = FoldGrid.parse(mGlobalConfig.foldGrid);
+            if (mFoldGrid.isEmpty()) {
+                // First run: derive the matrix from the desktop names and seed the measured fold widths.
+                mFoldGrid.deriveFromNames(mGlobalConfig.screensNames, mGlobalConfig.screensOrder);
+                mFoldGrid.setWidth(1, 1008);
+                mFoldGrid.setWidth(2, 2048);
+                mFoldGrid.setWidth(3, 2232);
+                saveFoldGrid();
+            }
+        }
+        return mFoldGrid;
+    }
+
+    private void saveFoldGrid() {
+        if (mFoldGrid != null) {
+            mGlobalConfig.foldGrid = mFoldGrid.toJson();
+            mEngine.saveDataDelayed();
+        }
+    }
+
+    // Single-finger horizontal swipe: move to the previous/next present offset within the current fold
+    // row (skip empty cells, clamp at the ends — no wrap, matching a fixed physical strip of desktops).
+    private void gotoMatrixOffset(int dir) {
+        FoldGrid g = foldGrid();
+        if (g.isEmpty() || mScreen == null || mScreen.getCurrentRootPage() == null) {
+            return;
+        }
+        int[] cell = g.findCell(mScreen.getCurrentRootPage().id);
+        if (cell == null) {
+            return;
+        }
+        java.util.List<Integer> offsets = g.offsetsSorted(cell[0]);
+        int idx = offsets.indexOf(Integer.valueOf(cell[1]));
+        int ni = idx + dir;
+        if (idx < 0 || ni < 0 || ni >= offsets.size()) {
+            return;
+        }
+        Integer target = g.cell(cell[0], offsets.get(ni));
+        if (target != null) {
+            setPagerPage(target, dir > 0 ? Screen.PAGE_DIRECTION_HINT_FORWARD : Screen.PAGE_DIRECTION_HINT_BACKWARD);
+        }
+    }
+
+    // ---- One-time cutover from the external Tasker fold logic to the native matrix -----------------
+    private void confirmFoldMigration() {
+        if (foldGrid().isEmpty() || foldGrid().migrated) {
+            Flash.show(this, R.string.fm_migrated);
+            return;
+        }
+        if (BackupFolder.getDir(this) == null) {
+            Flash.show(this, R.string.fm_need_backup_folder);
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.fm_migrate)
+                .setMessage(R.string.fm_migrate_confirm)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int w) {
+                        new FoldMigrationTask().execute();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private static boolean isTaskerAction(EventAction ea) {
+        return ea != null && ea.action == GlobalConfig.LAUNCH_SHORTCUT && ea.data != null
+                && (ea.data.contains("taskerm") || ea.data.contains("dinglisch"));
+    }
+
+    // Backs up first, then binds single-finger swipes to the matrix and clears the now-redundant
+    // per-page Tasker on-load checks and hand-wired GO_DESKTOP_POSITION swipes. Runs off the main
+    // thread (heavy backup); returns true on success. Idempotent via foldGrid.migrated.
+    private boolean performFoldMigration() {
+        FoldGrid g = foldGrid();
+        if (g.isEmpty() || g.migrated) {
+            return false;
+        }
+        try {
+            String name = "pre-foldmatrix-"
+                    + new java.text.SimpleDateFormat("yyyy-MM-dd HH-mm").format(new java.util.Date()) + ".lla";
+            DocumentFile doc = BackupFolder.createDoc(this, name);
+            if (doc == null) {
+                return false;
+            }
+            BackupRestoreTool.BackupConfig cfg = new BackupRestoreTool.BackupConfig();
+            cfg.context = this;
+            cfg.pathFrom = getApplicationInfo().dataDir + "/files";
+            cfg.uriTo = doc.getUri();
+            cfg.includeWidgetsData = true;
+            cfg.includeWallpaper = true;
+            cfg.includeFonts = true;
+            Exception ex = BackupRestoreTool.backup(cfg);
+            if (ex != null) {
+                try {
+                    doc.delete();
+                } catch (Exception e) {
+                    // pass
+                }
+                return false;
+            }
+
+            mGlobalConfig.swipeLeft = new EventAction(GlobalConfig.MATRIX_PREV_IN_ROW, null);
+            mGlobalConfig.swipeRight = new EventAction(GlobalConfig.MATRIX_NEXT_IN_ROW, null);
+
+            for (FoldGrid.Row r : g.rows) {
+                for (Integer off : g.offsetsSorted(r.rowKey)) {
+                    Integer pageId = g.cell(r.rowKey, off);
+                    if (pageId == null) {
+                        continue;
+                    }
+                    Page page = mEngine.getOrLoadPage(pageId);
+                    boolean changed = false;
+                    if (isTaskerAction(page.config.load)) {
+                        page.config.load = EventAction.UNSET();
+                        changed = true;
+                    }
+                    if (page.config.swipeLeft != null && page.config.swipeLeft.action == GlobalConfig.GO_DESKTOP_POSITION) {
+                        page.config.swipeLeft = EventAction.UNSET();
+                        changed = true;
+                    }
+                    if (page.config.swipeRight != null && page.config.swipeRight.action == GlobalConfig.GO_DESKTOP_POSITION) {
+                        page.config.swipeRight = EventAction.UNSET();
+                        changed = true;
+                    }
+                    if (changed) {
+                        page.setModified();
+                    }
+                }
+            }
+
+            g.migrated = true;
+            mGlobalConfig.foldGrid = g.toJson();
+            mEngine.saveData();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private class FoldMigrationTask extends AsyncTask<Void, Void, Boolean> {
+        private ProgressDialog mDlg;
+
+        @Override
+        protected void onPreExecute() {
+            mDlg = new ProgressDialog(Dashboard.this);
+            mDlg.setMessage(getString(R.string.fm_migrating));
+            mDlg.setCancelable(false);
+            mDlg.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            return performFoldMigration();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean ok) {
+            try {
+                if (mDlg != null) {
+                    mDlg.dismiss();
+                }
+            } catch (Exception e) {
+                // pass
+            }
+            if (ok) {
+                mEngine.notifyGlobalConfigChanged();
+                Flash.show(Dashboard.this, R.string.fm_migrated);
+            } else {
+                Flash.show(Dashboard.this, R.string.fm_backup_failed);
+            }
+        }
+    }
+
+    // Learn a row's width only when it has none yet (seeded rows keep their exact measured values).
+    private void maybeLearnFoldWidth(int rowKey, int width) {
+        FoldGrid.Row r = mFoldGrid == null ? null : mFoldGrid.row(rowKey);
+        if (r != null && r.widthPx == null) {
+            r.widthPx = width;
+            saveFoldGrid();
+        }
+    }
+
+    // The fold-appropriate page for the current fold state: keep the current horizontal offset, switch
+    // to the matched row (fall back to that row's home). Returns currentPageId unchanged when there's no
+    // matrix, no width match, or the page isn't a grid desktop (folders / app drawer are left alone).
+    private int foldTarget(int currentPageId) {
+        FoldGrid g = foldGrid();
+        if (g.isEmpty()) {
+            return currentPageId;
+        }
+        int width = currentFoldWidth();
+        int targetRow = g.rowForWidth(width);
+        if (targetRow < 0) {
+            return currentPageId;
+        }
+        int[] cell = g.findCell(currentPageId);
+        if (cell == null) {
+            return currentPageId;
+        }
+        maybeLearnFoldWidth(targetRow, width);
+        if (targetRow == cell[0]) {
+            return currentPageId;
+        }
+        Integer target = g.cell(targetRow, cell[1]);
+        if (target == null) {
+            target = g.cell(targetRow, 0);
+        }
+        return target != null ? target : currentPageId;
+    }
+
+    // On a configuration change, jump to the fold-appropriate desktop when the fold width changed.
+    private void onFoldMaybeChanged() {
+        if (mScreen == null || mScreen.getCurrentRootPage() == null) {
+            return;
+        }
+        int cur = mScreen.getCurrentRootPage().id;
+        int target = foldTarget(cur);
+        if (target != cur) {
+            setPagerPage(target, Screen.PAGE_DIRECTION_HINT_AUTO);
+        }
     }
 
     @Override
@@ -1627,6 +1874,10 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
 
             case R.id.mi_gesture_actions:
                 openActionsOverview(targetItem, targetItemLayout);
+                break;
+
+            case R.id.mi_fold_migrate:
+                confirmFoldMigration();
                 break;
 
             case R.id.mi_remove:
@@ -4763,6 +5014,9 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 addBubbleItem(R.id.mi_s, R.string.mi_s);
             }
             addBubbleItem(R.id.mi_gesture_actions, R.string.acd_actions);
+            if (!foldGrid().isEmpty() && !foldGrid().migrated) {
+                addBubbleItem(R.id.mi_fold_migrate, R.string.fm_migrate);
+            }
             addBubbleItem(R.id.mi_dm_customize, R.string.mi_es_settings);
         } else if (mode == BUBBLE_MODE_LIGHTNING_MENU_NO_EM) {
             addBubbleItem(R.id.mi_l, mGlobalConfig.itemLongTap.action == GlobalConfig.NOTHING ? R.string.mi_ul : R.string.mi_l);
@@ -4771,6 +5025,9 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 addBubbleItem(R.id.mi_s, R.string.mi_s);
             }
             addBubbleItem(R.id.mi_gesture_actions, R.string.acd_actions);
+            if (!foldGrid().isEmpty() && !foldGrid().migrated) {
+                addBubbleItem(R.id.mi_fold_migrate, R.string.fm_migrate);
+            }
             addBubbleItem(R.id.mi_dm_customize, R.string.mi_es_settings);
         } else if (mode == BUBBLE_MODE_SETTINGS) {
             int text_res_id;
@@ -8036,6 +8293,16 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
 
                 case GlobalConfig.NEXT_DESKTOP:
                     gotoPage(PAGE_DIRECTION_HINT_FORWARD);
+                    il = getTopmostItemLayout();
+                    break;
+
+                case GlobalConfig.MATRIX_PREV_IN_ROW:
+                    gotoMatrixOffset(-1);
+                    il = getTopmostItemLayout();
+                    break;
+
+                case GlobalConfig.MATRIX_NEXT_IN_ROW:
+                    gotoMatrixOffset(+1);
                     il = getTopmostItemLayout();
                     break;
 

@@ -1105,6 +1105,12 @@
     <string name="acd_cat_lifecycle">Lifecycle</string>
     <string name="acd_clear_title">Clear action?</string>
     <string name="acd_clear_warn">Remove the action for %1$s? It will revert to the default and cannot be undone.</string>
+    <string name="fm_migrate">Native fold cutover…</string>
+    <string name="fm_migrate_confirm">Back up, then switch to native fold control? Your per-desktop Tasker on-load fold checks and hand-wired swipes will be cleared (reversible from the backup). Afterwards, disable your Tasker fold profile.</string>
+    <string name="fm_migrating">Migrating…</string>
+    <string name="fm_migrated">Native fold control active. Backup saved.</string>
+    <string name="fm_need_backup_folder">Choose a backup folder first (Backup &amp; restore).</string>
+    <string name="fm_backup_failed">Backup failed — migration aborted.</string>
     <string name="nois">No option</string>
     <string name="lightning">Lightning</string>
     <string name="folder">Folder</string>

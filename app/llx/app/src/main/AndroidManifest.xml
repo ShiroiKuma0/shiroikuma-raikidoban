@@ -68,7 +68,7 @@
             android:alwaysRetainTaskState="true"
             android:theme="@style/AppLightNoActionBarWallpaper"
             android:windowSoftInputMode="adjustNothing"
-			android:configChanges="keyboardHidden|orientation|screenSize|mcc|mnc">
+			android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|mcc|mnc">
 
             <intent-filter>
 				<action android:name="android.intent.action.MAIN" />

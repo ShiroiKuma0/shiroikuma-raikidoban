@@ -54,6 +54,9 @@ public class GlobalConfig extends JsonLoader {
     public static final int OPEN_HIERARCHY_SCREEN = 44;
     public static final int SHOW_APP_SHORTCUTS = 45;
     public static final int REINIT_TASKER_WIDGETS = 46;
+    // Move within the current fold-matrix row (see FoldGrid): previous / next horizontal slot.
+    public static final int MATRIX_PREV_IN_ROW = 47;
+    public static final int MATRIX_NEXT_IN_ROW = 48;
     public int version = 1;
     public EventAction homeKey = new EventAction(GO_HOME_ZOOM_TO_ORIGIN, null);
     public EventAction menuKey = new EventAction(SHOW_HIDE_APP_MENU_STATUS_BAR, null);
@@ -86,6 +89,9 @@ public class GlobalConfig extends JsonLoader {
     public PageAnimation pageAnimation = PageAnimation.FADE;
     public int[] screensOrder = null;
     public String[] screensNames = null;
+    // Fold-aware desktop matrix (see FoldGrid), JSON-encoded so JsonLoader serializes it as a plain
+    // String and it rides along in backups. Null until derived/migrated.
+    public String foldGrid = null;
     public int homeScreen = Page.FIRST_DASHBOARD_PAGE;
     public int lockScreen = Page.NONE;
     public boolean launchUnlock = true;
