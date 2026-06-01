@@ -30,11 +30,6 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.util.DisplayMetrics;
@@ -313,19 +308,12 @@ public class BackupRestoreTool {
     }
 
     private static void backupWallpaper(BackupConfig backup_config, ZipOutputStream zos) throws IOException {
-        Drawable d;
-        try {
-            d = backup_config.context.getWallpaper();
-        } catch (Exception e) {
-            d = null;
-        }
-        if (d instanceof BitmapDrawable) {
-            putZipDirEntry(zos, ZIP_DIR_WALLPAPER);
-            ZipEntry ze = new ZipEntry(ZIP_DIR_WALLPAPER + "/" + ZIP_FILE_WALLPAPER_BITMAP);
-            zos.putNextEntry(ze);
-            ((BitmapDrawable) d).getBitmap().compress(CompressFormat.PNG, 100, zos);
-            zos.closeEntry();
-        }
+        // The system wallpaper is intentionally NOT captured anymore. Since targetSdk 33 (Android 13),
+        // Context.getWallpaper() / WallpaperManager.getDrawable() no longer returns the user's actual
+        // wallpaper to an app that did not set it and lacks MANAGE_EXTERNAL_STORAGE — it returns the
+        // built-in default instead. Storing that default and re-applying it on restore is exactly what
+        // was wiping the user's wallpaper, so we leave the system wallpaper untouched. The per-page
+        // launcher wallpaper ("pages/<id>/wp") lives in the core data and is backed up normally.
     }
 
     private static void backupFonts(BackupConfig backup_config, ZipOutputStream zos) throws IOException {
@@ -601,23 +589,11 @@ public class BackupRestoreTool {
     }
 
     private static ZipEntry restoreWallpaper(RestoreConfig restore_config, ZipInputStream zis) throws IOException {
-        if (!restore_config.restoreWallpaper) {
-            return skipZipEntries(zis, ZIP_DIR_WALLPAPER);
-        }
-
-        ZipEntry ze = zis.getNextEntry();
-        if (ze.getName().endsWith(ZIP_FILE_WALLPAPER_BITMAP)) {
-
-            try {
-                Bitmap wallpaper = BitmapFactory.decodeStream(zis);
-                restore_config.context.setWallpaper(wallpaper);
-            } catch (Throwable e) {
-
-            }
-            ze = zis.getNextEntry();
-        }
-
-        return ze;
+        // Never re-apply a backed-up system wallpaper, regardless of restore_config.restoreWallpaper.
+        // The bitmap stored in older archives is the built-in default (see backupWallpaper), so applying
+        // it would overwrite the user's current wallpaper. Skip any wallpaper entry and leave the system
+        // wallpaper exactly as the user has it.
+        return skipZipEntries(zis, ZIP_DIR_WALLPAPER);
     }
 
     private static ZipEntry restoreFonts(RestoreConfig restore_config, ZipInputStream zis) throws IOException {
