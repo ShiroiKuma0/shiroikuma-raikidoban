@@ -146,7 +146,17 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
         mEmptyView = findViewById(R.id.empty);
 
+        styleButtons();
+
         loadArchivesList();
+    }
+
+    // 「白い熊 雷起動盤 UI」: paint the three top buttons with the BUTTONS slots (black bg + yellow border
+    // by default) instead of the platform's grey button background.
+    private void styleButtons() {
+        net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.backup));
+        net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.export));
+        net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.import_));
     }
 
     @Override
@@ -168,6 +178,9 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Re-apply so 「白い熊 雷起動盤 UI」 button edits show on return from the settings screen.
+        styleButtons();
 
         Intent intent = getIntent();
         if (Intent.ACTION_VIEW.equals(intent.getAction())) {

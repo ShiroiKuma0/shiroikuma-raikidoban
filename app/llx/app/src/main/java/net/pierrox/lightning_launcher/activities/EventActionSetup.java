@@ -26,9 +26,14 @@ package net.pierrox.lightning_launcher.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.view.LayoutInflater;
@@ -40,6 +45,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mobeta.android.dslv.DragSortListView;
 
@@ -55,9 +61,12 @@ import net.pierrox.lightning_launcher.engine.LightningEngine;
 import net.pierrox.lightning_launcher.engine.variable.Variable;
 import net.pierrox.lightning_launcher.script.Script;
 import net.pierrox.lightning_launcher.util.ActionsOverviewDialog;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.ScriptPickerDialog;
 import net.pierrox.lightning_launcher.util.SetVariableDialog;
+import net.pierrox.lightning_launcher.util.TaskerWidgets;
 import net.pierrox.lightning_launcher.util.ThemedShortcutPicker;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 import net.pierrox.lightning_launcher_extreme.R;
 
 import org.json.JSONException;
@@ -80,6 +89,17 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
     private static final int REQUEST_PICK_SHORTCUT2 = 3;
     private static final int REQUEST_PICK_DESKTOP_POSITION_SHORTCUT = 4;
 
+    // Fork-only synthetic entries in the "Select action" chooser. They are NOT persisted action codes:
+    // each resolves to a normal LAUNCH_SHORTCUT (Tasker's creator directly / a fixed Backup-restore
+    // intent), so execution and display reuse the existing shortcut path. Negative to never collide with
+    // a real GlobalConfig.* code.
+    private static final int PSEUDO_TASKER_SHORTCUT = -1001;
+    private static final int PSEUDO_BACKUP_RESTORE = -1002;
+    private static final Action TASKER_SHORTCUT_ACTION =
+            new Action(PSEUDO_TASKER_SHORTCUT, R.string.an_ls_tasker, Action.CAT_LAUNCH_AND_APPS, 0, 0);
+    private static final Action BACKUP_RESTORE_ACTION =
+            new Action(PSEUDO_BACKUP_RESTORE, R.string.an_backup_restore, Action.CAT_EDITION, 0, 0);
+
 
     private ArrayList<EventAction> mEventActions;
     private boolean mForItem;
@@ -88,6 +108,13 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
 
     private ActionsDescription mActions;
     private EventActionAdapter mAdapter;
+
+    // Tasker's shortcut creator bounces instantly with RESULT_CANCELED when its data isn't loaded
+    // ("Tasker data not ready" — open+exit Tasker once to fix). Track whether the in-flight pick targets
+    // Tasker and when it launched, so a fast cancel can be told apart from a real user cancel.
+    private static final long TASKER_BOUNCE_MS = 1500;
+    private boolean mPickingTasker;
+    private long mTaskerPickStartMs;
 
     private EventAction mEventActionForPick;
     private boolean mEventActionForPickNew;
@@ -190,7 +217,10 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
 
         ViewGroup decorView = (ViewGroup) dialog.getWindow().getDecorView();
         Window window = getWindow();
-        window.setBackgroundDrawable(decorView.getBackground());
+        // Frame the "List of actions" panel with the configurable dialog border (yellow 2dp by default);
+        // fall back to the platform panel when the border is off and the background is not overridden.
+        Drawable panel = UiDialogStyler.panelBackground(this);
+        window.setBackgroundDrawable(panel != null ? panel : decorView.getBackground());
         window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
         View dialogContent = ((ViewGroup) decorView.findViewById(android.R.id.content)).getChildAt(0);
         ((ViewGroup) dialogContent.getParent()).removeView(dialogContent);
@@ -325,6 +355,12 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
         builder.setTitle(R.string.br_a);
         ListView list = new ListView(this);
         final ActionsAdapter adapter = new ActionsAdapter(this, mActions);
+        // Fork extras: a direct "Tasker shortcut" just above the generic "Launch a shortcut", and a
+        // "Backup / restore" launcher command in the Edition group. Only added when their anchor action
+        // is offered for this event type (so e.g. script handlers, which have no LAUNCH_SHORTCUT, get
+        // neither).
+        insertActionBefore(adapter, GlobalConfig.LAUNCH_SHORTCUT, TASKER_SHORTCUT_ACTION);
+        insertActionAfter(adapter, GlobalConfig.CUSTOMIZE_LAUNCHER, BACKUP_RESTORE_ACTION);
         list.setAdapter(adapter);
         builder.setView(list);
         final AlertDialog dialog = builder.create();
@@ -332,14 +368,104 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Action action = adapter.getItem(i);
-                EventAction ea = new EventAction(action.action, null);
-                mEventActions.add(ea);
-                mAdapter.notifyDataSetChanged();
                 dialog.dismiss();
-                editAction(ea, true);
+                onActionChosen(action.action);
             }
         });
         dialog.show();
+        UiDialogStyler.style(dialog);
+    }
+
+    // Insert a synthetic entry immediately before / after the row whose action code is {@code anchor}.
+    // No-op when the anchor is absent (so the extra never appears where its base action is unavailable).
+    private static void insertActionBefore(ActionsAdapter adapter, int anchor, Action toInsert) {
+        for (int i = 0; i < adapter.getCount(); i++) {
+            if (adapter.getItem(i).action == anchor) {
+                adapter.insert(toInsert, i);
+                return;
+            }
+        }
+    }
+
+    private static void insertActionAfter(ActionsAdapter adapter, int anchor, Action toInsert) {
+        for (int i = 0; i < adapter.getCount(); i++) {
+            if (adapter.getItem(i).action == anchor) {
+                adapter.insert(toInsert, i + 1);
+                return;
+            }
+        }
+    }
+
+    private void onActionChosen(int actionCode) {
+        if (actionCode == GlobalConfig.CATEGORY) {
+            return; // category header row
+        }
+        if (actionCode == PSEUDO_TASKER_SHORTCUT) {
+            EventAction ea = new EventAction(GlobalConfig.LAUNCH_SHORTCUT, null);
+            mEventActions.add(ea);
+            mAdapter.notifyDataSetChanged();
+            pickTaskerShortcut(ea, true);
+            return;
+        }
+        if (actionCode == PSEUDO_BACKUP_RESTORE) {
+            Intent open = new Intent(this, BackupRestore.class);
+            open.putExtra(LightningIntent.INTENT_EXTRA_SHORTCUT_LABEL, getString(R.string.an_backup_restore));
+            EventAction ea = new EventAction(GlobalConfig.LAUNCH_SHORTCUT, open.toUri(0));
+            mEventActions.add(ea);
+            mAdapter.notifyDataSetChanged();
+            return; // no picker needed — the target is fixed
+        }
+        EventAction ea = new EventAction(actionCode, null);
+        mEventActions.add(ea);
+        mAdapter.notifyDataSetChanged();
+        editAction(ea, true);
+    }
+
+    // Jump straight into Tasker's own shortcut creator (skipping the app picker), then reuse the normal
+    // REQUEST_PICK_SHORTCUT2 result handling. Falls back to the generic picker when Tasker is absent.
+    private void pickTaskerShortcut(EventAction ea, boolean forNew) {
+        mEventActionForPick = ea;
+        mEventActionForPickNew = forNew;
+        PackageManager pm = getPackageManager();
+        for (ResolveInfo ri : pm.queryIntentActivities(new Intent(Intent.ACTION_CREATE_SHORTCUT), 0)) {
+            if (TaskerWidgets.TASKER_PACKAGE.equals(ri.activityInfo.packageName)) {
+                Intent chosen = new Intent(Intent.ACTION_CREATE_SHORTCUT);
+                chosen.setComponent(new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name));
+                try {
+                    markTaskerPick(chosen);
+                    startActivityForResult(chosen, REQUEST_PICK_SHORTCUT2);
+                    return;
+                } catch (Exception e) {
+                    // fall through to the generic picker
+                }
+            }
+        }
+        ThemedShortcutPicker.show(this, new ThemedShortcutPicker.Listener() {
+            @Override
+            public void onChosen(Intent chosen) {
+                try {
+                    markTaskerPick(chosen);
+                    startActivityForResult(chosen, REQUEST_PICK_SHORTCUT2);
+                } catch (Exception e) {
+                }
+            }
+
+            @Override
+            public void onCancelled() {
+                if (mEventActionForPickNew) {
+                    mEventActions.remove(mEventActionForPick);
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+    }
+
+    // Remember whether the shortcut pick we are about to launch targets Tasker, and when, so a fast
+    // RESULT_CANCELED can be recognised as Tasker's "data not ready" bounce (see onActivityResult).
+    private void markTaskerPick(Intent chosen) {
+        String pkg = chosen.getComponent() != null ? chosen.getComponent().getPackageName() : chosen.getPackage();
+        mPickingTasker = TaskerWidgets.TASKER_PACKAGE.equals(pkg);
+        mTaskerPickStartMs = SystemClock.elapsedRealtime();
     }
 
     private void editAction(EventAction ea, boolean forNew) {
@@ -359,6 +485,7 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
                 @Override
                 public void onChosen(Intent chosen) {
                     try {
+                        markTaskerPick(chosen);
                         startActivityForResult(chosen, REQUEST_PICK_SHORTCUT2);
                     } catch (Exception e) {
                     }
@@ -441,6 +568,22 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
                 }
             }
         } else if (requestCode == REQUEST_PICK_ACTIVITY || requestCode == REQUEST_PICK_SHORTCUT2 || requestCode == REQUEST_PICK_DESKTOP_POSITION_SHORTCUT) {
+            boolean taskerPick = mPickingTasker;
+            long sinceLaunch = SystemClock.elapsedRealtime() - mTaskerPickStartMs;
+            mPickingTasker = false;
+            if (requestCode == REQUEST_PICK_SHORTCUT2 && taskerPick && resultCode != RESULT_OK
+                    && sinceLaunch < TASKER_BOUNCE_MS) {
+                // Tasker's creator bounced instantly ("Tasker data not ready"): drop the half-added action,
+                // tell the user how to fix it, and close the action page so they can retry afterwards.
+                if (mEventActionForPickNew) {
+                    mEventActions.remove(mEventActionForPick);
+                }
+                // Lower area but lifted: Tasker's own "data blocked" error pops at the very bottom, so keep
+                // ours just above it.
+                Flash.showRaised(this, getString(R.string.tasker_not_ready), Toast.LENGTH_LONG);
+                finish();
+                return;
+            }
             if (resultCode == RESULT_OK) {
                 try {
                     Intent i = requestCode == REQUEST_PICK_ACTIVITY ? data : (Intent) data.getParcelableExtra(Intent.EXTRA_SHORTCUT_INTENT);

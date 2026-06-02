@@ -16,6 +16,11 @@ import android.widget.TextView;
  */
 public final class UiTheme {
 
+    /** Default border width (dp) for a border slot when the user has not set one. */
+    public static final int DEFAULT_BORDER_DP = 2;
+    /** Default corner radius (dp) for a button when the user has not set one. */
+    public static final int DEFAULT_BUTTON_CORNER_DP = 6;
+
     private UiTheme() {
     }
 
@@ -37,6 +42,18 @@ public final class UiTheme {
             base = adjustAlpha(base, 0.6f);
         }
         return base;
+    }
+
+    /** Effective border width (dp) for a border slot: the user's value, or {@link #DEFAULT_BORDER_DP}. */
+    public static int borderWidthDp(UiSlot slot) {
+        int v = UiConfig.get().getBorderWidth(slot.key);
+        return v < 0 ? DEFAULT_BORDER_DP : v;
+    }
+
+    /** Effective corner radius (dp): the user's value, or {@link #DEFAULT_BUTTON_CORNER_DP}. */
+    public static int cornerRadiusDp(UiSlot slot) {
+        int v = UiConfig.get().getCornerRadius(slot.key);
+        return v < 0 ? DEFAULT_BUTTON_CORNER_DP : v;
     }
 
     public static int adjustAlpha(int color, float factor) {

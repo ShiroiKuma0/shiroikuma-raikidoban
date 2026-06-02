@@ -1,6 +1,8 @@
 package net.pierrox.lightning_launcher.util;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.view.View;
 import android.view.Window;
@@ -46,18 +48,36 @@ public final class UiDialogStyler {
         styleButton(dialog.getButton(AlertDialog.BUTTON_NEGATIVE), buttonColor);
         styleButton(dialog.getButton(AlertDialog.BUTTON_NEUTRAL), buttonColor);
 
-        // Only repaint the panel when the user actually overrode the dialog background, so the default
-        // look (theme black, with the platform's rounded corners) is preserved out of the box.
-        if (UiConfig.get().hasOverride(UiSlot.DIALOG_BG.key)) {
+        Drawable panel = panelBackground(dialog.getContext());
+        if (panel != null) {
             Window window = dialog.getWindow();
             if (window != null) {
-                float d = dialog.getContext().getResources().getDisplayMetrics().density;
-                GradientDrawable panel = new GradientDrawable();
-                panel.setColor(UiTheme.color(UiSlot.DIALOG_BG));
-                panel.setCornerRadius(12 * d);
                 window.setBackgroundDrawable(panel);
             }
         }
+    }
+
+    /**
+     * The dialog panel background: the {@link UiSlot#DIALOG_BG} fill, rounded, with a
+     * {@link UiSlot#DIALOG_BORDER} stroke. Returns {@code null} to keep the platform default panel —
+     * i.e. when the border width is 0 AND the user has not overridden the dialog background — so an
+     * untouched install still shows the theme's plain rounded black panel. Out of the box the border is
+     * {@link UiTheme#DEFAULT_BORDER_DP}dp yellow, so this normally returns a bordered panel.
+     */
+    public static Drawable panelBackground(Context ctx) {
+        int borderDp = UiTheme.borderWidthDp(UiSlot.DIALOG_BORDER);
+        boolean bgOverridden = UiConfig.get().hasOverride(UiSlot.DIALOG_BG.key);
+        if (borderDp <= 0 && !bgOverridden) {
+            return null;
+        }
+        float d = ctx.getResources().getDisplayMetrics().density;
+        GradientDrawable panel = new GradientDrawable();
+        panel.setColor(UiTheme.color(UiSlot.DIALOG_BG));
+        panel.setCornerRadius(12 * d);
+        if (borderDp > 0) {
+            panel.setStroke(Math.round(borderDp * d), UiTheme.color(UiSlot.DIALOG_BORDER));
+        }
+        return panel;
     }
 
     private static void styleButton(Button button, int color) {

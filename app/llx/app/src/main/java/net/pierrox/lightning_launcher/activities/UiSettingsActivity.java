@@ -172,7 +172,12 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
             addSection(group);
             List<UiSlot> slots = UiSlot.forGroup(group);
             for (UiSlot slot : slots) {
-                if (slot.hasFont) {
+                if (slot == UiSlot.DIALOG_BORDER) {
+                    addBorderSlot(slot, mStepPx);
+                } else if (slot == UiSlot.BUTTON_BORDER) {
+                    addBorderSlot(slot, mStepPx);
+                    addCornerRow(slot, mStepPx);
+                } else if (slot.hasFont) {
                     addTextSlot(slot, mStepPx);
                 } else {
                     addColorRow(slot, mStepPx);
@@ -339,6 +344,88 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         row.setOnLongClickListener(v -> {
             resetColor(slot);
             return true;
+        });
+        mHolder.addView(row);
+    }
+
+    // A border slot = a colour row (the line/stroke colour) plus a width SeekBar (0 = no border).
+    private void addBorderSlot(final UiSlot slot, int indent) {
+        addColorRow(slot, indent);
+
+        int sub = indent + mStepPx;
+        int textColor = UiTheme.color(UiSlot.TEXT);
+
+        LinearLayout widthRow = makeRowContainer(sub);
+        TextView widthLabel = makeLabel(getString(R.string.theme_border_width), textColor);
+        widthRow.addView(widthLabel);
+        final SeekBar seek = new SeekBar(this);
+        LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        slp.leftMargin = dp(8);
+        slp.rightMargin = dp(8);
+        seek.setLayoutParams(slp);
+        seek.setMax(UiConfig.MAX_BORDER_WIDTH_DP);
+        seek.setProgress(Math.max(0, Math.min(UiConfig.MAX_BORDER_WIDTH_DP, UiTheme.borderWidthDp(slot))));
+        widthRow.addView(seek);
+        final TextView widthValue = makeLabel(borderLabel(UiTheme.borderWidthDp(slot)), textColor);
+        widthValue.setMinWidth(dp(56));
+        widthValue.setGravity(Gravity.END);
+        widthRow.addView(widthValue);
+        seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                UiConfig.get().setBorderWidth(slot.key, progress);
+                widthValue.setText(borderLabel(progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+        mHolder.addView(widthRow);
+    }
+
+    private String borderLabel(int dp) {
+        return dp > 0 ? getString(R.string.theme_border_width_value, dp) : getString(R.string.theme_border_none);
+    }
+
+    // Corner-roundness slider for a button slot (0 = square). Shares the border slot's indent.
+    private void addCornerRow(final UiSlot slot, int indent) {
+        int sub = indent + mStepPx;
+        int textColor = UiTheme.color(UiSlot.TEXT);
+
+        LinearLayout row = makeRowContainer(sub);
+        TextView label = makeLabel(getString(R.string.theme_corner), textColor);
+        row.addView(label);
+        final SeekBar seek = new SeekBar(this);
+        LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        slp.leftMargin = dp(8);
+        slp.rightMargin = dp(8);
+        seek.setLayoutParams(slp);
+        seek.setMax(UiConfig.MAX_CORNER_RADIUS_DP);
+        seek.setProgress(Math.max(0, Math.min(UiConfig.MAX_CORNER_RADIUS_DP, UiTheme.cornerRadiusDp(slot))));
+        row.addView(seek);
+        final TextView value = makeLabel(getString(R.string.theme_border_width_value, UiTheme.cornerRadiusDp(slot)), textColor);
+        value.setMinWidth(dp(56));
+        value.setGravity(Gravity.END);
+        row.addView(value);
+        seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                UiConfig.get().setCornerRadius(slot.key, progress);
+                value.setText(getString(R.string.theme_border_width_value, progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
         mHolder.addView(row);
     }

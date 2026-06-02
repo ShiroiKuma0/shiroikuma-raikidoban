@@ -2683,24 +2683,70 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         switch (id) {
             case DIALOG_APP_NOT_INSTALLED:
                 if (mNotValidShortcut != null) {
-                    builder = new AlertDialog.Builder(this);
-                    builder.setMessage(R.string.app_not_valid);
                     final ComponentName cn = mNotValidShortcut.getIntent().getComponent();
+                    // A 4th choice ("Tasker shortcut") won't fit AlertDialog's three buttons, so offer the
+                    // choices as a themed list: pick another app, repoint at a Tasker shortcut, or (when the
+                    // missing component is known) open the store. Cancel stays a button.
+                    final java.util.ArrayList<CharSequence> labels = new java.util.ArrayList<>();
+                    final java.util.ArrayList<Integer> kinds = new java.util.ArrayList<>();
+                    labels.add(getString(R.string.mi_pick_app));
+                    kinds.add(0);
+                    labels.add(getString(R.string.an_ls_tasker));
+                    kinds.add(1);
+                    labels.add(getString(R.string.ll_action_shortcut));
+                    kinds.add(3);
                     if (cn != null) {
-                        builder.setPositiveButton(R.string.app_store, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Version.APP_STORE_INSTALL_PREFIX + cn.getPackageName()));
-                                Utils.startActivitySafely(Dashboard.this, intent, R.string.start_activity_error);
-                                mNotValidShortcut = null;
-                            }
-                        });
+                        labels.add(getString(R.string.fdroid));
+                        kinds.add(2);
+                        labels.add(getString(R.string.aurora_store));
+                        kinds.add(4);
                     }
-                    builder.setNeutralButton(R.string.mi_pick_app, new DialogInterface.OnClickListener() {
+                    // Yellow-on-black list (the default simple_list_item renders white): colour each row
+                    // with DIALOG_TEXT.
+                    ArrayAdapter<CharSequence> notInstalledAdapter = new ArrayAdapter<CharSequence>(
+                            this, android.R.layout.simple_list_item_1, android.R.id.text1, labels) {
+                        @Override
+                        public View getView(int position, View convertView, ViewGroup parent) {
+                            View v = super.getView(position, convertView, parent);
+                            UiTheme.applyTo((TextView) v.findViewById(android.R.id.text1), UiSlot.DIALOG_TEXT);
+                            return v;
+                        }
+                    };
+                    builder = new AlertDialog.Builder(this);
+                    builder.setTitle(R.string.app_not_valid);
+                    builder.setAdapter(notInstalledAdapter, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            replaceShortcutApp(mNotValidShortcut);
+                            Item target = mNotValidShortcut;
                             mNotValidShortcut = null;
+                            if (target == null) {
+                                return;
+                            }
+                            switch (kinds.get(which)) {
+                                case 0:
+                                    replaceShortcutApp(target);
+                                    break;
+                                case 1:
+                                    pickTaskerShortcutForItem(target);
+                                    break;
+                                case 3:
+                                    pickLightningActionForItem(target);
+                                    break;
+                                case 2:
+                                    // F-Droid (the missing component's package), opened in the F-Droid app
+                                    // if installed, else the browser.
+                                    Intent intent = new Intent(Intent.ACTION_VIEW,
+                                            Uri.parse("https://f-droid.org/packages/" + cn.getPackageName() + "/"));
+                                    Utils.startActivitySafely(Dashboard.this, intent, R.string.start_activity_error);
+                                    break;
+                                case 4:
+                                    // Aurora Store: the original Google Play (market://) link, which Aurora
+                                    // registers for (falls back to Play Store / browser).
+                                    Intent aurora = new Intent(Intent.ACTION_VIEW,
+                                            Uri.parse(Version.APP_STORE_INSTALL_PREFIX + cn.getPackageName()));
+                                    Utils.startActivitySafely(Dashboard.this, aurora, R.string.start_activity_error);
+                                    break;
+                            }
                         }
                     });
                     builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -2709,7 +2755,14 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                             mNotValidShortcut = null;
                         }
                     });
-                    return builder.create();
+                    AlertDialog notInstalledDialog = builder.create();
+                    notInstalledDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                        @Override
+                        public void onShow(DialogInterface d) {
+                            net.pierrox.lightning_launcher.util.UiDialogStyler.style((AlertDialog) d);
+                        }
+                    });
+                    return notInstalledDialog;
                 }
                 break;
 
@@ -3450,6 +3503,40 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         Intent picker = new Intent(this, AppDrawerX.class);
         picker.setAction(Intent.ACTION_PICK_ACTIVITY);
         startActivityForResult(picker, REQUEST_SELECT_APP_FOR_PICK);
+    }
+
+    // From the "app not installed" dialog: repoint the item straight at a Tasker shortcut via Tasker's own
+    // creator (reusing the item-replace result path, REQUEST_SELECT_SHORTCUT_FOR_PICK2). Falls back to the
+    // generic shortcut picker when Tasker is not installed.
+    private void pickTaskerShortcutForItem(Item item) {
+        mTmpItem = item;
+        PackageManager pm = getPackageManager();
+        for (ResolveInfo ri : pm.queryIntentActivities(new Intent(Intent.ACTION_CREATE_SHORTCUT), 0)) {
+            if (net.pierrox.lightning_launcher.util.TaskerWidgets.TASKER_PACKAGE.equals(ri.activityInfo.packageName)) {
+                Intent chosen = new Intent(Intent.ACTION_CREATE_SHORTCUT);
+                chosen.setComponent(new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name));
+                try {
+                    startActivityForResult(chosen, REQUEST_SELECT_SHORTCUT_FOR_PICK2);
+                    return;
+                } catch (Exception e) {
+                    // fall through to the generic picker
+                }
+            }
+        }
+        selectShortcutForAddOrPick(item);
+    }
+
+    // From the "app not installed" dialog: repoint the item at a 「白い熊 雷起動盤」 (Lightning) action by
+    // running our own action editor as a shortcut creator, reusing the item-replace result path.
+    private void pickLightningActionForItem(Item item) {
+        mTmpItem = item;
+        Intent i = new Intent(Intent.ACTION_CREATE_SHORTCUT);
+        i.setClass(this, EventActionSetup.class);
+        try {
+            startActivityForResult(i, REQUEST_SELECT_SHORTCUT_FOR_PICK2);
+        } catch (Exception e) {
+            // pass
+        }
     }
 
     private void selectAppForAdd() {

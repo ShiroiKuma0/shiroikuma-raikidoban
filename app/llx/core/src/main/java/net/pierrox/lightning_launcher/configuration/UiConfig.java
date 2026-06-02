@@ -24,6 +24,10 @@ public final class UiConfig {
     public static final int UNSET = Integer.MIN_VALUE;
     /** Upper bound of the size seekbar, in sp. 0 still means "leave the default size". */
     public static final int MAX_FONT_SIZE_SP = 40;
+    /** Upper bound of the border-width seekbar, in dp. 0 means "no border". */
+    public static final int MAX_BORDER_WIDTH_DP = 12;
+    /** Upper bound of the corner-roundness seekbar, in dp. 0 means "square corners". */
+    public static final int MAX_CORNER_RADIUS_DP = 28;
 
     private static final String PREFS = "llui";
     /** In-app UI locale: "" = follow the system, else a BCP-47 tag ("en", "ja"). */
@@ -31,6 +35,8 @@ public final class UiConfig {
     private static final String FONT_FAMILY_PREFIX = "font_family_";
     private static final String FONT_WEIGHT_PREFIX = "font_weight_";
     private static final String FONT_SIZE_PREFIX = "font_size_";
+    private static final String BORDER_WIDTH_PREFIX = "border_width_";
+    private static final String CORNER_RADIUS_PREFIX = "corner_radius_";
 
     private static UiConfig sInstance;
 
@@ -103,6 +109,46 @@ public final class UiConfig {
 
     public void setFontSize(String key, int value) {
         mPrefs.edit().putInt(FONT_SIZE_PREFIX + key, value).apply();
+    }
+
+    // --- border width (in dp). A missing key means "inherit the default" (see UiTheme); a present
+    // key (including 0 = no border) is an explicit per-slot value. ---
+
+    public boolean hasBorderWidth(String key) {
+        return mPrefs.contains(BORDER_WIDTH_PREFIX + key);
+    }
+
+    /** Stored border width in dp, or -1 when unset (caller resolves the default). */
+    public int getBorderWidth(String key) {
+        return mPrefs.getInt(BORDER_WIDTH_PREFIX + key, -1);
+    }
+
+    public void setBorderWidth(String key, int dp) {
+        mPrefs.edit().putInt(BORDER_WIDTH_PREFIX + key, dp).apply();
+    }
+
+    public void clearBorderWidth(String key) {
+        mPrefs.edit().remove(BORDER_WIDTH_PREFIX + key).apply();
+    }
+
+    // --- corner radius (in dp). A missing key means "inherit the default" (see UiTheme); a present key
+    // (including 0 = square) is an explicit per-slot value. ---
+
+    public boolean hasCornerRadius(String key) {
+        return mPrefs.contains(CORNER_RADIUS_PREFIX + key);
+    }
+
+    /** Stored corner radius in dp, or -1 when unset (caller resolves the default). */
+    public int getCornerRadius(String key) {
+        return mPrefs.getInt(CORNER_RADIUS_PREFIX + key, -1);
+    }
+
+    public void setCornerRadius(String key, int dp) {
+        mPrefs.edit().putInt(CORNER_RADIUS_PREFIX + key, dp).apply();
+    }
+
+    public void clearCornerRadius(String key) {
+        mPrefs.edit().remove(CORNER_RADIUS_PREFIX + key).apply();
     }
 
     // --- in-app language (forced locale, independent of the system / any language pack) ---

@@ -29,6 +29,10 @@ public enum UiSlot {
     DIALOG_BG("llui_dialog_bg", UiGroup.DIALOGS, R.string.llui_dialog_bg, false, false, "llui_background", 0),
     DIALOG_TITLE("llui_dialog_title", UiGroup.DIALOGS, R.string.llui_dialog_title, false, true, "llui_accent", 0),
     DIALOG_BUTTON("llui_dialog_button", UiGroup.DIALOGS, R.string.llui_dialog_button, false, false, "llui_accent", 0),
+    // Frame around dialog panels (shortcut picker, action chooser, the action list, …). Colour cascades
+    // from TEXT (yellow by default); its WIDTH is stored separately (see UiConfig border-width helpers,
+    // default {@link UiTheme#DEFAULT_BORDER_DP}). Width 0 = no border.
+    DIALOG_BORDER("llui_dialog_border", UiGroup.DIALOGS, R.string.llui_dialog_border, false, false, "llui_text", 0),
 
     // --- Settings & Customize preference pages ---
     PREF_TITLE("llui_pref_title", UiGroup.SETTINGS, R.string.llui_pref_title, false, true, "llui_text", 0),
@@ -40,7 +44,13 @@ public enum UiSlot {
     TOOLBAR_BG("llui_toolbar_bg", UiGroup.TOOLBARS, R.string.llui_toolbar_bg, false, false, "llui_background", 0),
     TOOLBAR_TEXT("llui_toolbar_text", UiGroup.TOOLBARS, R.string.llui_toolbar_text, false, true, "llui_accent", 0),
     TOOLBAR_ICON("llui_toolbar_icon", UiGroup.TOOLBARS, R.string.llui_toolbar_icon, false, false, "llui_accent", 0),
-    STATUSBAR_BG("llui_statusbar_bg", UiGroup.TOOLBARS, R.string.llui_statusbar_bg, false, false, "llui_background", 0);
+    STATUSBAR_BG("llui_statusbar_bg", UiGroup.TOOLBARS, R.string.llui_statusbar_bg, false, false, "llui_background", 0),
+
+    // --- Push buttons (e.g. the Backup/Restore screen). BUTTON_BORDER carries the border WIDTH and the
+    // corner RADIUS (see UiConfig); width 0 = no border, radius 0 = square. ---
+    BUTTON_BG("llui_button_bg", UiGroup.BUTTONS, R.string.llui_button_bg, false, false, "llui_background", 0),
+    BUTTON_TEXT("llui_button_text", UiGroup.BUTTONS, R.string.llui_button_text, false, true, "llui_text", 0),
+    BUTTON_BORDER("llui_button_border", UiGroup.BUTTONS, R.string.llui_button_border, false, false, "llui_text", 0);
 
     public final String key;
     public final UiGroup group;

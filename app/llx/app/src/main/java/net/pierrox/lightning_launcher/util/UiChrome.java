@@ -2,7 +2,9 @@ package net.pierrox.lightning_launcher.util;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.view.Menu;
+import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
 
@@ -43,6 +45,31 @@ public final class UiChrome {
         if (activity != null) {
             activity.getWindow().setStatusBarColor(UiTheme.color(UiSlot.STATUSBAR_BG));
         }
+    }
+
+    /**
+     * Style a push button with the BUTTONS slots: BUTTON_BG fill, BUTTON_BORDER stroke (width 0 = none)
+     * with the configurable corner radius, and BUTTON_TEXT colour + font. Replaces the platform's grey
+     * button background, so re-add some padding for the text.
+     */
+    public static void applyButton(TextView button) {
+        if (button == null) {
+            return;
+        }
+        float d = button.getResources().getDisplayMetrics().density;
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(UiTheme.color(UiSlot.BUTTON_BG));
+        bg.setCornerRadius(UiTheme.cornerRadiusDp(UiSlot.BUTTON_BORDER) * d);
+        int width = UiTheme.borderWidthDp(UiSlot.BUTTON_BORDER);
+        if (width > 0) {
+            bg.setStroke(Math.round(width * d), UiTheme.color(UiSlot.BUTTON_BORDER));
+        }
+        button.setBackground(bg);
+        button.setTextColor(UiTheme.color(UiSlot.BUTTON_TEXT));
+        UiTheme.applyFont(button, UiSlot.BUTTON_TEXT);
+        int padH = Math.round(16 * d);
+        int padV = Math.round(10 * d);
+        button.setPadding(padH, padV, padH, padV);
     }
 
     private static void tint(Drawable d, int color) {

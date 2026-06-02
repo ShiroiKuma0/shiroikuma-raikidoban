@@ -54,6 +54,24 @@ public final class Flash {
     }
 
     public static void show(Context ctx, CharSequence text, int duration) {
+        make(ctx, text, duration).show();
+    }
+
+    /**
+     * Like {@link #show}, but lifted into the lower portion of the screen (≈ a fifth of the height up
+     * from the bottom) instead of right at the bottom edge. Use when a bottom-centre flash would collide
+     * with another app's bottom dialog/toast (e.g. Tasker's "data not ready" error), so ours stays in the
+     * bottom area yet clearly above it. The offset is a fraction of the height so it adapts to the
+     * tri-fold's different fold widths.
+     */
+    public static void showRaised(Context ctx, CharSequence text, int duration) {
+        Toast toast = make(ctx, text, duration);
+        int yOffset = Math.round(ctx.getResources().getDisplayMetrics().heightPixels * 0.2f);
+        toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, yOffset);
+        toast.show();
+    }
+
+    private static Toast make(Context ctx, CharSequence text, int duration) {
         float d = ctx.getResources().getDisplayMetrics().density;
         int fg = UiTheme.color(UiSlot.DIALOG_TEXT);
         int bgColor = UiTheme.color(UiSlot.DIALOG_BG);
@@ -77,6 +95,6 @@ public final class Flash {
         Toast toast = new Toast(ctx);
         toast.setDuration(duration);
         toast.setView(tv);
-        toast.show();
+        return toast;
     }
 }

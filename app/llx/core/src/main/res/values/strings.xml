@@ -184,6 +184,9 @@
 <string name="an_cd">Current desktop settings</string>
 <string name="an_la">Launch an app</string>
 <string name="an_ls">Launch a shortcut</string>
+<string name="an_ls_tasker">Tasker shortcut</string>
+<string name="an_backup_restore">Backup / restore</string>
+<string name="tasker_not_ready">Tasker data not ready. Open Tasker, exit it, then add the Tasker shortcut again.</string>
 <string name="an_sw">Select a wallpaper</string>
 <string name="an_lm">Lightning Menu</string>
 <string name="an_ssb">Toggle status bar</string>
@@ -571,7 +574,10 @@
 <string name="revert_custom_icons_t">Revert custom icons</string>
 <string name="revert_custom_icons_s">This includes inner scale and icon effects.</string>
 <string name="please_wait">Please wait…</string>
-<string name="app_not_valid">Item is not installed. Search Google Play, or pick another app?</string>
+<string name="app_not_valid">Item is not installed. Search F-Droid, or pick another app?</string>
+<string name="fdroid">F-Droid</string>
+<string name="aurora_store">Aurora Store</string>
+<string name="ll_action_shortcut">白い熊 雷起動盤 action</string>
 <string name="app_store">Play Store</string>
 
 <!-- added 95 -->
@@ -1131,6 +1137,7 @@
     <string name="llui_group_dialogs">Dialogs</string>
     <string name="llui_group_settings">Settings &amp; Customize</string>
     <string name="llui_group_toolbars">Toolbars &amp; bars</string>
+    <string name="llui_group_buttons">Buttons</string>
     <string name="llui_background">Background</string>
     <string name="llui_text">Text &amp; default font</string>
     <string name="llui_accent">Accent</string>
@@ -1141,6 +1148,10 @@
     <string name="llui_dialog_bg">Dialog background</string>
     <string name="llui_dialog_title">Dialog title</string>
     <string name="llui_dialog_button">Dialog buttons</string>
+    <string name="llui_dialog_border">Dialog border</string>
+    <string name="llui_button_bg">Button background</string>
+    <string name="llui_button_text">Button text</string>
+    <string name="llui_button_border">Button border</string>
     <string name="llui_pref_title">Title</string>
     <string name="llui_pref_summary">Summary</string>
     <string name="llui_pref_category">Category heading</string>
@@ -1155,6 +1166,10 @@
     <string name="theme_size">Size</string>
     <string name="theme_size_default">default</string>
     <string name="theme_size_value">%1$d sp</string>
+    <string name="theme_border_width">Border width</string>
+    <string name="theme_border_width_value">%1$d dp</string>
+    <string name="theme_border_none">none</string>
+    <string name="theme_corner">Corner roundness</string>
     <string name="theme_add_font">Add font…</string>
     <string name="font_sample_text">The quick brown fox 白い熊 0123</string>
     <string name="font_system_default">System default</string>
