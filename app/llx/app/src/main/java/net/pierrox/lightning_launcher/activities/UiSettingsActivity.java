@@ -214,7 +214,7 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
 
     // --- language (in-app, independent of the system locale) ---
 
-    private static final String[] LANG_TAGS = {"", "en", "ja"};
+    private static final String[] LANG_TAGS = {"", "en", "ja", "cs", "ru"};
 
     private void addLanguageSection() {
         addSection(getString(R.string.llui_language));
@@ -223,7 +223,7 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
     }
 
     private CharSequence[] languageLabels() {
-        return new CharSequence[]{getString(R.string.llui_lang_system), "English", "日本語"};
+        return new CharSequence[]{getString(R.string.llui_lang_system), "English", "日本語", "Čeština", "Русский"};
     }
 
     private String currentLanguageLabel() {
@@ -236,6 +236,12 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         }
         if (tag.startsWith("en")) {
             return "English";
+        }
+        if (tag.startsWith("cs")) {
+            return "Čeština";
+        }
+        if (tag.startsWith("ru")) {
+            return "Русский";
         }
         return tag;
     }
