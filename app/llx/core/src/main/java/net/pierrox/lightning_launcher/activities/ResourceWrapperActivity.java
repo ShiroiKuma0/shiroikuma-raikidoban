@@ -1,5 +1,6 @@
 package net.pierrox.lightning_launcher.activities;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -18,6 +19,9 @@ import androidx.appcompat.app.AppCompatDelegate;
 import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.R;
 import net.pierrox.lightning_launcher.configuration.SystemConfig;
+import net.pierrox.lightning_launcher.configuration.UiConfig;
+import net.pierrox.lightning_launcher.configuration.UiSlot;
+import net.pierrox.lightning_launcher.configuration.UiTheme;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,10 +34,39 @@ public abstract class ResourceWrapperActivity extends AppCompatActivity {
     private ResourcesWrapperHelper mResourcesWrapperHelper;
 
 
+    private java.util.Locale mForcedLocale;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        mForcedLocale = UiConfig.getStoredLocale(newBase);
+        super.attachBaseContext(UiConfig.applyStoredLocale(newBase));
+    }
+
+    @Override
+    public void applyOverrideConfiguration(android.content.res.Configuration overrideConfiguration) {
+        // AppCompat passes a night-mode override config here; re-assert the forced locale so it isn't
+        // reset back to the system locale.
+        if (overrideConfiguration != null && mForcedLocale != null) {
+            overrideConfiguration.setLocale(mForcedLocale);
+        }
+        super.applyOverrideConfiguration(overrideConfiguration);
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme();
+        if (themeSystemBars()) {
+            // Black-yellow everywhere: chrome activities get a black status + nav bar. The wallpaper home
+            // (Dashboard / app drawer) opts out so it can keep its wallpaper-edge bars.
+            getWindow().setStatusBarColor(UiTheme.color(UiSlot.STATUSBAR_BG));
+            getWindow().setNavigationBarColor(UiTheme.color(UiSlot.BACKGROUND));
+        }
+    }
+
+    /** Whether to paint the system bars with the UI theme. Overridden to false by the wallpaper home. */
+    protected boolean themeSystemBars() {
+        return true;
     }
 
     @Override

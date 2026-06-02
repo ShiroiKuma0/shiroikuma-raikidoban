@@ -4764,6 +4764,12 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         return b;
     }
 
+    @Override
+    protected boolean themeSystemBars() {
+        // The home / app drawer shows wallpaper to the screen edges; keep its own system-bar handling.
+        return false;
+    }
+
     // 「白い熊 雷起動盤 UI」: a dynamic menu item's text colour + font + size (MENU_TEXT slot).
     private void styleBubbleItemText(TextView b) {
         b.setTextColor(UiTheme.color(UiSlot.MENU_TEXT));

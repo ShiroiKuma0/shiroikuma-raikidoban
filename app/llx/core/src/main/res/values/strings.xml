@@ -1123,6 +1123,8 @@
 
     <!-- 「白い熊 雷起動盤 UI」: launcher appearance (fonts + colours) -->
     <string name="llui_title">白い熊 雷起動盤 UI</string>
+    <string name="llui_language">Language</string>
+    <string name="llui_lang_system">System default</string>
     <string name="llui_summary">Fonts and colours for the launcher\'s own menus, dialogs and pages</string>
     <string name="llui_group_foundation">Foundation</string>
     <string name="llui_group_menus">Menus</string>

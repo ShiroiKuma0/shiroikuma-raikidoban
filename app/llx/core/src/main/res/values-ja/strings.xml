@@ -31,6 +31,8 @@
 
     <!-- 「白い熊 雷起動盤 UI」 -->
     <string name="llui_title">白い熊 雷起動盤 UI</string>
+    <string name="llui_language">言語</string>
+    <string name="llui_lang_system">システム既定</string>
     <string name="llui_summary">ランチャーのメニュー・ダイアログ・画面のフォントと色</string>
     <string name="llui_group_foundation">基本</string>
     <string name="llui_group_menus">メニュー</string>
@@ -75,4 +77,958 @@
     <string name="font_weight_bold">太</string>
     <string name="font_weight_black">極太</string>
     <string name="tasker_name_unset">（Tasker 名称が未設定）</string>
+
+    <!-- Bundled Japanese (from the legacy lp.jp pack) so JA is self-contained. -->
+    <string name="all_apps">全てのアプリ</string>
+    <string name="anim_glitch_fix_s">Androidの一部バージョンで見られる不具合を、パディングを1ピクセル増やすことで改善します。</string>
+    <string name="anim_glitch_fix_t">アニメーションの不具合を改善</string>
+    <string name="anim_in">開く時</string>
+    <string name="anim_out">閉じる時</string>
+    <string name="app_added">%s をホーム画面に追加しました。</string>
+    <string name="app_drawer_s">ドロワー（アプリ一覧）の設定です。</string>
+    <string name="app_drawer_t">ドロワーの設定</string>
+    <string name="app_killer_s">LLに統合された軽量タスクキラーです。</string>
+    <string name="app_killer_t">タスクキラー</string>
+    <string name="appearance">デザイン（左スワイプして変更をプレビューできます）</string>
+    <string name="auto_close_s">フォルダの中のアプリを立ち上げるとそのフォルダを閉じます。</string>
+    <string name="auto_close_t">オートクローズ</string>
+    <string name="auto_edit_s">新しいアイテムが追加されると自動的に編集モードに入ります。</string>
+    <string name="auto_edit_t">自動編集</string>
+    <string name="b_alignh_t">横位置</string>
+    <string name="b_alignv_t">縦位置</string>
+    <string name="b_color_focused">カーソルを当てた時の色</string>
+    <string name="b_color_normal">普段の色</string>
+    <string name="b_color_s">境界線や中身の色を設定できます。</string>
+    <string name="b_color_selected">選択時の色</string>
+    <string name="b_hint">"変更したい部分をタップすると（複数選択可） 
+以下の項目を設定することができます。"</string>
+    <string name="b_size">サイズ</string>
+    <string name="background_s">壁紙、フィルター、スクロール時のエフェクトを設定します。</string>
+    <string name="background_t">壁紙と背景</string>
+    <string name="behaviour">動作</string>
+    <string name="border">境界線</string>
+    <string name="bottom">下</string>
+    <string name="choose_style_name">新しいスタイルの名前</string>
+    <string name="col_num_s">デスクトップ1枚ごとの列数です</string>
+    <string name="col_size_s">各列の幅です。</string>
+    <string name="colums">縦列</string>
+    <string name="confirm_reset_page">現在のデザインをリセットしてよろしいですか？</string>
+    <string name="content">中身</string>
+    <string name="customize_ll">Lightningをカスタマイズ</string>
+    <string name="dashboard_s">現在のホーム画面のデザインと動作を変更します。</string>
+    <string name="dashboard_t">デスクトップの設定</string>
+    <string name="default_folder_name">フォルダ</string>
+    <string name="delete_style">このスタイルを削除しますか？</string>
+    <string name="dialog_action_title">追加</string>
+    <string name="dialog_color_picker">色の選択</string>
+    <string name="display_title">タイトルを表示</string>
+    <string name="donate">寄付</string>
+    <string name="dual_pos_s">アイテムの配置を画面が縦位置の時と横位置の時で変更します。</string>
+    <string name="dual_pos_t">デュアルポジションモード</string>
+    <string name="empty_folder">"アイテムを追加するには 
+ロングタップしてください。 
+その他はメニューを押してください。"</string>
+    <string name="ev_bg_dtap">空きスペースでダブルタップ</string>
+    <string name="ev_bg_ltap">空きスペースでロングタップ</string>
+    <string name="ev_bg_tap">空きスペースでタップ</string>
+    <string name="ev_home">ホームボタン</string>
+    <string name="ev_item_ltap">アイテムをロングタップ</string>
+    <string name="ev_item_tap">アイテムをタップ</string>
+    <string name="ev_menu">メニューボタン</string>
+    <string name="ev_search">検索ボタン</string>
+    <string name="ev_swipe2_d">二本指で下スワイプ</string>
+    <string name="ev_swipe2_l">二本指で右スワイプ</string>
+    <string name="ev_swipe2_r">二本指で左スワイプ</string>
+    <string name="ev_swipe2_u">二本指で上スワイプ</string>
+    <string name="ev_swipe_d">下スワイプ</string>
+    <string name="ev_swipe_l">右スワイプ</string>
+    <string name="ev_swipe_r">左スワイプ</string>
+    <string name="ev_swipe_u">上スワイプ</string>
+    <string name="events_s">ボタンやジェスチャーの設定です。</string>
+    <string name="events_t">動作設定</string>
+    <string name="extras">その他</string>
+    <string name="facebook_s">次期バージョンの開発情報や新機能の要望・バグの報告はこちら</string>
+    <string name="facebook_t">このアプリのGoogle+ページにアクセス</string>
+    <string name="file_picker_activity_up">上に行く</string>
+    <string name="first_use_message">"Lightning Launcher（ライトニングランチャー、LL）は、高速かつ軽量で、そのうえ細かくカスタマイズできるAndroid用ホームアプリです。 
+ 
+現在、LLはインストール済みアプリの一覧を準備しています。 
+ 
+まずはデスクトップに配置されているチュートリアルをご覧ください。 
+操作方法を把握したら、自由にカスタマイズしてみましょう。慣れるまでは少し大変かもしれませんが、しばらく触っていれば次第にLLを操れるようになるでしょう。 
+ 
+あなただけのホーム画面カスタマイズをお楽しみください。"</string>
+    <string name="first_use_title">ようこそ！</string>
+    <string name="fit_item_s">デスクトップをページの集合ではなく、アイテムのある範囲だけに限定します。</string>
+    <string name="fit_item_t">デスクトップの余分をなくす</string>
+    <string name="folder_anims">アニメーション</string>
+    <string name="folder_feel_s">オートクローズなど</string>
+    <string name="folder_feel_t">フォルダ</string>
+    <string name="folder_look_s">デフォルトの背景、枠線、アニメーションなどを設定します。</string>
+    <string name="folder_look_t">フォルダのウィンドウ</string>
+    <string name="folder_title">タイトル設定</string>
+    <string name="font_color">文字色</string>
+    <string name="font_size">フォントサイズ</string>
+    <string name="free_mode_s">グリッドを使いません。アイテムの位置、サイズ、向きなどを自由に変更できます。</string>
+    <string name="free_mode_t">フリーモード</string>
+    <string name="general_s">言語、ボタン操作、ジェスチャー</string>
+    <string name="general_t">一般</string>
+    <string name="grid_color_s">表示しない場合は値を0にしてください。</string>
+    <string name="grid_h_color_t">横線の色</string>
+    <string name="grid_h_size_t">横線の太さ</string>
+    <string name="grid_s">グリッドモード時のみ有効。線の幅、色、位置を設定します。</string>
+    <string name="grid_size_s">極細にする場合は値を0にしてください。</string>
+    <string name="grid_t">グリッド線</string>
+    <string name="grid_v_color_t">縦線の色</string>
+    <string name="grid_v_size_t">縦線の太さ</string>
+    <string name="hide_statusbar_t">ステータスバーを隠す</string>
+    <string name="i_custom">オリジナルアイコンを選択</string>
+    <string name="i_display">アイコンを表示</string>
+    <string name="i_folder_t">フォルダのアイコンのスタイル</string>
+    <string name="i_main">メイン</string>
+    <string name="i_reflect">反射効果</string>
+    <string name="i_reflect_enable">反射効果を有効にする</string>
+    <string name="i_reflect_overlap">アイコンと重ねる</string>
+    <string name="i_reflect_scale">スケール</string>
+    <string name="i_reflect_size">サイズ</string>
+    <string name="i_smooth">アイコンを滑らかにする</string>
+    <string name="il_preview">"プレビュー 
+（実際のデスクトップとは異なる場合があります）"</string>
+    <string name="install_widgets">LLウィジェットを追加</string>
+    <string name="item_settings_icon_copy_failed">アイコンをコピーできません(´・ω・｀)</string>
+    <string name="keep_in_memory_s">ホーム画面への復帰が速くなりますが、メモリ消費量が増えます。</string>
+    <string name="keep_in_memory_t">メモリに常駐</string>
+    <string name="l_color_focused">カーソルを当てた時の色</string>
+    <string name="l_color_normal">通常時の色</string>
+    <string name="l_color_selected">選択時の色</string>
+    <string name="l_colors">色</string>
+    <string name="l_custom">ラベルを変更</string>
+    <string name="l_display">ラベルの表示</string>
+    <string name="l_main">メイン</string>
+    <string name="l_num_lines">最大行数</string>
+    <string name="l_shadow">影</string>
+    <string name="l_shadow_color">色</string>
+    <string name="l_shadow_enable">影を表示</string>
+    <string name="l_shadow_offset_x">ずれ（X軸）</string>
+    <string name="l_shadow_offset_y">ずれ（Y軸）</string>
+    <string name="l_shadow_radius">半径</string>
+    <string name="l_size">フォントサイズ</string>
+    <string name="l_style_t">フォントのスタイル</string>
+    <string name="l_type_face">オリジナルフォントを使う</string>
+    <string name="la_margin">アイコンとラベルの間隔</string>
+    <string name="la_position_t">ラベルの位置</string>
+    <string name="language_s">言語パックの選択またはインストール</string>
+    <string name="language_t">言語 / Language</string>
+    <string name="layout_s">アイテムの設置方法（グリッド／フリーモード）、グリッドのサイズなどを設定します。</string>
+    <string name="layout_t">レイアウト</string>
+    <string name="left">左</string>
+    <string name="lg_contrib_s">あなたの言語が見つかりませんか？ 翻訳にご協力ください。</string>
+    <string name="lg_contrib_t">多言語化に協力</string>
+    <string name="lg_install_s">言語パックをPlay Storeから入手します / Get new packs</string>
+    <string name="lg_install_t">言語パックを入手</string>
+    <string name="lg_pick_s">言語パックの選択後、LLが再起動します。 / Select a language pack</string>
+    <string name="lg_pick_t">言語パックを選択</string>
+    <string name="load_style_s">スタイルを読み込み、現在の設定を読み込んだスタイルで置き換えます。</string>
+    <string name="load_style_t">スタイルを適用する</string>
+    <string name="m_alpha_s">見た目は良くなりますが動作が遅くなります。0にすると見えなくなり、255にすると透明効果は適用されません。</string>
+    <string name="m_alpha_t">透明効果</string>
+    <string name="m_smooth_transform_s">見た目は良くなりますが動作が遅くなります。</string>
+    <string name="m_smooth_transform_t">移動時に滑らかにする</string>
+    <string name="manage">管理</string>
+    <string name="margin">マージン</string>
+    <string name="menu_add">追加</string>
+    <string name="menu_customize">Lightningをカスタマイズ</string>
+    <string name="menu_customize_folder">フォルダの設定</string>
+    <string name="menu_objects_layout">レイアウトを編集</string>
+    <string name="menu_refresh">再読み込み</string>
+    <string name="menu_see_all">全てのアプリ</string>
+    <string name="menu_see_only_hidden">非表示にしたアプリ</string>
+    <string name="menu_see_only_visible">表示にしたアプリ</string>
+    <string name="menu_settings">Androidの設定</string>
+    <string name="menu_zoom">ズーム</string>
+    <string name="mi_add_to_launcher">ホーム画面に追加</string>
+    <string name="mi_app_details">アプリの詳細</string>
+    <string name="mi_customize">カスタマイズ</string>
+    <string name="mi_hide_unhide">表示／非表示</string>
+    <string name="mi_move_out_of_folder">フォルダから出す</string>
+    <string name="mi_pin">ピン留めする</string>
+    <string name="mi_remove">削除</string>
+    <string name="mi_unpin">ピン留めを外す</string>
+    <string name="mi_widget_options">ウィジェットの設定</string>
+    <string name="mode_t">モード</string>
+    <string name="new_style">新しいスタイル</string>
+    <string name="no_diagonal_scrolling_s">一度に縦横どちらか一方にだけスクロールします。</string>
+    <string name="no_diagonal_scrolling_t">斜めスクロールをしない</string>
+    <string name="number">列数</string>
+    <string name="other_apps">LL開発者によるその他のアプリ</string>
+    <string name="overscroll_t">端まで行った時の効果</string>
+    <string name="ovr_custom">カスタム</string>
+    <string name="padding">パディング</string>
+    <string name="page_anim_t">デスクトップ切替時のアニメーション</string>
+    <string name="permission_denied">このショートカットを起動できません。</string>
+    <string name="pg_misc_s">画面の向きやステータスバーの設定です。</string>
+    <string name="pg_misc_t">その他</string>
+    <string name="pick_a_font">フォントファイル(TTF)を選択</string>
+    <string name="pinch_zoom_t">二本指ズームを有効にする</string>
+    <string name="placement">配置</string>
+    <string name="preview_toast">"プレビューモード 
+（実際には動作しません）"</string>
+    <string name="rate_s">Play Storeにご感想をお寄せください。</string>
+    <string name="rate_t">このアプリを評価する</string>
+    <string name="relayout_items">このスタイルにすると列の数が少なくなり、アイテムの配置が変わります。よろしいですか？</string>
+    <string name="reset_page_s">アイテムなどを削除し、デフォルトのスタイルに戻します。</string>
+    <string name="reset_page_t">スタイルをリセット</string>
+    <string name="right">右</string>
+    <string name="row_num_s">デスクトップ1枚ごとの列数です</string>
+    <string name="row_size_s">各列の高さです。</string>
+    <string name="rows">横列</string>
+    <string name="save_style_s">現在のデザインを新しいスタイルとして保存します。</string>
+    <string name="save_style_t">スタイルとして保存</string>
+    <string name="screen_orient_t">画面の向き</string>
+    <string name="scroll_dir_t">スクロールの向き</string>
+    <string name="select_launcher_title">デフォルトのホームアプリを選択</string>
+    <string name="settings">設定</string>
+    <string name="size">幅／高さ</string>
+    <string name="start_activity_error">このアプリを起動できませんでした。</string>
+    <string name="style_loaded">スタイルを適用しました。</string>
+    <string name="style_saved">スタイルを保存しました。</string>
+    <string name="system_font">システムフォントを使用する</string>
+    <string name="tab_box">ボックス</string>
+    <string name="tab_icon">アイコン</string>
+    <string name="tab_label">テキスト</string>
+    <string name="tab_layout">配置</string>
+    <string name="tab_misc">その他</string>
+    <string name="this_folder_feel_t">このフォルダ</string>
+    <string name="this_folder_look_s">背景、枠線、アニメーションなど</string>
+    <string name="this_folder_look_t">このフォルダのウィンドウ</string>
+    <string name="tool_not_available">申し訳ありません。このツールは利用できません。</string>
+    <string name="tools_pick_shortcut">ショートカットの選択</string>
+    <string name="tools_pick_widget">ウィジェットの選択</string>
+    <string name="top">上</string>
+    <string name="tut_custo">"アイテムを
+カスタマイズ"</string>
+    <string name="tut_free_mode">フリーモード</string>
+    <string name="tut_intro">イントロダクション</string>
+    <string name="tut_lock">ロック画面</string>
+    <string name="tut_pin">アイテムをピン留め／ドックに固定</string>
+    <string name="tut_scroll">"デスクトップと
+移動"</string>
+    <string name="tutorials">チュートリアル</string>
+    <string name="wp_scroll_s">パフォーマンスに影響を及ぼすことがあります。</string>
+    <string name="wp_scroll_t">壁紙をスクロールする</string>
+    <string name="zoom_scroll_s">デスクトップ内でどう動くかを設定します。</string>
+    <string name="zoom_scroll_t">ズームとスクロール</string>
+    <string name="grid_above">最前面に表示</string>
+    <string name="snap_to_pages_t">ページごとに移動</string>
+    <string name="snap_to_pages_s">常にページの端で止まります。</string>
+    <string name="i_scale_s">警告:スケールを大きくするとメモリ消費量が大幅に増加します。</string>
+    <string name="i_scale_t">スケール</string>
+    <string name="m_enabled_t">選択可能にする</string>
+    <string name="m_enabled_s">チェックを外すとアイコンが選択不可になります</string>
+    <string name="i_effect">レイヤー</string>
+    <string name="i_e_back">背景画像</string>
+    <string name="i_e_over">オーバーレイ</string>
+    <string name="i_e_mask">マスク</string>
+    <string name="i_e_scale">内側のサイズ</string>
+    <string name="mi_edit_icon">カスタムアイコンを選択</string>
+    <string name="mi_edit_label">ラベルを編集</string>
+    <string name="mi_edit_more">詳細</string>
+    <string name="mi_pick_app">関連付けるアプリを選択</string>
+    <string name="color_c">色</string>
+    <string name="wp_w_t">幅</string>
+    <string name="wp_h_t">高さ</string>
+    <string name="wp_auto">自動的に調整する場合は値を0にしてください。</string>
+    <string name="ld_t">Lightning Drawer</string>
+    <string name="ld_s">拡張された高機能ドロワー</string>
+    <string name="mi_pick_widget">別のウィジェットを選択</string>
+    <string name="backup_t">バックアップ</string>
+    <string name="restore_t">バックアップから復元</string>
+    <string name="donate_t">寄付</string>
+    <string name="donate_s">開発のご支援はこちらからお願いします</string>
+    <string name="mi_position">位置</string>
+    <string name="mi_move_to_screen">別のデスクトップに移動</string>
+    <string name="confirm_delete">本当に削除しますか？</string>
+    <string name="pack_name">Lightning Launcher - 日本語</string>
+    <string name="pick_file">画像を選択</string>
+    <string name="pick_gallery">画像を選択（外部ファイルマネージャ）</string>
+    <string name="pick_icon_pack">インストール済みADWアイコンパック</string>
+    <string name="pick_t">アイコンを選択する：</string>
+    <string name="reset_wp">リセット</string>
+    <string name="bg_sys_wp">システムの壁紙</string>
+    <string name="bg_sys_wp_select_t">システムの壁紙を変更</string>
+    <string name="bg_sys_wp_select_s">システムの壁紙はすべてのデスクトップやドロワーに適用されます。</string>
+    <string name="bg_screen_wp">デスクトップの壁紙</string>
+    <string name="bg_screen_wp_select_t">デスクトップの壁紙を変更</string>
+    <string name="bg_screen_wp_select_s">この壁紙はシステムの壁紙の上に表示されるため、デスクトップ別に壁紙を適用することができます。</string>
+    <string name="bg_more">詳細</string>
+    <string name="bg_more_color_t">色</string>
+    <string name="bg_more_color_s">壁紙を隠すには不透明な色を、壁紙を透過してを表示させるには透明な色を設定してください。</string>
+    <string name="ev_long_tap">ロングタップ</string>
+    <string name="ev_tap">タップ</string>
+    <string name="style_s1">標準</string>
+    <string name="style_s2">コンパクト（小さなアイコンとテキスト）</string>
+    <string name="style_s3">読みやすさ優先（大きなアイコンとテキスト）</string>
+    <string name="style_s4">リスト（アイコンを右側に配置）</string>
+    <string name="style_s5">リスト（大きなテキスト/アイコン無し）</string>
+    <string name="style_s6">リスト（大きなテキストとアイコン）</string>
+    <string name="style_s7">タイル（テキスト無し）</string>
+    <string name="style_s8">Flashy colors</string>
+    <string name="style_s9">Zune風</string>
+    <string name="dialog_help_hint_t">ヒント</string>
+    <string name="dialog_help_hint_m">設定項目をロングタップすることでヘルプ（英語）が表示されます。</string>
+    <string name="dialog_help_hint_dsa">再度表示しない</string>
+    <string name="m_events">ジェスチャー</string>
+    <string name="m_pin_mode">ピン留めモード</string>
+    <string name="shortcut_screen">LL - デスクトップブックマーク</string>
+    <string name="llx_t">Lightning Launcher eXtreme</string>
+    <string name="llx_s">LLをさらに拡張した究極のランチャー</string>
+    <string name="more_apps_t">PierroXの無料アプリ</string>
+    <string name="more_apps_s">LL作者による他のツールやゲームなどをGoogle Playでチェック</string>
+    <string name="icons_t">アイコンパック</string>
+    <string name="icons_s">アイコンパックの設定</string>
+    <string name="apply_icon_pack_t">ADWアイコンパックを適用</string>
+    <string name="apply_icon_pack_s">有効なアプリ別アイコンを提供しているテーマが適用できます。</string>
+    <string name="revert_custom_icons_t">アイコンをデフォルトに差し戻し</string>
+    <string name="revert_custom_icons_s">カスタム効果やサイズもデフォルトの設定に戻ります</string>
+    <string name="please_wait">お待ちください…</string>
+    <string name="app_not_valid">このショートカットは有効なアプリに関連付けられていません。アプリをGoogle Playからダウンロード、あるいは別のアプリを選択しますか？</string>
+    <string name="app_store">Google Play</string>
+    <string name="shortcut_settings">LL - 設定</string>
+    <string name="shortcut_actions">LL - アクション</string>
+    <string name="no_backup_archive">復元に利用できるバックアップデータが存在しません</string>
+    <string name="backup_in_progress">バックアップ中…</string>
+    <string name="restore_in_progress">復元中…</string>
+    <string name="backup_done">"バックアップが保存されました: 
+%s"</string>
+    <string name="backup_error">バックアップに失敗しました。SDカードに十分な空き容量があるか確認してください。</string>
+    <string name="restore_error">復元に失敗しました。バックアップデータが有効で読み込み可能か確認してください。</string>
+    <string name="dtext">Dynamic Text</string>
+    <string name="tab_dt_data">データ</string>
+    <string name="dt_source_t">表示する内容</string>
+    <string name="dt_date_ef_t">表示形式</string>
+    <string name="dt_date_xf_t">表示形式を編集</string>
+    <string name="dt_date_xf_s">ロングタップでヘルプを表示（英語）</string>
+    <string name="dt_display_empty_t">数値が0のときにも表示</string>
+    <string name="dt_format_error">入力された形式が正しくありません</string>
+    <string name="dt_storage_s_t">ストレージを選択</string>
+    <string name="dt_storage_f_t">表示形式</string>
+    <string name="dt_storage_w_t">表示内容</string>
+    <string name="trans_statusbar_t">タスクバーを透明化</string>
+    <string name="trans_statusbar_s">一部の端末のみ動作します（ロングタップで詳細情報を表示）</string>
+    <string name="swap_items_t">アイテムを入れ替える</string>
+    <string name="swap_items_s">アイテムを重ねたときに配置を入れ替えます（グリッドモードのみ）</string>
+    <string name="rearrange_items_t">アイテムを詰めて再配列</string>
+    <string name="rearrange_items_s">アイテム間の隙間を詰めて再配列します。（グリッドモードのみ）現在の配置が大幅に変更されます。</string>
+    <string name="backup_restore_t">バックアップ &amp; 復元</string>
+    <string name="an_u">設定しない</string>
+    <string name="an_n">何もしない</string>
+    <string name="an_ad">ドロワー（アプリ一覧）を表示</string>
+    <string name="an_zfs">デスクトップ全体を見る</string>
+    <string name="an_z100">デスクトップを標準の表示サイズに戻す</string>
+    <string name="an_zt">全体／標準のズームを切り替え</string>
+    <string name="an_pd">前のデスクトップ</string>
+    <string name="an_nd">次のデスクトップ</string>
+    <string name="an_el">レイアウトを編集</string>
+    <string name="an_ao">アイテムを追加</string>
+    <string name="an_cl">Lightningをカスタマイズ</string>
+    <string name="an_cd">現在のデスクトップまたはフォルダをカスタマイズ</string>
+    <string name="an_la">アプリ起動</string>
+    <string name="an_ls">ショートカットを起動</string>
+    <string name="an_sw">壁紙を選択</string>
+    <string name="an_lm">LLメニューを開く</string>
+    <string name="an_ssb">ステータスバーを表示</string>
+    <string name="an_smsb">LLメニューとステータスバーを表示／非表示</string>
+    <string name="an_sn">通知を見る</string>
+    <string name="an_s">検索</string>
+    <string name="an_i_m">アイテムの移動</string>
+    <string name="an_i_c">アイテムのカスタマイズ</string>
+    <string name="an_i_me">アイテムのメニュー</string>
+    <string name="an_i_l">アイテムを起動</string>
+    <string name="mi_kill">タスクの強制終了</string>
+    <string name="pack_name_short">日本語</string>
+    <string name="an_gh">デフォルトのホーム画面を表示</string>
+    <string name="an_ghz100">デフォルトのホーム画面を表示して100％にズームする</string>
+    <string name="an_sd">表示するデスクトップを選択</string>
+    <string name="an_re">アプリを再起動</string>
+    <string name="grid_pl_t">以下の設定が適用されます</string>
+    <string name="configure_pages_t">マルチデスクトップ設定</string>
+    <string name="configure_pages_s">マルチデスクトップの追加、削除、順番、アイコンなどの設定</string>
+    <string name="killed_freed">強制終了しました (%dMB のメモリが解放されました)</string>
+    <string name="killed">強制終了しました</string>
+    <string name="auto_exit_t">自動で閉じる</string>
+    <string name="auto_exit_s">アプリ起動時にドロワーを閉じます</string>
+    <string name="mi_mode_by_name">全てのアプリ（名前順）</string>
+    <string name="mi_mode_custom">My Drawer</string>
+    <string name="mi_mode_recent_apps">最近起動したアプリ</string>
+    <string name="mi_mode_recently_updated">最近更新したアプリ</string>
+    <string name="mi_mode_frequently_used">よく使うアプリ</string>
+    <string name="mi_es_refresh">更新</string>
+    <string name="mi_es_settings">Lightningをカスタマイズ</string>
+    <string name="mi_uninstall">アンインストール</string>
+    <string name="my_drawer_title">My Drawer</string>
+    <string name="my_drawer_message">"My Drawer（マイドロワー）モードでは、アプリの配置を自由にカスタマイズできます。 
+ 
+アイテム（アプリ）はデスクトップ（ホーム画面）と同様に大きなキャンバス上を自由に移動可能で、フォルダを配置してアイテムを整理することも可能です。 
+ 
+メニューから「レイアウトを編集」を選択してみてください。あなた好みにアイテムを配置し、カスタマイズしてみましょう。"</string>
+    <string name="mi_es_edit_layout">レイアウトを編集</string>
+    <string name="empty_folder_x">"空のフォルダです。 
+アイテムをフォルダのアイコンまでドラッグ&amp;ドロップしてください"</string>
+    <string name="ll_import_title">設定の移行</string>
+    <string name="ll_import_message">"お使いの端末にLightning Launcher（通常版）がインストールされています。 
+現在、通常版の設定をLightning Launcher eXtremeに移行中です。 
+ 
+移行完了後、Lightning Launcher eXtremeやお使いのウィジェットなどが問題なく動作するようであれば、通常版をアンインストールしても構いません。 
+通常版と併存させることも不可能ではありませんが、混乱や予期せぬ不具合を防ぐために一本化することを推奨します。"</string>
+    <string name="init_ok">設定の移行が完了しました！</string>
+    <string name="init_ko">ファイルのコピー中に何らかの問題が発生しました。</string>
+    <string name="mi_es_folder_settings">フォルダの設定</string>
+    <string name="apply_tmpl_t">バックアップの確認</string>
+    <string name="apply_tmpl_g">テンプレートを適用中…</string>
+    <string name="apply_tmpl_e">テンプレートを適用できませんでした</string>
+    <string name="tmpl_t">テンプレート</string>
+    <string name="tmpl_s">テンプレートの検索、適用、出力</string>
+    <string name="tmpl_a_t">テンプレートを適用</string>
+    <string name="tmpl_a_s">インストール済みのテンプレートを適用します。</string>
+    <string name="tmpl_b_t">テンプレートを検索</string>
+    <string name="tmpl_b_s">新しいテンプレートをGoogle Playで検索します。</string>
+    <string name="tmpl_e_t">APKファイルとして出力</string>
+    <string name="tmpl_e_s">ロングタップでチュートリアル（英語）を表示します。</string>
+    <string name="tmpl_c">テンプレートを選択</string>
+    <string name="tmpl_e_m">テンプレートとしてエクスポート中…</string>
+    <string name="tmpl_e_d">エクスポートが完了しました</string>
+    <string name="tmpl_e_e">エクスポートに失敗しました</string>
+    <string name="tmpl_check">テンプレートを開いています…</string>
+    <string name="tmpl_check_e">このテンプレートを読み込めませんでした</string>
+    <string name="tmpl_get_llx">LLXを購入する</string>
+    <string name="tmpl_warn_t">警告</string>
+    <string name="tmpl_warn_c">無視して続行する</string>
+    <string name="tmpl_warn_llx">- このテンプレートはLightning Launcher eXtreme(LLX)用に作成されているため、通常版のLLでは動作しない機能が使用されている可能性があります。</string>
+    <string name="tmpl_warn_screen">- このテンプレートはお使いの端末の画面仕様に適合していません。 一部の要素が正常に表示されない可能性があります。</string>
+    <string name="tmpl_warn_widget">- お使いの端末においてウィジェットが自動的に復元されないため、手動でウィジェットを再配置および再設定する必要が生じる可能性があります。</string>
+    <string name="widget_e">"ウィジェットを読み込めませんでした。 
+再配置または新しいウィジェットを選択するにはタップしてください"</string>
+    <string name="tmpl_s_p">エクスポートするデスクトップを選択</string>
+    <string name="ev_screen_on">スクリーンをオン</string>
+    <string name="ev_screen_off">スクリーンをオフ</string>
+    <string name="an_sa">アプリを検索</string>
+    <string name="gc_hpie_t">ピン留めされたアイテムを独立</string>
+    <string name="tab_stop_point">スクロールストッパー</string>
+    <string name="sp_b">挙動</string>
+    <string name="sp_ss">スクロールを抑止</string>
+    <string name="sp_sd">ドラッグを抑止</string>
+    <string name="sp_ba">バリア</string>
+    <string name="sp_dw">デスクトップ幅</string>
+    <string name="sp_n">スナップ</string>
+    <string name="sp_d">方向</string>
+    <string name="sp_dlr">左から右へ</string>
+    <string name="sp_drl">右から左へ</string>
+    <string name="sp_dtb">上から下へ</string>
+    <string name="sp_dbt">下から上へ</string>
+    <string name="assp_t">スクロールストッパーを常に表示</string>
+    <string name="assp_s">編集モードでない時もスクロールストッパーを表示します。</string>
+    <string name="gc_edit">レイアウトエディター</string>
+    <string name="an_of">フォルダを開く</string>
+    <string name="an_ctf">一番上のフォルダを閉じる</string>
+    <string name="an_caf">すべてのフォルダを閉じる</string>
+    <string name="backup_d">バックアップ</string>
+    <string name="sf">フォルダを選択</string>
+    <string name="br_n">名前</string>
+    <string name="br_r">名前を変更</string>
+    <string name="br_rc">このバックアップを復元しますか？</string>
+    <string name="br_d">削除</string>
+    <string name="br_dc">このバックアップを削除しますか？</string>
+    <string name="br_a">動作を選択</string>
+    <string name="br_s">送信</string>
+    <string name="dt_gml_t">Gmailラベル</string>
+    <string name="mi_copy_to_screen">デスクトップにコピー</string>
+    <string name="f_p">配置</string>
+    <string name="f_ac">位置設定をカスタムにしている場合のみ</string>
+    <string name="f_l">左</string>
+    <string name="f_t">上</string>
+    <string name="sp_e">端に合わせる</string>
+    <string name="sp_el">左</string>
+    <string name="sp_er">右</string>
+    <string name="sp_et">上</string>
+    <string name="sp_eb">下</string>
+    <string name="np">背景画像を利用する</string>
+    <string name="np_n">通常時の背景画像</string>
+    <string name="np_s">選択時の背景画像</string>
+    <string name="np_f">カーソルを当てた時の背景画像</string>
+    <string name="np_d">ロングタップで使用方法（英語）を表示</string>
+    <string name="np_r">背景画像</string>
+    <string name="ev_op">縦画面に切り替え</string>
+    <string name="ev_ol">横画面に切り替え</string>
+    <string name="an_gdp">指定されたデスクトップ・位置を表示</string>
+    <string name="cof_t">他のフォルダを閉じる</string>
+    <string name="cof_s">一度に2つ以上のフォルダを開かないようにします。</string>
+    <string name="t_nb">ナビゲーションバーを透明化</string>
+    <string name="gb_l">左</string>
+    <string name="gb_t">上</string>
+    <string name="gb_w">幅</string>
+    <string name="gb_h">高さ</string>
+    <string name="gb_a">角度</string>
+    <string name="gb_sx">スケール（X軸）</string>
+    <string name="gb_sy">スケール（Y軸）</string>
+    <string name="gb_kx">X軸傾き</string>
+    <string name="gb_ky">Y軸傾き</string>
+    <string name="mi_geometry">座標</string>
+    <string name="f_af">フェード</string>
+    <string name="efolder">パネル</string>
+    <string name="mc_ef">パネルの中身をカスタマイズ</string>
+    <string name="mi_lmg">グリッドから独立させる</string>
+    <string name="mi_lmf">グリッドに合わせる</string>
+    <string name="mi_mop">パネルの外に移動</string>
+    <string name="container">パネルサイズ</string>
+    <string name="uds_t">デスクトップのサイズを使用</string>
+    <string name="uds_s">パネルサイズではなく、セルのサイズを計算する場合に使用してください。</string>
+    <string name="mi_l">ロック</string>
+    <string name="mi_ul">ロック解除</string>
+    <string name="ev_menul">メニューボタン（長押し）</string>
+    <string name="ev_back">戻るボタン</string>
+    <string name="ev_backl">戻るボタン（長押し）</string>
+    <string name="mi_i">アイテム</string>
+    <string name="mi_ic">最小化して詰める</string>
+    <string name="mi_isa">並べ替え（昇順）</string>
+    <string name="mi_isd">並べ替え（降順）</string>
+    <string name="an_us">ロック解除</string>
+    <string name="nly">ロックされていません</string>
+    <string name="s_ls_t">ロック画面</string>
+    <string name="s_ls_s">ロック画面として表示するデスクトップを選択</string>
+    <string name="s_ls_s_t">ロック画面の選択/無効化</string>
+    <string name="s_ls_s_s">デスクトップを選択・または無効化します</string>
+    <string name="s_ls_s_c">ロック画面は無効になっています</string>
+    <string name="ukp_na">プラグインがインストールされていません。タップしてGoogle Playを開きます。</string>
+    <string name="i_ul">アンロッカー（ロック解除アイコン）</string>
+    <string name="s_ls_w">ロック画面として設定する前に、デスクトップにアンロッカー（ロック解除アイコン）を配置しているか、あるいはロック解除のアクションを設定しているかを確認してください。設定が不十分であればロック解除が困難になる恐れがあります。</string>
+    <string name="m_sel_e_t">アイテム選択時のエフェクト</string>
+    <string name="sp_w">スクロールストッパーが「ページごとに移動」オプションと競合した際、オプションを無効にします。</string>
+    <string name="i_rot_t">アイテムの回転</string>
+    <string name="i_rot_s">画面回転時にアイテムを回転させる</string>
+    <string name="sc_name">名前</string>
+    <string name="sc_new">新規作成</string>
+    <string name="sc_delete">削除</string>
+    <string name="sc_edit">編集</string>
+    <string name="sc_help">ヘルプ</string>
+    <string name="sc_deleted">不明または削除されたスクリプトです。新しいスクリプトが作成されました。</string>
+    <string name="sc_untitled">名称未設定スクリプト</string>
+    <string name="sc_dn_t">スクリプト名</string>
+    <string name="sc_dd_t">確認してください</string>
+    <string name="sc_dd_m">このスクリプトは他のアクションに利用されています。本当に削除しますか？</string>
+    <string name="sc_dc_t">記法チェック結果</string>
+    <string name="sc_dc_ok">この記法は問題ありません</string>
+    <string name="an_rs">スクリプトを実行</string>
+    <string name="sc_view">スクリプトを表示</string>
+    <string name="sc_disable">無効</string>
+    <string name="sc_editor">スクリプトエディタ</string>
+    <string name="ev_pos">位置変更(Position changed)</string>
+    <string name="sp_re">イベント発生(Reached event)</string>
+    <string name="ev_load">読み込み</string>
+    <string name="an_b">戻る</string>
+    <string name="tmpl_fn">テンプレート</string>
+    <string name="br_ob">バックアップを使用して上書き</string>
+    <string name="br_ot">テンプレートを使用して上書き</string>
+    <string name="sc_ma">表示先:</string>
+    <string name="sc_ml">LLメニュー</string>
+    <string name="sc_mi">アイテムメニュー</string>
+    <string name="sc_mc">カスタムメニュー</string>
+    <string name="an_cm">カスタムスクリプトメニュー</string>
+    <string name="tmpl_r">置き換え: 現在の設定を完全に置き換える</string>
+    <string name="tmpl_m">統合: 現在の設定を維持した上で新しいデスクトップとしてインポート</string>
+    <string name="tmpl_u">アップデート: keep desktops and items, apply style from desktops in the template only</string>
+    <string name="s_ls_lu_t">Launch unlock</string>
+    <string name="s_ls_lu_s">アプリをロック画面から起動した場合、同時にロックを解除する</string>
+    <string name="tmpl_w">壁紙を読み込み</string>
+    <string name="no_lim_t">無限スクロール</string>
+    <string name="no_lim_s">制限を超えてデスクトップをスクロール可能にする</string>
+    <string name="mi_h">階層</string>
+    <string name="mi_if">アイテム情報</string>
+    <string name="in_s">ラベルによってこのアイテムを区別する</string>
+    <string name="mi_b">戻る</string>
+    <string name="mi_im">アイテムメニュー</string>
+    <string name="em_t">Expert mode</string>
+    <string name="em_s">Unleash the power of LL by displaying advanced options (take effect upon reload)</string>
+    <string name="bm_c">色</string>
+    <string name="bm_bg">背景画像</string>
+    <string name="bm_prev">プレビュー</string>
+    <string name="rs_t">スクリプトを実行</string>
+    <string name="rs_s">スクリプトの例外を許可</string>
+    <string name="rs_w">警告:現在の設定において、スクリプトの実行が無効になっています</string>
+    <string name="h_ad">"アプリのショートカットです。 
+ここからアプリを起動することが可能です。 
+ランチャー画面でアプリのアイコンを長押して「ホーム画面に追加」をタップすることでアプリのショートカットを追加できます。 
+ 
+タップするとさらに解説を表示します。"</string>
+    <string name="h_f">"フォルダを追加しました。 
+フォルダにはアプリへのショートカット、ウィジェット、他のフォルダを格納できます。 
+ 
+アイテムをフォルダまでドラッグし、少し待って（アニメーション表示が終わる頃に）指を離せばアイテムをフォルダに格納することができます。 
+ 
+タップするとさらに解説を表示します。"</string>
+    <string name="h_p">"これがパネルです。 
+パネルはドラッグ&amp;ドロップを行うことでショートカットやウィジェットなどのアイテムを配置することができます。 
+ 
+タップするとさらに解説を表示します。"</string>
+    <string name="h_t">ヒント</string>
+    <string name="h_k">"これがあなたのデスクトップです。ロングタップ（長押し）でアイテム（アプリ、ウィジェット、フォルダなど）を追加したり、設定画面を表示したりできます。 
+ 
+Pages are created as soon as you drag objects over them: to the left and right sides, but also to the top and bottom sides. 
+ 
+Tap to learn more on LL concepts."</string>
+    <string name="tut_concepts">コンセプト</string>
+    <string name="tut_wiki">Wiki</string>
+    <string name="mi_s">スクリプト</string>
+    <string name="ev_paused">ポーズ</string>
+    <string name="ev_resumed">再開</string>
+    <string name="ad_ab_c_t">アクションバー</string>
+    <string name="ad_ab_b">背景画像</string>
+    <string name="ad_ab_h">アクションバーを隠す</string>
+    <string name="hw_t">Ok Google</string>
+    <string name="hw_s">お話しください</string>
+    <string name="ad_ab_ss">スクロールでアクションバーを表示</string>
+    <string name="ip">Image Picker</string>
+    <string name="ip_none">画像なし</string>
+    <string name="ip_camera">カメラ</string>
+    <string name="ip_ext_file">外部ファイラー</string>
+    <string name="ip_bgcolor">背景色</string>
+    <string name="delete_file">このファイルを消去しますか？</string>
+    <string name="ev_touch">タッチ</string>
+    <string name="sc_data">Pass these data to the script (leave blank if not used):</string>
+    <string name="sc_send">送信</string>
+    <string name="mi_ls">スクリプトを読み込む</string>
+    <string name="ls_ok">スクリプトが正常に読み込まれました</string>
+    <string name="ls_ko">スクリプトを読み込みできませんでした</string>
+    <string name="ls_b">Play Storeで探す</string>
+    <string name="ur">回復不能なエラー</string>
+    <string name="in_t">名称を設定</string>
+    <string name="wrap_s">Experimental: when reaching a side, items from the other side are displayed as if the desktop were a sphere</string>
+    <string name="i_cf_t">Colorize</string>
+    <string name="i_cf_s">Use alpha to adjust the saturation</string>
+    <string name="sbo_t">Status bar and content overlap</string>
+    <string name="nbo_t">Navigation bar and content overlap</string>
+    <string name="sb_t">システムバー</string>
+    <string name="sb_s">Set status and navigation bars visibility, transparency, etc.</string>
+    <string name="sbc_t">ステータスバーの色</string>
+    <string name="nbc_t">ナビゲーションバーの色</string>
+    <string name="sb_c">ステータスバー</string>
+    <string name="nb_c">ナビゲーションバー</string>
+    <string name="mi_app_store">Play Store</string>
+    <string name="an_um">User menu</string>
+    <string name="gc_as_t">Settings screen style</string>
+    <string name="i_rm_t">Material effect mask</string>
+    <string name="i_rm_s">"Constraint the ripples inside the item's boundaries"</string>
+    <string name="icon_font">Icon font</string>
+    <string name="tmpl_b">先にバックアップを作成する</string>
+    <string name="um_t">Themes</string>
+    <string name="pi">Page indicator</string>
+    <string name="tab_page_indicator">Ind.</string>
+    <string name="pi_style">Style</string>
+    <string name="pi_rf_t">Text format</string>
+    <string name="pi_dmx_t">Horizontal spacing</string>
+    <string name="pi_dmy_t">Vertical spacing</string>
+    <string name="pi_dmor">Outer radius</string>
+    <string name="pi_dmoc">Outer color</string>
+    <string name="pi_dmow">Outer width</string>
+    <string name="pi_dmir">Inner radius</string>
+    <string name="pi_dmic">Inner color</string>
+    <string name="pi_mosc">Map border color</string>
+    <string name="pi_mosw">Map border width</string>
+    <string name="pi_mofc">Map background color</string>
+    <string name="pi_misc">Screen border color</string>
+    <string name="pi_misw">Screen border width</string>
+    <string name="pi_mifc">Screen background color</string>
+    <string name="pi_lbc">Background color</string>
+    <string name="pi_lbw">Background width</string>
+    <string name="pi_lfc">Cursor color</string>
+    <string name="pi_lfw">Cursor width</string>
+    <string name="pi_lg">Gravity</string>
+    <string name="ac_s">Icon &amp; Text</string>
+    <string name="ac_c">Container</string>
+    <string name="ac_d">Dynamic content</string>
+    <string name="ac_m">More</string>
+    <string name="ai_t">Text</string>
+    <string name="ai_i">Icon</string>
+    <string name="ai_sb">Side bar</string>
+    <string name="ai_b">Badge</string>
+    <string name="ac_n">Navigation</string>
+    <string name="ai_bo">Bookmark</string>
+    <string name="ai_d">Blank item</string>
+    <string name="h_sb">A side bar is a customized folder. Drop items here to move them into the side bar. Tap on the icon to toggle the side bar, or assign it to a gesture or any other event. Change the window alignment values to dock it on other sides.</string>
+    <string name="mi_exel">編集モードを終了</string>
+    <string name="h_pi">A page indicator displays the current page position in the desktop. By default this is item pinned and not clickable. Enter the edit layout mode first to change its style, color, etc.</string>
+    <string name="h_sp">A stop point is a tool to create custom scrolling scheme: the desktop will stop scrolling at stop points. Long tap on a stop point to edit its properties. Stop points are only visible in edit mode.</string>
+    <string name="h_b">A bookmark saves the current position and scale of your desktop. Once the bookmark has been created you can move it anywhere else, tapping on it will automatically bring you back to the memorized desktop position. It works inside panels and folders too!</string>
+    <string name="sc_h">Swipe from the left edge to reveal the drawer</string>
+    <string name="sc_a">Actions</string>
+    <string name="sc_o">Options</string>
+    <string name="sc_w">Word wrap</string>
+    <string name="wrapx_t">Seamless mode X</string>
+    <string name="wrapy_t">Seamless mode Y</string>
+    <string name="h_w">"The seamless mode is automatically disabled in edit mode, otherwise empty pages wouldn't be reachable. Be aware that some items may then suddenly disappear when entering edit mode: they are just displayed at their original position in the desktop instead of being wrapped.
+Seamless mode is enabled again when exiting edit mode."</string>
+    <string name="ad_bc">Selected:</string>
+    <string name="an_wt">Wallpaper tap</string>
+    <string name="an_wst">Wallpaper secondary tap</string>
+    <string name="ds_sh">Start here</string>
+    <string name="ds_uc">User community</string>
+    <string name="ds_tt">Tips &amp; tricks</string>
+    <string name="ds_br">Backup &amp; Restore</string>
+    <string name="ds_hn">"ヒント:アイテムを追加するかドラッグすることで新しいページを作成できます。 
+ページは左右だけでなく上下方向にも作成できます。お試しください！ 
+ 
+（このヒントは削除しても問題ありません） 
+"</string>
+    <string name="ds_z">Zoom</string>
+    <string name="sc_import">Import…</string>
+    <string name="sc_si_t">スクリプト読み込みツール（Script Importer）がインストールされていません</string>
+    <string name="sc_si_m">PlayStoreからインストールしますか？</string>
+    <string name="ds_um">"ヒント:ホーム画面において、1本指または2本指で上にスワイプするとユーザーメニューが表示されます。このユーザーメニューはカスタマイズ可能です。また、ホーム画面でロングタップするとコンテクストメニューが表示されます。コンテクストメニューからはAndroidの設定やLLの設定などにアクセスできます。 
+ 
+（このヒントは削除しても問題ありません） 
+"</string>
+    <string name="adm_t">Categories</string>
+    <string name="adm_s">Select visible app drawer categories</string>
+    <string name="adm_z">At least one category need to be selected…</string>
+    <string name="tmpl_warn_m">テンプレート適用の準備が出来ましたが、いくつかの問題があります</string>
+    <string name="tr_fl_t">Please unlock Lightning to use this feature</string>
+    <string name="tr_fl_m">"Lightning Launcher(LL)の完全版にアップグレードすることで以下の機能が利用可能になります。 
+ 
+-拡張されたドロワー（フォルダ、アクションバー、カテゴリなどが利用できます） 
+-デスクトップの追加・削除 
+-デスクトップごとに異なる壁紙 
+-未読カウントやバッジを表示できるDynamic text 
+-カスタマイズ可能なロック画面 
+-LLに統合されたタスクキラー 
+ 
+以前、この端末や別の端末でLLの完全版を導入されたことがある場合は「OK」を選択すると再認証を行います。"</string>
+    <string name="tr_pw">お待ちください</string>
+    <string name="tr_ty">Lightningの開発にご協力いただきまして誠にありがとうございます！</string>
+    <string name="tr_eu">申し訳ありません。エラーが発生しました。</string>
+    <string name="tr_c">Canceled</string>
+    <string name="tr_rm">"Lightningはユーザからのレビューをお待ちしております。 
+ 
+PlayStoreで評価をいただけますでしょうか？"</string>
+    <string name="ds_hls">"これはロック画面のサンプルです。自由にカスタマイズできます。 
+アプリやウィジェットを追加し、ロック画面の設定から有効化できます（ここをタップ）"</string>
+    <string name="ic">画像のトリミング</string>
+    <string name="bg_st">位置</string>
+    <string name="rect">矩形にトリミングする</string>
+    <string name="ip_solid">Solid color</string>
+    <string name="ip_search">検索</string>
+    <string name="sst">スクリプトを選択</string>
+    <string name="ips_t">Image pool size</string>
+    <string name="ips_s">この値を変更する前にドキュメントをお読みください</string>
+    <string name="v_m">表示するアイテム</string>
+    <string name="v_a">すべて</string>
+    <string name="v_ov">表示にしたアイテムのみ</string>
+    <string name="v_oh">非表示にしたアイテムのみ</string>
+    <string name="ad_ab_tc">テキストの色</string>
+    <string name="cv">Custom view</string>
+    <string name="h_cv">Custom views are designed for advanced use cases. It enables Android view creation through scripting and as a consequence it requires advanced scripting and Android knowledge.</string>
+    <string name="cv_c">Create script</string>
+    <string name="cv_d">Destroy script</string>
+    <string name="tranlator_name">池田 朋矢 / Ryo Aramaki</string>
+    <string name="description">"add new translations at 8 October 2013 (by Ryo Aramaki) 
+ 
+池田 朋矢さんによる翻訳（14 June 2013 21:57）に新たな翻訳を追加。 
+------ 
+Oct. 9, 2013 : added new translations for LL Version 8 &amp; fixed some problems(error: right &amp; left , Japanese expression: 下さい→ください) - by Ryo Aramaki 
+ 
+Oct. 13, 2013 : add new translation for LL extreme and fix some problems(e.g. Facebook→Google+, ホーム画面に移動→別のスクリーンに移動) - by Ryo Aramaki 
+Sorry for many minor changes. 
+ 
+Oct. 15, 2013 : unified some expressions (スクリーン→デスクトップ, オブジェクト→アイテム) 
+ 
+Oct. 18, 2013 : unified some expressions 
+ 
+Oct. 24, 2013 : fix some problems 
+ 
+Oct. 30, 2013 : add new translation for LL/LLX 8.4 
+ 
+Nov. 1, 2013 : add new translation for LL/LLX 8.5 
+ 
+Nov. 16, 2013 : add new translation for LL/LLX 8.7.1 and fix some problems 
+ 
+Nov. 23, 2013 : fix some problems and expressions. 
+ 
+Dec. 15, 2013 : fix some expressions. 
+ 
+Dec. 20, 2013 : add new translations for new version 
+ 
+Dec. 22, 2013 : add new translations for v9.0 and fix some expressions. 
+ 
+Jan. 6, 2014 : fix some expressions. 
+ 
+Jan. 17, 2014 : add new translations for v9.1 and fix some expressions. 
+ 
+Jan. 23, 2014 : add &amp; fix new translations for v9.2 
+ 
+Jan. 26, 2014 : update some translation : Nine Patch to Background Image 
+ 
+Jan. 29, 2014 : fix some expressions. 
+ 
+Jul. 13, 2014 : add translations 
+ 
+Nov. 16, 2014 : add translations 
+ 
+Mar. 23, 2015 : add translations"</string>
+    <string name="icon_pack_no_appfilter">このアイコンパックには有効なアプリ別アイコンが含まれていません。</string>
+    <string name="tmpl_check_ut">LLをアップデートする必要があります</string>
+    <string name="tmpl_check_um">このテンプレートは新しいバージョンのLightning Launcherで作成されているため、このバージョンのLLでは動作しません。アップデートを実行しますか？</string>
+    <string-array name="b_alignh_e">
+        <item>左</item>
+        <item>中央</item>
+        <item>右</item>
+        <item>カスタム</item>
+    </string-array>
+    <string-array name="b_alignv_e">
+        <item>上</item>
+        <item>中央</item>
+        <item>下</item>
+        <item>カスタム</item>
+    </string-array>
+    <string-array name="dialog_action_values">
+        <item>アプリ</item>
+        <item>ショートカット</item>
+        <item>ウィジェット</item>
+        <item>LLのウィジェット</item>
+        <item>フォルダ</item>
+        <item>スクロールストッパー</item>
+    </string-array>
+    <string-array name="i_folder_e">
+        <item>アイコン</item>
+        <item>グリッド</item>
+        <item>固定</item>
+    </string-array>
+    <string-array name="l_style_e">
+        <item>標準</item>
+        <item>太字</item>
+        <item>斜体</item>
+        <item>太字 &amp; 斜体</item>
+    </string-array>
+    <string-array name="la_position_e">
+        <item>左</item>
+        <item>上</item>
+        <item>右</item>
+        <item>下</item>
+    </string-array>
+    <string-array name="mode_e">
+        <item>自動</item>
+        <item>列数で決める</item>
+        <item>幅／高さで決める</item>
+    </string-array>
+    <string-array name="overscroll_e">
+        <item>減速</item>
+        <item>バウンド</item>
+        <item>なし</item>
+    </string-array>
+    <string-array name="page_anim_e">
+        <item>なし</item>
+        <item>フェード</item>
+        <item>左右にスライド</item>
+        <item>上下にスライド</item>
+    </string-array>
+    <string-array name="preview_item_labels">
+        <item>普段</item>
+        <item>選択時</item>
+        <item>カーソルを当てた時</item>
+    </string-array>
+    <string-array name="screen_orient_e">
+        <item>自動</item>
+        <item>縦</item>
+        <item>横</item>
+        <item>システム設定に従う</item>
+    </string-array>
+    <string-array name="scroll_dir_e">
+        <item>自動</item>
+        <item>水平のみ</item>
+        <item>垂直のみ</item>
+        <item>両方</item>
+        <item>スクロールなし</item>
+    </string-array>
+    <string-array name="m_pin_mode_e">
+        <item>ピン留めしない</item>
+        <item>水平&amp;垂直</item>
+        <item>水平</item>
+        <item>垂直</item>
+    </string-array>
+    <string-array name="dt_source_e">
+        <item>SMS未読件数</item>
+        <item>Gmail未読件数</item>
+        <item>不在着信数</item>
+        <item>日付と時刻</item>
+        <item>ストレージ容量</item>
+        <item>バッテリー残量</item>
+        <item>総ヒープ領域</item>
+        <item>利用可能ヒープ領域</item>
+    </string-array>
+    <string-array name="dt_date_ef_e">
+        <item>日付</item>
+        <item>時刻</item>
+        <item>日付と時刻</item>
+    </string-array>
+    <string-array name="dt_date_ef_v">
+        <item>yyyy-MM-dd</item>
+        <item>HH:mm:ss</item>
+        <item>yyyy-MM-dd HH:mm:ss</item>
+    </string-array>
+    <string-array name="dt_storage_s_e">
+        <item>内蔵ストレージ</item>
+        <item>外部ストレージ（SDカードなど）</item>
+    </string-array>
+    <string-array name="dt_storage_f_e">
+        <item>通常</item>
+        <item>小数点以下を四捨五入</item>
+        <item>パーセンテージ</item>
+        <item>バイト数</item>
+    </string-array>
+    <string-array name="dt_storage_w_e">
+        <item>空き容量</item>
+        <item>使用中の容量</item>
+        <item>ストレージ全体の容量</item>
+    </string-array>
+    <string-array name="grid_pl_e">
+        <item>縦位置 &amp; 横位置</item>
+        <item>縦位置</item>
+        <item>横位置</item>
+    </string-array>
+    <string-array name="anim2_e">
+        <item>なし</item>
+        <item>開閉</item>
+        <item>左から右へスライド</item>
+        <item>右から左へスライド</item>
+        <item>上から下へスライド</item>
+        <item>下から上へスライド</item>
+    </string-array>
+    <string-array name="m_sel_e_e">
+        <item>通常</item>
+        <item>Holo</item>
+        <item>Material</item>
+    </string-array>
+    <string-array name="ip_s">
+        <item>アイコンパック</item>
+        <item>ファイル</item>
+        <item>アプリ</item>
+        <item>ランチャーの画像</item>
+    </string-array>
+    <string-array name="gc_as_e">
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+    <string-array name="pi_style_e">
+        <item>Dots</item>
+        <item>Horizontal line</item>
+        <item>Vertical line</item>
+        <item>Mini map</item>
+        <item>Textual</item>
+    </string-array>
+    <string-array name="pi_lg_e">
+        <item>Center</item>
+        <item>Right or Bottom</item>
+        <item>Left or Top</item>
+    </string-array>
+    <string-array name="bg_st_e">
+        <item>中央（拡大縮小しない）</item>
+        <item>高さと幅に合わせる</item>
+    </string-array>
 </resources>

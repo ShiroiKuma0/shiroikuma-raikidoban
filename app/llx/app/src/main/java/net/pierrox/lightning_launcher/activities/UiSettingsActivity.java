@@ -165,6 +165,8 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         mSwatches.clear();
         mTextSlots.clear();
 
+        addLanguageSection();
+
         for (UiGroup group : UiGroup.values()) {
             addSection(group);
             List<UiSlot> slots = UiSlot.forGroup(group);
@@ -184,13 +186,17 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
     }
 
     private void addSection(UiGroup group) {
+        addSection(getString(group.labelRes));
+    }
+
+    private void addSection(String labelText) {
         int accent = UiTheme.color(UiSlot.ACCENT);
 
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(dp(8), dp(18), dp(8), dp(4));
 
-        TextView label = makeLabel(getString(group.labelRes), accent);
+        TextView label = makeLabel(labelText, accent);
         label.setTextSize(20);
         label.setTypeface(label.getTypeface(), Typeface.BOLD);
         box.addView(label);
@@ -204,6 +210,60 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         box.addView(rule);
 
         mHolder.addView(box);
+    }
+
+    // --- language (in-app, independent of the system locale) ---
+
+    private static final String[] LANG_TAGS = {"", "en", "ja"};
+
+    private void addLanguageSection() {
+        addSection(getString(R.string.llui_language));
+        TextView value = addValueRow(getString(R.string.llui_language), mStepPx, v -> openLanguagePicker());
+        value.setText(currentLanguageLabel());
+    }
+
+    private CharSequence[] languageLabels() {
+        return new CharSequence[]{getString(R.string.llui_lang_system), "English", "日本語"};
+    }
+
+    private String currentLanguageLabel() {
+        String tag = UiConfig.get().getLocaleTag();
+        if (tag == null || tag.isEmpty()) {
+            return getString(R.string.llui_lang_system);
+        }
+        if (tag.startsWith("ja")) {
+            return "日本語";
+        }
+        if (tag.startsWith("en")) {
+            return "English";
+        }
+        return tag;
+    }
+
+    private void openLanguagePicker() {
+        String tag = UiConfig.get().getLocaleTag();
+        int checked = 0;
+        for (int i = 0; i < LANG_TAGS.length; i++) {
+            if (LANG_TAGS[i].equals(tag)) {
+                checked = i;
+                break;
+            }
+        }
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.llui_language)
+                .setSingleChoiceItems(languageLabels(), checked, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        d.dismiss();
+                        UiConfig.get().setLocaleTag(LANG_TAGS[which]);
+                        // recreate() re-runs attachBaseContext, which applies the forced locale.
+                        recreate();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        dialog.show();
+        net.pierrox.lightning_launcher.util.UiDialogStyler.style(dialog);
     }
 
     private TextView makeLabel(CharSequence text, int color) {

@@ -2,8 +2,11 @@ package net.pierrox.lightning_launcher.configuration;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 
 import net.pierrox.lightning_launcher.LLApp;
+
+import java.util.Locale;
 
 /**
  * App-wide store for 「白い熊 雷起動盤 UI」 — the launcher's own chrome appearance (fonts + colours).
@@ -23,6 +26,8 @@ public final class UiConfig {
     public static final int MAX_FONT_SIZE_SP = 40;
 
     private static final String PREFS = "llui";
+    /** In-app UI locale: "" = follow the system, else a BCP-47 tag ("en", "ja"). */
+    public static final String PREF_LOCALE = "ui_locale";
     private static final String FONT_FAMILY_PREFIX = "font_family_";
     private static final String FONT_WEIGHT_PREFIX = "font_weight_";
     private static final String FONT_SIZE_PREFIX = "font_size_";
@@ -98,5 +103,38 @@ public final class UiConfig {
 
     public void setFontSize(String key, int value) {
         mPrefs.edit().putInt(FONT_SIZE_PREFIX + key, value).apply();
+    }
+
+    // --- in-app language (forced locale, independent of the system / any language pack) ---
+
+    public String getLocaleTag() {
+        return mPrefs.getString(PREF_LOCALE, "");
+    }
+
+    public void setLocaleTag(String tag) {
+        mPrefs.edit().putString(PREF_LOCALE, tag == null ? "" : tag).apply();
+    }
+
+    /**
+     * Wrap a base context with the stored UI locale, if any. Reads SharedPreferences directly so it is
+     * safe to call from {@code attachBaseContext} (before {@link LLApp#get()} is ready). Returns the
+     * context unchanged when no in-app locale is set (follow the system). This is the device-independent
+     * path — it does not rely on the platform per-app-locale service (absent on this HarmonyOS/API 31).
+     */
+    public static Context applyStoredLocale(Context base) {
+        Locale locale = getStoredLocale(base);
+        if (locale == null) {
+            return base;
+        }
+        Locale.setDefault(locale);
+        Configuration config = new Configuration(base.getResources().getConfiguration());
+        config.setLocale(locale);
+        return base.createConfigurationContext(config);
+    }
+
+    /** The stored UI locale, or null to follow the system. Reads prefs directly (attachBaseContext-safe). */
+    public static Locale getStoredLocale(Context base) {
+        String tag = base.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(PREF_LOCALE, "");
+        return (tag == null || tag.isEmpty()) ? null : Locale.forLanguageTag(tag);
     }
 }

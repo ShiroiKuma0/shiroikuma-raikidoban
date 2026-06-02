@@ -84,6 +84,13 @@ public abstract class LLApp extends Application {
     }
 
     @Override
+    protected void attachBaseContext(Context base) {
+        // Force the in-app UI locale app-wide (covers app-context string lookups), independent of the
+        // system language and of any external language pack.
+        super.attachBaseContext(net.pierrox.lightning_launcher.configuration.UiConfig.applyStoredLocale(base));
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
 
@@ -123,23 +130,11 @@ public abstract class LLApp extends Application {
         SharedAsyncGraphicsDrawable.setPoolSize((long) (mSystemConfig.imagePoolSize * Runtime.getRuntime().maxMemory()));
 
 
-        if (mSystemConfig.language != null) {
-            mLanguage = mSystemConfig.language;
-        } else {
-            List<ResolveInfo> r = getPackageManager().queryIntentActivities(new Intent("net.pierrox.lightning_launcher.lp.ENUMERATE"), 0);
-            mLanguage = null;
-            for (ResolveInfo ri : r) {
-                String p = ri.activityInfo.packageName;
-                if (!p.equals(LL_PKG_NAME) && !p.equals(LLX_PKG_NAME)) {
-                    mLanguage = p;
-                    break;
-                }
-            }
-        }
-
-        if (getPackageName().equals(mLanguage)) {
-            mLanguage = null;
-        }
+        // Japanese is now bundled in the app's own values-ja, and the in-app language switch drives the
+        // locale (UiConfig.applyStoredLocale in attachBaseContext). The external lp.jp pack — even when
+        // SystemConfig.language still points at it — is fully retired, so the ResourcesWrapper no longer
+        // overrides strings with pack values (which ignored the locale and broke English mode).
+        mLanguage = null;
 
         mResourcesWrapperHelper = new ResourcesWrapperHelper(this, super.getResources());
 
