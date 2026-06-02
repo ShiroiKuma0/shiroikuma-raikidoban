@@ -82,6 +82,7 @@
 <string name="mi_reinit_tasker_widgets">Reinitialize Tasker widgets</string>
 <string name="mi_tasker_a11y_settings">Tasker auto-fill (accessibility)…</string>
 <string name="tasker_widget_name_title">Internal Tasker name (e.g. test.item.1)</string>
+<string name="tasker_name_unset">(Tasker name not set)</string>
 <string name="tasker_reinit_paste">Paste this name in Tasker: %s</string>
 <string name="tasker_reinit_done">Tasker widgets reinitialized</string>
 <string name="tasker_reinit_none">No named Tasker widgets here to reinitialize</string>

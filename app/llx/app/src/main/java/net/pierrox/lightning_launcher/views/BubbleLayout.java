@@ -145,19 +145,12 @@ public class BubbleLayout extends AbsoluteLayout {
             b_top = above ? 0 : ah;
             int height_diff = bh - (b_bottom - b_top);
             if (height_diff > 0) {
+                // The content is taller than the room on the chosen side (e.g. a large menu font):
+                // let it grow across the item into the free space below, capped to the screen and then
+                // scrolled — rather than clamping it to the space above the item.
                 b_bottom += height_diff;
                 a_top += height_diff;
                 a_bottom += height_diff;
-            }
-            if (above) {
-                int max_height = anchor_y;//h/2-ah;
-                int height = b_bottom - b_top;
-                if (height > max_height) {
-                    height_diff = max_height - height;
-                    b_bottom += height_diff;
-                    a_top += height_diff;
-                    a_bottom += height_diff;
-                }
             }
         }
         if (b_bottom > h) b_bottom = h;

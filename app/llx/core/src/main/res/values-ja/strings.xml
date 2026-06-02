@@ -74,4 +74,5 @@
     <string name="font_weight_semibold">半太</string>
     <string name="font_weight_bold">太</string>
     <string name="font_weight_black">極太</string>
+    <string name="tasker_name_unset">（Tasker 名称が未設定）</string>
 </resources>

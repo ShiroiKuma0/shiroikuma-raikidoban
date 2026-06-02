@@ -4413,10 +4413,20 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 text = Utils.formatItemLayoutName(itemLayout);
                 configureBubbleForContainer(mode, itemLayout);
             } else {
-                text = Utils.formatItemName(itemView.getItem(), 20, getSelectedItemViews().size());
+                Item titleItem = itemView.getItem();
+                text = Utils.formatItemName(titleItem, 20, getSelectedItemViews().size());
+                if (net.pierrox.lightning_launcher.util.TaskerWidgets.isTaskerWidgetV2(titleItem)) {
+                    // Show the recorded Tasker name on a second line so it can be checked at a glance.
+                    String taskerName = net.pierrox.lightning_launcher.util.TaskerWidgets.getStoredName(titleItem);
+                    text = text + "\n" + (taskerName != null ? taskerName : getString(R.string.tasker_name_unset));
+                }
                 configureBubbleForItem(mode, itemView, shortcuts);
             }
-            ((TextView) mBubble.findViewById(R.id.bbl_ttl)).setText(text);
+            TextView bbl_ttl = mBubble.findViewById(R.id.bbl_ttl);
+            boolean multiLineTitle = text.indexOf('\n') >= 0;
+            bbl_ttl.setSingleLine(!multiLineTitle);
+            bbl_ttl.setMaxLines(multiLineTitle ? 2 : 1);
+            bbl_ttl.setText(text);
         }
 
         mBubble.setScreenPadding(mEditControlsView.getPaddingTop());
@@ -4963,6 +4973,14 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             addBubbleItem(R.id.mi_position, R.string.mi_position);
             addBubbleItem(R.id.mi_actions, R.string.mi_actions);
             addBubbleItem(R.id.mi_gesture_actions, R.string.acd_actions);
+            // A live Tasker Widget V2 swallows the normal-mode long-press, so its labeling / re-init /
+            // accessibility entries are unreachable from the no-edit menu. Surface them here too: in edit
+            // mode you tap the widget to select it and get this bubble.
+            if (net.pierrox.lightning_launcher.util.TaskerWidgets.isTaskerWidgetV2(item)) {
+                addBubbleItem(R.id.mi_set_tasker_widget_name, R.string.mi_set_tasker_widget_name);
+                addBubbleItem(R.id.mi_reinit_tasker_widgets, R.string.mi_reinit_tasker_widgets);
+                addBubbleItem(R.id.mi_tasker_a11y_settings, R.string.mi_tasker_a11y_settings);
+            }
         } else if (mode == BUBBLE_MODE_ITEM_NO_EM) {
             Page page = item.getPage();
             boolean is_folder_page = page.isFolder();
