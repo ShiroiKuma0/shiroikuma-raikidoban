@@ -1,60 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen 
+<PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android" >
-    
-    <PreferenceCategory
+
+    <net.pierrox.lightning_launcher.feature.settings.LlPreferenceCategory
         android:key="t">
-        
-		<Preference
+
+		<net.pierrox.lightning_launcher.feature.settings.LlPreference
+		    android:key="llui"/>
+
+		<net.pierrox.lightning_launcher.feature.settings.LlPreference
 		    android:key="g"/>
-		
-        <Preference
+
+        <net.pierrox.lightning_launcher.feature.settings.LlPreference
            	android:key="d"/>
-		
-		<Preference
+
+		<net.pierrox.lightning_launcher.feature.settings.LlPreference
 		    android:key="a"/>
 
-        <Preference
+        <net.pierrox.lightning_launcher.feature.settings.LlPreference
             android:key="p"/>
 
 
-	</PreferenceCategory>
+	</net.pierrox.lightning_launcher.feature.settings.LlPreferenceCategory>
 
-    <PreferenceCategory
+    <net.pierrox.lightning_launcher.feature.settings.LlPreferenceCategory
         android:key="tc">
-        <Preference 
+        <net.pierrox.lightning_launcher.feature.settings.LlPreference
 		    android:key="br"/>
-        		
-        <Preference
+
+        <net.pierrox.lightning_launcher.feature.settings.LlPreference
             android:key="tb"/>
 
-        <Preference
+        <net.pierrox.lightning_launcher.feature.settings.LlPreference
             android:key="ta"/>
-    </PreferenceCategory>
+    </net.pierrox.lightning_launcher.feature.settings.LlPreferenceCategory>
 
-    <PreferenceCategory
+    <net.pierrox.lightning_launcher.feature.settings.LlPreferenceCategory
         android:key="i"
         android:title="@string/app_name">
 
 
-				
-        <Preference
+
+        <net.pierrox.lightning_launcher.feature.settings.LlPreference
             android:key="f">
 			<intent
 				android:action="android.intent.action.VIEW"
 				android:data="https://community.lightninglauncher.com/"/>
-		</Preference>  
-	
-		<Preference
+		</net.pierrox.lightning_launcher.feature.settings.LlPreference>
+
+		<net.pierrox.lightning_launcher.feature.settings.LlPreference
 		    android:key="r">
 			<intent
 				android:action="android.intent.action.VIEW"
 				android:data="http://market.android.com/details?id=net.pierrox.lightning_launcher_extreme"/>
-		</Preference>
-				
-		<Preference 
+		</net.pierrox.lightning_launcher.feature.settings.LlPreference>
+
+		<net.pierrox.lightning_launcher.feature.settings.LlPreference
 		    android:key="s"/>
-		
-    </PreferenceCategory>
-    
+
+    </net.pierrox.lightning_launcher.feature.settings.LlPreferenceCategory>
+
 </PreferenceScreen>

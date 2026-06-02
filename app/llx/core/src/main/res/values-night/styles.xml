@@ -28,4 +28,12 @@
         <item name="android:windowBackground">#FF000000</item>
     </style>
 
+    <!-- Toolbars (Customize / Settings) in the dark theme: yellow title + icons. The black bar comes
+         from android:background="?android:attr/colorBackground" on the Toolbar view itself. -->
+    <style name="ToolbarOverlay" parent="ThemeOverlay.AppCompat">
+        <item name="colorControlNormal">#FFFFFF00</item>
+        <item name="android:textColorPrimary">#FFFFFF00</item>
+        <item name="android:textColorSecondary">#FFFFFF00</item>
+    </style>
+
 </resources>

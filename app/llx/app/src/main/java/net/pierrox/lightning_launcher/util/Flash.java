@@ -31,15 +31,16 @@ import android.view.Gravity;
 import android.widget.Toast;
 import android.widget.TextView;
 
+import net.pierrox.lightning_launcher.configuration.UiSlot;
+import net.pierrox.lightning_launcher.configuration.UiTheme;
+
 /**
  * A small toast / "info flash" in the app's black-yellow scheme: black background, yellow text, yellow
- * border. Use this instead of Toast.makeText() so every info flash matches the theme. The launcher is
- * the foreground app, so custom toast views still display on modern Android.
+ * border. Use this instead of Toast.makeText() so every info flash matches the theme. Colours and font
+ * follow the DIALOG slots of 「白い熊 雷起動盤 UI」. The launcher is the foreground app, so custom toast
+ * views still display on modern Android.
  */
 public final class Flash {
-
-    private static final int YELLOW = 0xFFFFFF00;
-    private static final int BLACK = 0xFF000000;
 
     private Flash() {
     }
@@ -54,20 +55,23 @@ public final class Flash {
 
     public static void show(Context ctx, CharSequence text, int duration) {
         float d = ctx.getResources().getDisplayMetrics().density;
+        int fg = UiTheme.color(UiSlot.DIALOG_TEXT);
+        int bgColor = UiTheme.color(UiSlot.DIALOG_BG);
 
         TextView tv = new TextView(ctx);
         tv.setText(text);
-        tv.setTextColor(YELLOW);
+        tv.setTextColor(fg);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        UiTheme.applyFont(tv, UiSlot.DIALOG_TEXT);
         tv.setGravity(Gravity.CENTER);
         int padH = Math.round(18 * d);
         int padV = Math.round(12 * d);
         tv.setPadding(padH, padV, padH, padV);
 
         GradientDrawable bg = new GradientDrawable();
-        bg.setColor(BLACK);
+        bg.setColor(bgColor);
         bg.setCornerRadius(8 * d);
-        bg.setStroke(Math.round(2 * d), YELLOW);
+        bg.setStroke(Math.round(2 * d), fg);
         tv.setBackground(bg);
 
         Toast toast = new Toast(ctx);

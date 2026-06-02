@@ -24,6 +24,9 @@ SOFTWARE.
 
 package net.pierrox.lightning_launcher.prefs;
 
+import net.pierrox.lightning_launcher.configuration.UiSlot;
+import net.pierrox.lightning_launcher.configuration.UiTheme;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -454,6 +457,22 @@ public class LLPreferenceListView extends ListView implements OnItemClickListene
             }
 
             setEnabledStateOnViews(convertView, !p.isDisabled());
+
+            // 「白い熊 雷起動盤 UI」: colour + font for the Customize preference rows.
+            TextView titleView = convertView.findViewById(android.R.id.title);
+            if (titleView != null) {
+                UiTheme.applyTo(titleView, is_category ? UiSlot.PREF_CATEGORY : UiSlot.PREF_TITLE);
+            }
+            if (!is_category) {
+                TextView summaryView = convertView.findViewById(android.R.id.summary);
+                if (summaryView != null) {
+                    UiTheme.applyTo(summaryView, UiSlot.PREF_SUMMARY);
+                }
+            }
+            TextView overrideView = convertView.findViewById(R.id.override_t);
+            if (overrideView != null) {
+                UiTheme.applyTo(overrideView, UiSlot.PREF_SUMMARY);
+            }
 
             return convertView;
         }

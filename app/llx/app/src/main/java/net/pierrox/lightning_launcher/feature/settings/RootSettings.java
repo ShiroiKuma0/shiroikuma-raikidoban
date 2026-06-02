@@ -42,9 +42,30 @@ public class RootSettings extends ResourceWrapperActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+
+        applyChrome();
+
         replaceScreen();
+    }
+
+    private androidx.appcompat.widget.Toolbar mToolbar;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        applyChrome();
+    }
+
+    private void applyChrome() {
+        net.pierrox.lightning_launcher.util.UiChrome.applyToolbar(mToolbar);
+        net.pierrox.lightning_launcher.util.UiChrome.applyStatusBar(this);
+        android.view.View container = findViewById(R.id.fragment_container);
+        if (container != null) {
+            container.setBackgroundColor(net.pierrox.lightning_launcher.configuration.UiTheme.color(
+                    net.pierrox.lightning_launcher.configuration.UiSlot.PREF_BG));
+        }
     }
 
     @Override
@@ -53,6 +74,7 @@ public class RootSettings extends ResourceWrapperActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.root_settings, menu);
         menu.findItem(R.id.h).setTitle(getString(R.string.sc_help));
+        net.pierrox.lightning_launcher.util.UiChrome.tintMenu(menu);
         return super.onCreateOptionsMenu(menu);
     }
 

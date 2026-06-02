@@ -54,6 +54,9 @@ import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.api.ScreenIdentity;
 import net.pierrox.lightning_launcher.configuration.FoldGrid;
 import net.pierrox.lightning_launcher.configuration.GlobalConfig;
+import net.pierrox.lightning_launcher.configuration.UiFonts;
+import net.pierrox.lightning_launcher.configuration.UiSlot;
+import net.pierrox.lightning_launcher.configuration.UiTheme;
 import net.pierrox.lightning_launcher.data.Page;
 import net.pierrox.lightning_launcher.engine.LightningEngine;
 import net.pierrox.lightning_launcher.views.ItemLayout;
@@ -78,10 +81,11 @@ public class FoldMatrixActivity extends ResourceWrapperActivity
     private static final float PREVIEW_RATIO = 0.3f;
     private static final int THUMB_W_DP = 144;
     private static final int CELL_EXTRA_DP = 16;
-    private static final int YELLOW = 0xFFFFFF00;
-    private static final int DIM_YELLOW = 0xFF888800;
-    private static final int FAINT_YELLOW = 0xFF444400;
-    private static final int BLACK = 0xFF000000;
+    // Colours follow the DIALOG slots of 「白い熊 雷起動盤 UI」 (initialised in onCreate).
+    private int YELLOW;
+    private int DIM_YELLOW;
+    private int FAINT_YELLOW;
+    private int BLACK;
 
     private LightningEngine mEngine;
     private GlobalConfig mGlobalConfig;
@@ -112,11 +116,16 @@ public class FoldMatrixActivity extends ResourceWrapperActivity
         mGlobalConfig = mEngine.getGlobalConfig();
         mGrid = FoldGrid.parse(mGlobalConfig.foldGrid);
 
+        YELLOW = UiTheme.color(UiSlot.DIALOG_TEXT);
+        BLACK = UiTheme.color(UiSlot.DIALOG_BG);
+        DIM_YELLOW = UiTheme.adjustAlpha(YELLOW, 0.53f);
+        FAINT_YELLOW = UiTheme.adjustAlpha(YELLOW, 0.27f);
+
         DisplayMetrics dm = getResources().getDisplayMetrics();
         mDisplayW = dm.widthPixels;
         mDisplayH = dm.heightPixels;
 
-        getWindow().setStatusBarColor(BLACK);
+        getWindow().setStatusBarColor(UiTheme.color(UiSlot.STATUSBAR_BG));
         getWindow().setNavigationBarColor(BLACK);
 
         // Off-screen Screen used only to render desktop previews (mirrors ScreenManager).
@@ -168,9 +177,8 @@ public class FoldMatrixActivity extends ResourceWrapperActivity
         t.setTextColor(color);
         t.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp);
         t.setGravity(Gravity.CENTER);
-        if (bold) {
-            t.setTypeface(Typeface.DEFAULT_BOLD);
-        }
+        t.setTypeface(UiFonts.typeface(UiTheme.family(UiSlot.DIALOG_TEXT),
+                UiTheme.weight(UiSlot.DIALOG_TEXT), bold ? Typeface.BOLD : Typeface.NORMAL));
         return t;
     }
 

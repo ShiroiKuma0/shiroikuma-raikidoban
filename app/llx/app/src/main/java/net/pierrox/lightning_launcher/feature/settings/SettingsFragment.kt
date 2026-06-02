@@ -23,6 +23,7 @@ import net.pierrox.lightning_launcher_extreme.R
 
 class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClickListener {
     companion object {
+        private const val KEY_UI = "llui"
         private const val KEY_GLOBAL_CONFIG = "g"
         private const val KEY_CURRENT_PAGE = "d"
         private const val KEY_APP_DRAWER = "a"
@@ -55,6 +56,7 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClic
         addPreferencesFromResource(R.xml.preference_root)
 
         setupPreference(KEY_CAT_SETTINGS, R.string.settings, 0)
+        setupPreference(KEY_UI, R.string.llui_title, R.string.llui_summary)
         setupPreference(KEY_GLOBAL_CONFIG, R.string.general_t, R.string.general_s)
         setupPreference(KEY_CURRENT_PAGE, R.string.dashboard_t, R.string.dashboard_s)
         setupPreference(KEY_APP_DRAWER, R.string.app_drawer_t, R.string.app_drawer_s)
@@ -108,7 +110,9 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClic
     override fun onPreferenceClick(preference: Preference): Boolean {
         val key: String = preference.key
 
-        if (KEY_CONFIGURE_PAGES == key) {
+        if (KEY_UI == key) {
+            startActivity(Intent(activity, net.pierrox.lightning_launcher.activities.UiSettingsActivity::class.java))
+        } else if (KEY_CONFIGURE_PAGES == key) {
             val intent = Intent(activity, ScreenManager::class.java)
             intent.setAction(Intent.ACTION_EDIT)
             startActivity(intent)

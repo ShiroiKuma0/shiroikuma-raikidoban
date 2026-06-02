@@ -36,6 +36,10 @@
         <item name="colorAccent">@color/color_accent</item>
     </style>
 
+    <!-- Toolbar theme overlay: dark icons/text on a light bar in day; overridden to yellow-on-black
+         in values-night so the Customize / Settings toolbars match the dark theme. -->
+    <style name="ToolbarOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
     <style name="NoDisplay" parent="AppLightNoActionBarWallpaper">
         <!--<item name="android:windowBackground">@android:color/transparent</item>-->
         <item name="android:windowNoTitle">true</item>

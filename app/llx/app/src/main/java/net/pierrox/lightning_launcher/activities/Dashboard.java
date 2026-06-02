@@ -121,6 +121,9 @@ import net.pierrox.lightning_launcher.configuration.PageConfig;
 import net.pierrox.lightning_launcher.configuration.ShortcutConfig;
 import net.pierrox.lightning_launcher.configuration.ShortcutConfigStylable;
 import net.pierrox.lightning_launcher.configuration.SystemConfig;
+import net.pierrox.lightning_launcher.configuration.UiConfig;
+import net.pierrox.lightning_launcher.configuration.UiSlot;
+import net.pierrox.lightning_launcher.configuration.UiTheme;
 import net.pierrox.lightning_launcher.data.Action;
 import net.pierrox.lightning_launcher.data.Box;
 import net.pierrox.lightning_launcher.data.ContainerPath;
@@ -3496,13 +3499,15 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             public View getView(int position, View convertView, ViewGroup parent) {
                 View v = convertView != null ? convertView : inflater.inflate(R.layout.shortcut_picker_item, parent, false);
                 ResolveInfo ri = shortcuts.get(position);
-                ((TextView) v.findViewById(R.id.label)).setText(ri.loadLabel(pm));
+                TextView label = v.findViewById(R.id.label);
+                label.setText(ri.loadLabel(pm));
+                UiTheme.applyTo(label, UiSlot.DIALOG_TEXT);
                 ((ImageView) v.findViewById(R.id.icon)).setImageDrawable(ri.loadIcon(pm));
                 return v;
             }
         };
 
-        new AlertDialog.Builder(this)
+        AlertDialog pickerDialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.tools_pick_shortcut)
                 .setAdapter(adapter, new DialogInterface.OnClickListener() {
                     @Override
@@ -3515,6 +3520,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
+        net.pierrox.lightning_launcher.util.UiDialogStyler.style(pickerDialog);
     }
 
     // ---- Gesture-actions overview (long-tap "Gestures…" on a desktop or item) -------------------
@@ -4417,6 +4423,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         if (focus != null) {
             mBubble.setItemBounds(focus);
         }
+        applyBubbleChrome();
         if (mBubble.getVisibility() == View.GONE) {
             if (mBubbleAnimIn != null) {
                 mBubble.startAnimation(mBubbleAnimIn);
@@ -4446,6 +4453,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 b.setTag(script);
                 b.setText(script.name);
                 b.setOnClickListener(this);
+                styleBubbleItemText(b);
                 mBubbleContent.addView(b);
             }
 
@@ -4732,6 +4740,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         b.setId(id);
         b.setText(title);
         b.setOnClickListener(this);
+        styleBubbleItemText(b);
         mBubbleContent.addView(b);
         return b;
     }
@@ -4740,8 +4749,67 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         Button b = (Button) getLayoutInflater().inflate(R.layout.bubble_item, null);
         b.setText(title);
         b.setOnClickListener(listener);
+        styleBubbleItemText(b);
         mBubbleContent.addView(b);
         return b;
+    }
+
+    // 「白い熊 雷起動盤 UI」: a dynamic menu item's text colour + font + size (MENU_TEXT slot).
+    private void styleBubbleItemText(TextView b) {
+        b.setTextColor(UiTheme.color(UiSlot.MENU_TEXT));
+        UiTheme.applyFont(b, UiSlot.MENU_TEXT);
+    }
+
+    // 「白い熊 雷起動盤 UI」: the static bubble chrome (title, icon buttons, and — when overridden — the
+    // menu background panel + arrows + item cells). Re-applied on every open so config edits take effect.
+    private void applyBubbleChrome() {
+        if (mBubble == null) {
+            return;
+        }
+        int menuText = UiTheme.color(UiSlot.MENU_TEXT);
+        int accent = UiTheme.color(UiSlot.MENU_ACCENT);
+
+        TextView ttl = mBubble.findViewById(R.id.bbl_ttl);
+        if (ttl != null) {
+            ttl.setTextColor(accent);
+            UiTheme.applyFont(ttl, UiSlot.MENU_TEXT);
+        }
+        // icon buttons keep their icon-font glyphs — recolour only
+        int[] iconIds = {R.id.bbl_edit, R.id.bbl_add, R.id.bbl_clone, R.id.bbl_settings, R.id.bbl_rm};
+        for (int id : iconIds) {
+            View v = mBubble.findViewById(id);
+            if (v instanceof TextView) {
+                ((TextView) v).setTextColor(menuText);
+            }
+        }
+
+        // Background only when the user actually overrode it (else the theme's black panel is kept).
+        if (UiConfig.get().hasOverride(UiSlot.MENU_BG.key)) {
+            int bg = UiTheme.color(UiSlot.MENU_BG);
+            tintBubbleBackground(mBubble, bg);
+        }
+    }
+
+    private void tintBubbleBackground(android.view.ViewGroup root, int bg) {
+        for (int i = 0; i < root.getChildCount(); i++) {
+            View c = root.getChildAt(i);
+            if (c instanceof android.widget.ScrollView) {
+                tintDrawable(c.getBackground(), bg);
+            } else if (c instanceof ImageView) {
+                tintDrawable(((ImageView) c).getDrawable(), bg);
+            }
+        }
+        if (mBubbleContent != null) {
+            for (int i = 0; i < mBubbleContent.getChildCount(); i++) {
+                tintDrawable(mBubbleContent.getChildAt(i).getBackground(), bg);
+            }
+        }
+    }
+
+    private void tintDrawable(Drawable d, int color) {
+        if (d != null) {
+            d.mutate().setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN);
+        }
     }
 
     /*
@@ -4786,6 +4854,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             btn.setText(label);
             btn.setTag(intent);
             btn.setOnClickListener(this);
+            styleBubbleItemText(btn);
             mBubbleContent.addView(btn);
         }
     }

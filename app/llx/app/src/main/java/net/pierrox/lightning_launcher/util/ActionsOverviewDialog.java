@@ -174,6 +174,7 @@ public class ActionsOverviewDialog {
                 .setView(list)
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
+        net.pierrox.lightning_launcher.util.UiDialogStyler.style(mDialog);
     }
 
     /** Re-read every slot and redraw; call after a slot has been edited or cleared. */
@@ -474,7 +475,10 @@ public class ActionsOverviewDialog {
                 if (convertView == null) {
                     convertView = mInflater.inflate(mCategoryLayout, parent, false);
                 }
-                ((TextView) convertView.findViewById(android.R.id.title)).setText((Integer) o);
+                TextView title = convertView.findViewById(android.R.id.title);
+                title.setText((Integer) o);
+                net.pierrox.lightning_launcher.configuration.UiTheme.applyTo(title,
+                        net.pierrox.lightning_launcher.configuration.UiSlot.DIALOG_TITLE);
                 return convertView;
             }
 
@@ -485,8 +489,17 @@ public class ActionsOverviewDialog {
                 delete.setTypeface(LLApp.get().getIconsTypeface());
             }
 
-            ((TextView) convertView.findViewById(R.id.label)).setText(slot.titleRes);
-            ((TextView) convertView.findViewById(R.id.value)).setText(valueText(slot));
+            TextView label = convertView.findViewById(R.id.label);
+            TextView value = convertView.findViewById(R.id.value);
+            label.setText(slot.titleRes);
+            value.setText(valueText(slot));
+            net.pierrox.lightning_launcher.configuration.UiTheme.applyTo(label,
+                    net.pierrox.lightning_launcher.configuration.UiSlot.DIALOG_TEXT);
+            value.setTextColor(net.pierrox.lightning_launcher.configuration.UiTheme.color(
+                    net.pierrox.lightning_launcher.configuration.UiSlot.DIALOG_TEXT));
+            ((TextView) convertView.findViewById(R.id.delete)).setTextColor(
+                    net.pierrox.lightning_launcher.configuration.UiTheme.color(
+                            net.pierrox.lightning_launcher.configuration.UiSlot.DIALOG_TEXT));
 
             View delete = convertView.findViewById(R.id.delete);
             delete.setOnClickListener(new View.OnClickListener() {

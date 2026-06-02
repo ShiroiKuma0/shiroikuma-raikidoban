@@ -49,6 +49,8 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.util.TypedValue;
+
 import androidx.appcompat.widget.Toolbar;
 
 import com.readystatesoftware.systembartint.SystemBarTintManager;
@@ -305,6 +307,7 @@ public class Customize extends ResourceWrapperActivity implements
     private String mIntentGoto;
     private GridMode mGridMode;
     private SystemBarTintManager mSystemBarTintManager;
+    private Toolbar mToolbar;
     private boolean mDontSaveOnNextPause;
     /**************************************** GLOBAL CONFIG *************************************/
     private ArrayList<LLPreference> mPreferencesGlobalConfig;
@@ -516,8 +519,12 @@ public class Customize extends ResourceWrapperActivity implements
 
         setContentView(R.layout.customize);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+
+        // Toolbar + status bar follow 「白い熊 雷起動盤 UI」 (TOOLBARS slots).
+        net.pierrox.lightning_launcher.util.UiChrome.applyToolbar(mToolbar);
+        net.pierrox.lightning_launcher.util.UiChrome.applyStatusBar(this);
 
         mMyViewPager = findViewById(R.id.view_pager);
         mMyViewPager.setOnPageChangeListener(this);
@@ -689,6 +696,9 @@ public class Customize extends ResourceWrapperActivity implements
     protected void onResume() {
         super.onResume();
 
+        net.pierrox.lightning_launcher.util.UiChrome.applyToolbar(mToolbar);
+        net.pierrox.lightning_launcher.util.UiChrome.applyStatusBar(this);
+
         if (mScreen != null) {
             mScreen.resume();
         }
@@ -706,6 +716,7 @@ public class Customize extends ResourceWrapperActivity implements
         inflater.inflate(R.menu.customize, menu);
         menu.findItem(R.id.rs).setTitle(getString(R.string.menu_customize));
         menu.findItem(R.id.h).setTitle(getString(R.string.sc_help));
+        net.pierrox.lightning_launcher.util.UiChrome.tintMenu(menu);
         return super.onCreateOptionsMenu(menu);
     }
 
