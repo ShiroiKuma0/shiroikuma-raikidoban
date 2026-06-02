@@ -57,6 +57,7 @@ import net.pierrox.lightning_launcher.script.Script;
 import net.pierrox.lightning_launcher.util.ActionsOverviewDialog;
 import net.pierrox.lightning_launcher.util.ScriptPickerDialog;
 import net.pierrox.lightning_launcher.util.SetVariableDialog;
+import net.pierrox.lightning_launcher.util.ThemedShortcutPicker;
 import net.pierrox.lightning_launcher_extreme.R;
 
 import org.json.JSONException;
@@ -350,13 +351,27 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
             picker.setAction(Intent.ACTION_PICK_ACTIVITY);
             startActivityForResult(picker, REQUEST_PICK_ACTIVITY);
         } else if (new_action == GlobalConfig.LAUNCH_SHORTCUT) {
-            Intent i = new Intent(Intent.ACTION_PICK_ACTIVITY);
-            i.putExtra(Intent.EXTRA_INTENT, new Intent(Intent.ACTION_CREATE_SHORTCUT));
-            i.putExtra(Intent.EXTRA_TITLE, getString(R.string.tools_pick_shortcut));
-            try {
-                startActivityForResult(i, REQUEST_PICK_SHORTCUT1);
-            } catch (Exception e) {
-            }
+            // Use our own yellow-on-black shortcut-app picker instead of the framework
+            // ACTION_PICK_ACTIVITY chooser (drawn by another process, so it can't follow the night theme).
+            // It hands back the chosen CREATE_SHORTCUT component, which we launch to build the shortcut —
+            // the same outcome the system chooser's result would have produced (REQUEST_PICK_SHORTCUT2).
+            ThemedShortcutPicker.show(this, new ThemedShortcutPicker.Listener() {
+                @Override
+                public void onChosen(Intent chosen) {
+                    try {
+                        startActivityForResult(chosen, REQUEST_PICK_SHORTCUT2);
+                    } catch (Exception e) {
+                    }
+                }
+
+                @Override
+                public void onCancelled() {
+                    if (mEventActionForPickNew) {
+                        mEventActions.remove(mEventActionForPick);
+                        mAdapter.notifyDataSetChanged();
+                    }
+                }
+            });
         } else if (new_action == GlobalConfig.RUN_SCRIPT) {
             ScriptPickerDialog dialog = new ScriptPickerDialog(this, mAppEngine, ea.data, Script.TARGET_NONE, new ScriptPickerDialog.OnScriptPickerEvent() {
                 @Override

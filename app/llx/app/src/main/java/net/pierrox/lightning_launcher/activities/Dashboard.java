@@ -3473,54 +3473,20 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         });
     }
 
-    // The framework ACTION_PICK_ACTIVITY chooser is drawn by another process, so it can't follow our
-    // night theme (it shows up white-on-grey). This in-app dialog inherits the yellow-on-black look and
-    // hands the chosen CREATE_SHORTCUT component back to the caller.
+    // Delegates to the shared yellow-on-black shortcut-app picker (ThemedShortcutPicker): the framework
+    // ACTION_PICK_ACTIVITY chooser is drawn by another process and can't follow our night theme.
     private void showThemedShortcutPicker(final OnShortcutActivityChosen onChosen) {
-        final PackageManager pm = getPackageManager();
-        final List<ResolveInfo> shortcuts = pm.queryIntentActivities(new Intent(Intent.ACTION_CREATE_SHORTCUT), 0);
-        // Tasker is the #1 choice -> pin it to the top; everything else follows alphabetically.
-        final ResolveInfo.DisplayNameComparator nameComparator = new ResolveInfo.DisplayNameComparator(pm);
-        Collections.sort(shortcuts, new Comparator<ResolveInfo>() {
+        net.pierrox.lightning_launcher.util.ThemedShortcutPicker.show(this, new net.pierrox.lightning_launcher.util.ThemedShortcutPicker.Listener() {
             @Override
-            public int compare(ResolveInfo a, ResolveInfo b) {
-                boolean aTasker = net.pierrox.lightning_launcher.util.TaskerWidgets.TASKER_PACKAGE.equals(a.activityInfo.packageName);
-                boolean bTasker = net.pierrox.lightning_launcher.util.TaskerWidgets.TASKER_PACKAGE.equals(b.activityInfo.packageName);
-                if (aTasker != bTasker) {
-                    return aTasker ? -1 : 1;
-                }
-                return nameComparator.compare(a, b);
+            public void onChosen(Intent chosen) {
+                onChosen.onChosen(chosen);
+            }
+
+            @Override
+            public void onCancelled() {
+                // Keep the existing binding / add nothing — matches the prior no-op cancel behaviour.
             }
         });
-
-        final LayoutInflater inflater = getLayoutInflater();
-        ArrayAdapter<ResolveInfo> adapter = new ArrayAdapter<ResolveInfo>(this, R.layout.shortcut_picker_item, R.id.label, shortcuts) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View v = convertView != null ? convertView : inflater.inflate(R.layout.shortcut_picker_item, parent, false);
-                ResolveInfo ri = shortcuts.get(position);
-                TextView label = v.findViewById(R.id.label);
-                label.setText(ri.loadLabel(pm));
-                UiTheme.applyTo(label, UiSlot.DIALOG_TEXT);
-                ((ImageView) v.findViewById(R.id.icon)).setImageDrawable(ri.loadIcon(pm));
-                return v;
-            }
-        };
-
-        AlertDialog pickerDialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.tools_pick_shortcut)
-                .setAdapter(adapter, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ResolveInfo ri = shortcuts.get(which);
-                        Intent chosen = new Intent(Intent.ACTION_CREATE_SHORTCUT);
-                        chosen.setComponent(new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name));
-                        onChosen.onChosen(chosen);
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
-        net.pierrox.lightning_launcher.util.UiDialogStyler.style(pickerDialog);
     }
 
     // ---- Gesture-actions overview (long-tap "Gestures…" on a desktop or item) -------------------
