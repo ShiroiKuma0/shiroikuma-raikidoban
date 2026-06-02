@@ -112,7 +112,9 @@ public final class UiConfig {
     }
 
     public void setLocaleTag(String tag) {
-        mPrefs.edit().putString(PREF_LOCALE, tag == null ? "" : tag).apply();
+        // commit() (synchronous) — the language change is immediately followed by a process kill/restart,
+        // so the value must be flushed to disk before exit(0); apply() would lose it.
+        mPrefs.edit().putString(PREF_LOCALE, tag == null ? "" : tag).commit();
     }
 
     /**

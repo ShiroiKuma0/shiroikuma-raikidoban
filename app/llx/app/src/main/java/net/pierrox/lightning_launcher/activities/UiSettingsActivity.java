@@ -26,6 +26,7 @@ package net.pierrox.lightning_launcher.activities;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -226,6 +227,18 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         return new CharSequence[]{getString(R.string.llui_lang_system), "English", "日本語", "Čeština", "Русский"};
     }
 
+    private void restartApp() {
+        Intent launch = getPackageManager().getLaunchIntentForPackage(getPackageName());
+        if (launch == null) {
+            launch = new Intent(Intent.ACTION_MAIN)
+                    .addCategory(Intent.CATEGORY_HOME)
+                    .setPackage(getPackageName());
+        }
+        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(launch);
+        Runtime.getRuntime().exit(0);
+    }
+
     private String currentLanguageLabel() {
         String tag = UiConfig.get().getLocaleTag();
         if (tag == null || tag.isEmpty()) {
@@ -262,8 +275,10 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
                     public void onClick(DialogInterface d, int which) {
                         d.dismiss();
                         UiConfig.get().setLocaleTag(LANG_TAGS[which]);
-                        // recreate() re-runs attachBaseContext, which applies the forced locale.
-                        recreate();
+                        // A full process restart is required: recreate()/swipe-from-Recents leaves stale
+                        // resources behind, so parts of the UI keep the old language. Relaunch the home in
+                        // a fresh process so the forced locale (attachBaseContext) applies everywhere.
+                        restartApp();
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, null)

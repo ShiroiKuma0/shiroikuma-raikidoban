@@ -78,6 +78,11 @@
     <string name="font_weight_black">極太</string>
     <string name="tasker_name_unset">（Tasker 名称が未設定）</string>
 
+    <string name="mi_set_tasker_widget_name">Tasker ウィジェット名を設定</string>
+    <string name="mi_reinit_tasker_widgets">Tasker ウィジェットを再初期化</string>
+    <string name="mi_tasker_a11y_settings">Tasker 自動入力（ユーザー補助）…</string>
+    <string name="tasker_widget_name_title">Tasker 内部名（例: test.item.1）</string>
+
     <!-- Bundled Japanese (from the legacy lp.jp pack) so JA is self-contained. -->
     <string name="all_apps">全てのアプリ</string>
     <string name="anim_glitch_fix_s">Androidの一部バージョンで見られる不具合を、パディングを1ピクセル増やすことで改善します。</string>
