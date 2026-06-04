@@ -172,9 +172,8 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
             addSection(group);
             List<UiSlot> slots = UiSlot.forGroup(group);
             for (UiSlot slot : slots) {
-                if (slot == UiSlot.DIALOG_BORDER) {
-                    addBorderSlot(slot, mStepPx);
-                } else if (slot == UiSlot.BUTTON_BORDER) {
+                if (slot == UiSlot.DIALOG_BORDER || slot == UiSlot.BUTTON_BORDER) {
+                    // Border slots = colour + width slider + corner-roundness slider.
                     addBorderSlot(slot, mStepPx);
                     addCornerRow(slot, mStepPx);
                 } else if (slot.hasFont) {

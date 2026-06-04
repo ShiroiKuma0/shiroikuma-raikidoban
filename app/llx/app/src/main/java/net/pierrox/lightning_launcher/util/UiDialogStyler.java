@@ -73,7 +73,7 @@ public final class UiDialogStyler {
         float d = ctx.getResources().getDisplayMetrics().density;
         GradientDrawable panel = new GradientDrawable();
         panel.setColor(UiTheme.color(UiSlot.DIALOG_BG));
-        panel.setCornerRadius(12 * d);
+        panel.setCornerRadius(UiTheme.cornerRadiusDp(UiSlot.DIALOG_BORDER) * d);
         if (borderDp > 0) {
             panel.setStroke(Math.round(borderDp * d), UiTheme.color(UiSlot.DIALOG_BORDER));
         }

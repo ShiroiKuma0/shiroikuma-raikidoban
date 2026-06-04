@@ -63,6 +63,7 @@ import net.pierrox.lightning_launcher.data.Folder;
 import net.pierrox.lightning_launcher.data.Item;
 import net.pierrox.lightning_launcher.data.Page;
 import net.pierrox.lightning_launcher.util.BackupFolder;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 import net.pierrox.lightning_launcher_extreme.R;
 
 import org.json.JSONObject;
@@ -267,6 +268,19 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         startActivityForResult(intent, REQUEST_PICK_FOLDER);
     }
 
+    // 「白い熊 雷起動盤 UI」: give these framework dialogs the themed bordered panel (the yellow
+    // DIALOG_BORDER frame + rounded DIALOG_BG), matching the rest of the app's dialogs. Styled on show
+    // so the title / buttons exist by the time UiDialogStyler runs.
+    private AlertDialog withChrome(AlertDialog dialog) {
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface d) {
+                UiDialogStyler.style((AlertDialog) d);
+            }
+        });
+        return dialog;
+    }
+
     @Override
     protected Dialog onCreateDialog(int id) {
         AlertDialog.Builder builder;
@@ -325,7 +339,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                     }
                 });
                 builder.setNegativeButton(android.R.string.cancel, null);
-                return builder.create();
+                return withChrome(builder.create());
 
             case DIALOG_CONFIRM_RESTORE:
                 if (mArchiveUri != null) {
@@ -339,7 +353,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                         }
                     });
                     builder.setNegativeButton(android.R.string.cancel, null);
-                    return builder.create();
+                    return withChrome(builder.create());
                 }
                 break;
 
@@ -358,7 +372,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                         }
                     });
                     builder.setNegativeButton(android.R.string.cancel, null);
-                    return builder.create();
+                    return withChrome(builder.create());
                 }
                 break;
 
@@ -419,7 +433,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                         }
                     });
                     builder.setNegativeButton(android.R.string.cancel, null);
-                    return builder.create();
+                    return withChrome(builder.create());
                 }
                 break;
         }

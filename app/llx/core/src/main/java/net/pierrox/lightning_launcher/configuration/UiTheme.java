@@ -20,6 +20,8 @@ public final class UiTheme {
     public static final int DEFAULT_BORDER_DP = 2;
     /** Default corner radius (dp) for a button when the user has not set one. */
     public static final int DEFAULT_BUTTON_CORNER_DP = 6;
+    /** Default corner radius (dp) for a dialog panel when the user has not set one. */
+    public static final int DEFAULT_DIALOG_CORNER_DP = 12;
 
     private UiTheme() {
     }
@@ -50,10 +52,15 @@ public final class UiTheme {
         return v < 0 ? DEFAULT_BORDER_DP : v;
     }
 
-    /** Effective corner radius (dp): the user's value, or {@link #DEFAULT_BUTTON_CORNER_DP}. */
+    /** Effective corner radius (dp): the user's value, or the slot's default (see {@link #defaultCornerDp}). */
     public static int cornerRadiusDp(UiSlot slot) {
         int v = UiConfig.get().getCornerRadius(slot.key);
-        return v < 0 ? DEFAULT_BUTTON_CORNER_DP : v;
+        return v < 0 ? defaultCornerDp(slot) : v;
+    }
+
+    /** Unset-default corner radius (dp): dialog panels round more (12) than buttons (6). */
+    public static int defaultCornerDp(UiSlot slot) {
+        return slot == UiSlot.DIALOG_BORDER ? DEFAULT_DIALOG_CORNER_DP : DEFAULT_BUTTON_CORNER_DP;
     }
 
     public static int adjustAlpha(int color, float factor) {
