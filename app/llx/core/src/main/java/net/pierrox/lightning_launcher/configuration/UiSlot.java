@@ -29,7 +29,7 @@ public enum UiSlot {
     DIALOG_BG("llui_dialog_bg", UiGroup.DIALOGS, R.string.llui_dialog_bg, false, false, "llui_background", 0),
     // Title defaults to TEXT (yellow), not the accent — a yellow title reads better on the black panel.
     DIALOG_TITLE("llui_dialog_title", UiGroup.DIALOGS, R.string.llui_dialog_title, false, true, "llui_text", 0),
-    DIALOG_BUTTON("llui_dialog_button", UiGroup.DIALOGS, R.string.llui_dialog_button, false, false, "llui_accent", 0),
+    DIALOG_BUTTON("llui_dialog_button", UiGroup.DIALOGS, R.string.llui_dialog_button, false, true, "llui_accent", 0),
     // Frame around dialog panels (shortcut picker, action chooser, the action list, the Backup/Restore
     // dialogs, …). Colour cascades from TEXT (yellow by default); its WIDTH and corner RADIUS are stored
     // separately (see UiConfig; defaults {@link UiTheme#DEFAULT_BORDER_DP} / {@link UiTheme#DEFAULT_DIALOG_CORNER_DP}).
