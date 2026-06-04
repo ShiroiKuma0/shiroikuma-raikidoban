@@ -151,6 +151,54 @@ public final class UiConfig {
         mPrefs.edit().remove(CORNER_RADIUS_PREFIX + key).apply();
     }
 
+    // --- recently picked colours (a small shared MRU list powering the colour picker's one-tap swatches) ---
+
+    private static final String PREF_RECENT_COLORS = "recent_colors";
+    /** How many recently-picked colours to remember / show as one-tap swatches. */
+    public static final int MAX_RECENT_COLORS = 8;
+    // Seed the list (first run only) with the theme's own palette so the swatches are useful immediately.
+    private static final int[] SEED_RECENT_COLORS = {0xFFFFFF00, 0xFFFFA500, 0xFF000000};
+
+    /** Recently-picked colours, most-recent first. Seeded with the theme palette when nothing is stored. */
+    public int[] getRecentColors() {
+        String csv = mPrefs.getString(PREF_RECENT_COLORS, null);
+        if (csv == null || csv.isEmpty()) {
+            return SEED_RECENT_COLORS.clone();
+        }
+        String[] parts = csv.split(",");
+        int[] out = new int[parts.length];
+        int n = 0;
+        for (String p : parts) {
+            try {
+                out[n++] = Integer.parseInt(p);
+            } catch (NumberFormatException e) {
+                // skip a corrupt entry
+            }
+        }
+        if (n == out.length) {
+            return out;
+        }
+        int[] trimmed = new int[n];
+        System.arraycopy(out, 0, trimmed, 0, n);
+        return trimmed;
+    }
+
+    /** Record a picked colour at the front of the MRU list (de-duplicated, capped at {@link #MAX_RECENT_COLORS}). */
+    public void addRecentColor(int color) {
+        int[] current = getRecentColors();
+        StringBuilder sb = new StringBuilder();
+        sb.append(color);
+        int count = 1;
+        for (int c : current) {
+            if (c == color || count >= MAX_RECENT_COLORS) {
+                continue;
+            }
+            sb.append(',').append(c);
+            count++;
+        }
+        mPrefs.edit().putString(PREF_RECENT_COLORS, sb.toString()).apply();
+    }
+
     // --- in-app language (forced locale, independent of the system / any language pack) ---
 
     public String getLocaleTag() {

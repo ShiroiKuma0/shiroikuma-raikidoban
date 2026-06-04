@@ -22,12 +22,23 @@
     android:paddingRight="5dp"
     android:orientation="vertical">
 		
+	<!-- Recently-picked colours: one-tap round swatches, populated at runtime (hidden when empty). -->
+	<LinearLayout
+		android:id="@+id/recent_colors"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_horizontal"
+		android:orientation="horizontal"
+		android:paddingTop="6dp"
+		android:paddingBottom="4dp"
+		android:visibility="gone" />
+
+	<!-- Fixed size (instead of match_parent + weight) so the picker doesn't balloon on wide screens. -->
 	<net.margaritov.preference.colorpicker.ColorPickerView
 		android:id="@+id/color_picker_view"
-		android:layout_width="match_parent"
-		android:layout_height="0dip"
-		android:layout_weight="1"
-		android:layout_gravity="center"
+		android:layout_width="280dp"
+		android:layout_height="240dp"
+		android:layout_gravity="center_horizontal"
 		android:tag="portrait"
 		android:layerType="software"
 	/>
@@ -48,57 +59,35 @@
 		</EditText>
 	</FrameLayout>
 
+	<!-- Cancel / OK as themed push-buttons (BUTTONS slots): black bg, yellow text + border, rounded,
+	     all configurable under the 「白い熊 雷起動盤 UI」 Buttons section. Each sizes to its own label on a
+	     single line (so 「キャンセル」 never wraps), with a min width so OK isn't tiny. -->
 	<LinearLayout
 		android:layout_width="wrap_content"
-		android:layout_height="48dp"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_horizontal"
 		android:orientation="horizontal"
 		android:layout_margin="10dp">
-		
-		<FrameLayout
-            android:layout_width="0px"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.5" >
 
-            <net.margaritov.preference.colorpicker.ColorPickerPanelView
-                android:id="@+id/old_color_panel"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+		<Button
+			android:id="@+id/cancel_button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:maxLines="1"
+			android:minWidth="120dp"
+			android:text="@android:string/cancel" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:shadowColor="#fff"
-                android:shadowRadius="1"
-                android:text="@android:string/cancel"
-                android:textColor="#000"
-                android:textStyle="bold" />
-        </FrameLayout>
-	
-		<View 
-		    android:layout_width="20dp"
-		    android:layout_height="match_parent"/>
+		<View
+			android:layout_width="12dp"
+			android:layout_height="match_parent" />
 
-		<FrameLayout
-            android:layout_width="0px"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.5" >
-
-            <net.margaritov.preference.colorpicker.ColorPickerPanelView
-                android:id="@+id/new_color_panel"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:shadowColor="#fff"
-                android:shadowRadius="3"
-                android:text="@android:string/ok"
-                android:textColor="#000"
-                android:textStyle="bold" />
-        </FrameLayout>	
+		<Button
+			android:id="@+id/ok_button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:maxLines="1"
+			android:minWidth="120dp"
+			android:text="@android:string/ok" />
 	</LinearLayout>
 	
 </LinearLayout>
