@@ -62,6 +62,7 @@ import net.pierrox.lightning_launcher.script.api.Property;
 import net.pierrox.lightning_launcher.script.api.RectL;
 import net.pierrox.lightning_launcher.util.AnimationDecoder;
 import net.pierrox.lightning_launcher.util.Flash;
+import net.pierrox.lightning_launcher.util.ScriptToast;
 import net.pierrox.lightning_launcher.views.Graphics;
 import net.pierrox.lightning_launcher.views.ItemLayout;
 import net.pierrox.lightning_launcher.views.SharedAsyncGraphicsDrawable;
@@ -225,7 +226,7 @@ public class ScriptExecutor {
             ScriptableObject.defineProperty(mScriptScope, "Uri", new NativeJavaClass(mScriptScope, Uri.class), 0);
             ScriptableObject.defineProperty(mScriptScope, "ComponentName", new NativeJavaClass(mScriptScope, ComponentName.class), 0);
             ScriptableObject.defineProperty(mScriptScope, "Bundle", new NativeJavaClass(mScriptScope, Bundle.class), 0);
-            ScriptableObject.defineProperty(mScriptScope, "Toast", new NativeJavaClass(mScriptScope, Toast.class), 0);
+            ScriptableObject.defineProperty(mScriptScope, "Toast", new NativeJavaClass(mScriptScope, ScriptToast.class), 0);
             ScriptableObject.defineProperty(mScriptScope, "Log", new NativeJavaClass(mScriptScope, Log.class), 0);
 
             ScriptableObject.defineProperty(mScriptScope, "MotionEvent", new NativeJavaClass(mScriptScope, MotionEvent.class), 0);
