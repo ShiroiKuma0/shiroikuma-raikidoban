@@ -27,7 +27,6 @@ package net.pierrox.lightning_launcher.activities;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -63,6 +62,7 @@ import net.pierrox.lightning_launcher.data.Folder;
 import net.pierrox.lightning_launcher.data.Item;
 import net.pierrox.lightning_launcher.data.Page;
 import net.pierrox.lightning_launcher.util.BackupFolder;
+import net.pierrox.lightning_launcher.util.ThemedProgressDialog;
 import net.pierrox.lightning_launcher.util.UiDialogStyler;
 import net.pierrox.lightning_launcher_extreme.R;
 
@@ -81,8 +81,6 @@ import java.util.Comparator;
 import java.util.Date;
 
 public class BackupRestore extends ResourceWrapperActivity implements View.OnClickListener, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener, OnLongClickListener {
-    private static final int DIALOG_BACKUP_IN_PROGRESS = 1;
-    private static final int DIALOG_RESTORE_IN_PROGRESS = 2;
     private static final int DIALOG_SELECT_ARCHIVE_NAME = 3;
     private static final int DIALOG_SELECT_BACKUP_ACTION = 4;
     private static final int DIALOG_CONFIRM_RESTORE = 5;
@@ -284,21 +282,8 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
     @Override
     protected Dialog onCreateDialog(int id) {
         AlertDialog.Builder builder;
-        ProgressDialog progress;
 
         switch (id) {
-            case DIALOG_BACKUP_IN_PROGRESS:
-                progress = new ProgressDialog(this);
-                progress.setMessage(getString(R.string.backup_in_progress));
-                progress.setCancelable(false);
-                return progress;
-
-            case DIALOG_RESTORE_IN_PROGRESS:
-                progress = new ProgressDialog(this);
-                progress.setMessage(getString(R.string.restore_in_progress));
-                progress.setCancelable(false);
-                return progress;
-
             case DIALOG_SELECT_ARCHIVE_NAME:
                 builder = new AlertDialog.Builder(this);
                 builder.setTitle(R.string.br_n);
@@ -562,14 +547,11 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         final int sb_height = r.top;
 
         new AsyncTask<Void, Void, Boolean>() {
-            private ProgressDialog mDialog;
+            private AlertDialog mDialog;
 
             @Override
             protected void onPreExecute() {
-                mDialog = new ProgressDialog(BackupRestore.this);
-                mDialog.setMessage(getString(R.string.tmpl_e_m));
-                mDialog.setCancelable(false);
-                mDialog.show();
+                mDialog = ThemedProgressDialog.show(BackupRestore.this, getString(R.string.tmpl_e_m));
             }
 
             @Override
@@ -630,14 +612,11 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
             return;
         }
         new AsyncTask<Void, Void, DocumentFile>() {
-            private ProgressDialog mDialog;
+            private AlertDialog mDialog;
 
             @Override
             protected void onPreExecute() {
-                mDialog = new ProgressDialog(BackupRestore.this);
-                mDialog.setMessage(getString(R.string.importing));
-                mDialog.setCancelable(false);
-                mDialog.show();
+                mDialog = ThemedProgressDialog.show(BackupRestore.this, getString(R.string.importing));
             }
 
             @Override
@@ -706,6 +685,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
     @SuppressLint("StaticFieldLeak")
     private class BackupTask extends AsyncTask<Void, Void, Exception> {
         private final DocumentFile mTarget;
+        private AlertDialog mDialog;
 
         private BackupTask(DocumentFile target) {
             mTarget = target;
@@ -713,7 +693,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
         @Override
         protected void onPreExecute() {
-            showDialog(DIALOG_BACKUP_IN_PROGRESS);
+            mDialog = ThemedProgressDialog.show(BackupRestore.this, getString(R.string.backup_in_progress));
         }
 
         @Override
@@ -739,7 +719,9 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
         @Override
         protected void onPostExecute(Exception result) {
-            removeDialog(DIALOG_BACKUP_IN_PROGRESS);
+            if (mDialog != null) {
+                mDialog.dismiss();
+            }
 
             String name = mTarget.getName();
 
@@ -768,6 +750,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
     private class RestoreTask extends AsyncTask<Void, Void, Integer> {
         private final Uri mUri;
+        private AlertDialog mDialog;
 
         private RestoreTask(Uri uri) {
             mUri = uri;
@@ -775,7 +758,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
         @Override
         protected void onPreExecute() {
-            showDialog(DIALOG_RESTORE_IN_PROGRESS);
+            mDialog = ThemedProgressDialog.show(BackupRestore.this, getString(R.string.restore_in_progress));
         }
 
         @Override
@@ -826,7 +809,9 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
         @Override
         protected void onPostExecute(Integer result) {
-            removeDialog(DIALOG_RESTORE_IN_PROGRESS);
+            if (mDialog != null) {
+                mDialog.dismiss();
+            }
             if (result == 1) {
                 startActivity(new Intent(BackupRestore.this, Dashboard.class));
                 System.exit(0);
