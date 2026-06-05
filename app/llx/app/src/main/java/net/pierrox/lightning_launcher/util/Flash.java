@@ -88,8 +88,11 @@ public final class Flash {
 
         GradientDrawable bg = new GradientDrawable();
         bg.setColor(bgColor);
-        bg.setCornerRadius(8 * d);
-        bg.setStroke(Math.round(2 * d), fg);
+        bg.setCornerRadius(UiTheme.cornerRadiusDp(UiSlot.DIALOG_BORDER) * d);
+        int borderDp = UiTheme.borderWidthDp(UiSlot.DIALOG_BORDER);
+        if (borderDp > 0) {
+            bg.setStroke(Math.round(borderDp * d), UiTheme.color(UiSlot.DIALOG_BORDER));
+        }
         tv.setBackground(bg);
 
         Toast toast = new Toast(ctx);

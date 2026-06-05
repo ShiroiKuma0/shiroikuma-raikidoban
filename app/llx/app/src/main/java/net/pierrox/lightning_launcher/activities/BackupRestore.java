@@ -62,6 +62,7 @@ import net.pierrox.lightning_launcher.data.Folder;
 import net.pierrox.lightning_launcher.data.Item;
 import net.pierrox.lightning_launcher.data.Page;
 import net.pierrox.lightning_launcher.util.BackupFolder;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.ThemedProgressDialog;
 import net.pierrox.lightning_launcher.util.UiDialogStyler;
 import net.pierrox.lightning_launcher_extreme.R;
@@ -316,7 +317,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                         } else {
                             DocumentFile doc = BackupFolder.createDoc(BackupRestore.this, name);
                             if (doc == null) {
-                                Toast.makeText(BackupRestore.this, R.string.backup_folder_lost, Toast.LENGTH_LONG).show();
+                                Flash.show(BackupRestore.this, getString(R.string.backup_folder_lost), Toast.LENGTH_LONG);
                             } else {
                                 new BackupTask(doc).execute();
                             }
@@ -376,7 +377,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                                     // overwrite backup: re-create the document with the same name
                                     DocumentFile doc = BackupFolder.createDoc(BackupRestore.this, mSelected.getName());
                                     if (doc == null) {
-                                        Toast.makeText(BackupRestore.this, R.string.backup_folder_lost, Toast.LENGTH_LONG).show();
+                                        Flash.show(BackupRestore.this, getString(R.string.backup_folder_lost), Toast.LENGTH_LONG);
                                     } else {
                                         new BackupTask(doc).execute();
                                     }
@@ -474,7 +475,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 DocumentFile target = mPendingExportName == null ? null : BackupFolder.createDoc(this, mPendingExportName);
                 mPendingExportName = null;
                 if (target == null) {
-                    Toast.makeText(this, R.string.backup_folder_lost, Toast.LENGTH_LONG).show();
+                    Flash.show(this, getString(R.string.backup_folder_lost), Toast.LENGTH_LONG);
                 } else {
                     doExportTemplate(target, all_pages);
                 }
@@ -585,7 +586,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
             @Override
             protected void onPostExecute(Boolean ok) {
                 mDialog.dismiss();
-                Toast.makeText(BackupRestore.this, ok ? R.string.tmpl_e_d : R.string.tmpl_e_e, Toast.LENGTH_SHORT).show();
+                Flash.show(BackupRestore.this, getString(ok ? R.string.tmpl_e_d : R.string.tmpl_e_e));
                 loadArchivesList();
             }
         }.execute((Void) null);
@@ -658,7 +659,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                     loadArchivesList();
                     confirmRestore(target.getUri(), target.getName());
                 } else {
-                    Toast.makeText(BackupRestore.this, R.string.import_e, Toast.LENGTH_SHORT).show();
+                    Flash.show(BackupRestore.this, R.string.import_e);
                 }
             }
         }.execute((Void) null);
@@ -742,7 +743,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 startActivity(Intent.createChooser(email_intent, "Backup error, please send a bug report by email"));
             }
             String msg = (result == null ? getString(R.string.backup_done, name) : getString(R.string.backup_error));
-            Toast.makeText(BackupRestore.this, msg, Toast.LENGTH_LONG).show();
+            Flash.show(BackupRestore.this, msg, Toast.LENGTH_LONG);
 
             loadArchivesList();
         }
@@ -821,7 +822,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 startActivity(intent);
                 finish();
             } else {
-                Toast.makeText(BackupRestore.this, R.string.restore_error, Toast.LENGTH_LONG).show();
+                Flash.show(BackupRestore.this, getString(R.string.restore_error), Toast.LENGTH_LONG);
             }
         }
     }
