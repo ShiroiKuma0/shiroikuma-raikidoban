@@ -104,6 +104,7 @@ import net.pierrox.lightning_launcher.prefs.LLPreferenceListView.OnLLPreferenceL
 import net.pierrox.lightning_launcher.prefs.LLPreferenceSlider;
 import net.pierrox.lightning_launcher.prefs.LLPreferenceSlider.ValueType;
 import net.pierrox.lightning_launcher.util.FilesHolder;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.PhoneUtils;
 import net.pierrox.lightning_launcher.util.Setup;
 import net.pierrox.lightning_launcher.views.BoxEditorView;
@@ -966,7 +967,7 @@ public class Customize extends ResourceWrapperActivity implements
                 int modes = computeAppDrawerModes();
                 if (modes == 0) {
                     ((LLPreferenceCheckBox) preference).setChecked(true);
-                    Toast.makeText(this, R.string.adm_z, Toast.LENGTH_SHORT).show();
+                    Flash.show(this, R.string.adm_z);
                 }
             }
             copyPreferencesToPageConfiguration();
@@ -1079,7 +1080,7 @@ public class Customize extends ResourceWrapperActivity implements
                     }
                     mModified = true;
                 } catch (Exception e) {
-                    Toast.makeText(this, R.string.item_settings_icon_copy_failed, Toast.LENGTH_SHORT).show();
+                    Flash.show(this, R.string.item_settings_icon_copy_failed);
                     e.printStackTrace();
                 } finally {
                     if (fos != null) try {
@@ -1111,7 +1112,7 @@ public class Customize extends ResourceWrapperActivity implements
                 lock_screen = data.getIntExtra(API.SCREEN_PICKER_INTENT_EXTRA_SCREEN, Page.FIRST_DASHBOARD_PAGE);
                 showDialog(DIALOG_LOCK_SCREEN_WARNING);
             } else {
-                Toast.makeText(this, R.string.s_ls_s_c, Toast.LENGTH_SHORT).show();
+                Flash.show(this, R.string.s_ls_s_c);
                 lock_screen = Page.NONE;
             }
             mGlobalConfig.lockScreen = lock_screen;
@@ -1121,7 +1122,7 @@ public class Customize extends ResourceWrapperActivity implements
             if (resultCode == RESULT_OK) {
                 overlay_screen = data.getIntExtra(API.SCREEN_PICKER_INTENT_EXTRA_SCREEN, Page.FIRST_DASHBOARD_PAGE);
             } else {
-                Toast.makeText(this, R.string.ov_d, Toast.LENGTH_SHORT).show();
+                Flash.show(this, R.string.ov_d);
                 overlay_screen = Page.NONE;
             }
             mGlobalConfig.overlayScreen = overlay_screen;
@@ -2135,7 +2136,7 @@ public class Customize extends ResourceWrapperActivity implements
             mPage.reload();
 
             loadPage(mPagePath);
-            Toast.makeText(this, R.string.style_loaded, Toast.LENGTH_SHORT).show();
+            Flash.show(this, R.string.style_loaded);
         } catch (IOException e) {
             // pass
         }
@@ -2177,8 +2178,7 @@ public class Customize extends ResourceWrapperActivity implements
             String theme_name = to.getName();
             FileUtils.copyIcons(null, mPage.getIconDir(), "", theme_dir, theme_name);
 
-            Toast.makeText(this, R.string.style_saved, Toast.LENGTH_SHORT)
-                    .show();
+            Flash.show(this, R.string.style_saved);
         } catch (IOException e) {
             // pass
         } catch (JSONException e) {
@@ -2218,7 +2218,7 @@ public class Customize extends ResourceWrapperActivity implements
             @Override
             public void onPackApplied(boolean success) {
                 if (!success) {
-                    Toast.makeText(Customize.this, R.string.icon_pack_no_appfilter, Toast.LENGTH_SHORT).show();
+                    Flash.show(Customize.this, R.string.icon_pack_no_appfilter);
                 }
                 try {
                     dismissDialog(DIALOG_PROGRESS);
@@ -2368,7 +2368,7 @@ public class Customize extends ResourceWrapperActivity implements
     }
 
     private void showPreviewToast() {
-        Toast.makeText(this, R.string.preview_toast, Toast.LENGTH_SHORT).show();
+        Flash.show(this, R.string.preview_toast);
     }
 
     @Override

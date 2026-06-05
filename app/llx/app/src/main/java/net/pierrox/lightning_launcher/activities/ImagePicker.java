@@ -80,6 +80,7 @@ import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.data.Page;
 import net.pierrox.lightning_launcher.data.Utils;
 import net.pierrox.lightning_launcher.util.FilesHolder;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.LruCache;
 import net.pierrox.lightning_launcher.views.EditTextIme;
 import net.pierrox.lightning_launcher_extreme.R;
@@ -511,7 +512,7 @@ public class ImagePicker extends ResourceWrapperActivity implements AdapterView.
         ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
         ClipData clip = newPlainText("llx", clip_text);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(this, label, Toast.LENGTH_LONG).show();
+        Flash.show(this, label, Toast.LENGTH_LONG);
         return true;
     }
 
@@ -585,7 +586,7 @@ public class ImagePicker extends ResourceWrapperActivity implements AdapterView.
                 label_res = R.string.ip_search;
                 break;
         }
-        Toast.makeText(this, label_res, Toast.LENGTH_SHORT).show();
+        Flash.show(this, label_res);
         return true;
     }
 

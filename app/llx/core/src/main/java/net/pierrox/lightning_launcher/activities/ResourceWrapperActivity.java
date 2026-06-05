@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.R;
 import net.pierrox.lightning_launcher.configuration.SystemConfig;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.configuration.UiConfig;
 import net.pierrox.lightning_launcher.configuration.UiSlot;
 import net.pierrox.lightning_launcher.configuration.UiTheme;
@@ -156,7 +157,7 @@ public abstract class ResourceWrapperActivity extends AppCompatActivity {
         if(ok) {
             return true;
         } else {
-            Toast.makeText(this, errorToast, Toast.LENGTH_LONG).show();
+            Flash.show(this, errorToast, Toast.LENGTH_LONG);
             finish();
             return false;
         }

@@ -11,6 +11,8 @@ import android.graphics.Typeface;
 import android.util.SparseArray;
 import android.widget.Toast;
 
+import net.pierrox.lightning_launcher.util.Flash;
+
 import com.faendir.rhino_android.RhinoAndroidHelper;
 
 import net.dinglisch.android.tasker.TaskerIntent;
@@ -592,7 +594,7 @@ public class Lightning {
                 context.sendBroadcast(intent);
                 throw pending;
             } catch (IllegalStateException e) {
-                Toast.makeText(context, "cannot wait for Tasker result in this context, set 'synchronous' to false", Toast.LENGTH_SHORT).show();
+                Flash.show(context, "cannot wait for Tasker result in this context, set 'synchronous' to false");
                 return false;
             } finally {
                 org.mozilla.javascript.Context.exit();
@@ -660,13 +662,13 @@ public class Lightning {
                 throw pending;
             } catch (IllegalStateException e) {
                 // not called with continuation support
-                Toast.makeText(context, "cannot display \"" + message + "\" in this context", Toast.LENGTH_SHORT).show();
+                Flash.show(context, "cannot display \"" + message + "\" in this context");
                 return false;
             } finally {
                 org.mozilla.javascript.Context.exit();
             }
         } else {
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            Flash.show(context, message);
             return false;
         }
     }
@@ -679,7 +681,7 @@ public class Lightning {
      * @param text message to display
      */
     public void toast(String text) {
-        Toast.makeText(getScriptScreen().getContext(), text, Toast.LENGTH_LONG).show();
+        Flash.show(getScriptScreen().getContext(), text, Toast.LENGTH_LONG);
     }
 
     /**

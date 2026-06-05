@@ -10,6 +10,7 @@ import android.view.SurfaceView;
 import android.widget.Toast;
 
 import net.pierrox.lightning_launcher.configuration.PageConfig;
+import net.pierrox.lightning_launcher.util.Flash;
 
 import java.io.File;
 
@@ -69,7 +70,7 @@ public class NativeWallpaperView extends SurfaceView implements SurfaceHolder.Ca
                     try {
                         NativeImage.loadImage(mKey, file);
                     } catch(Throwable e) {
-                        Toast.makeText(getContext(), "desktop wallpaper too large", Toast.LENGTH_SHORT).show();
+                        Flash.show(getContext(), "desktop wallpaper too large");
                     }
     			}
     			NativeImage.drawImageWithColorOnSurface(mKey, mTintColor, mScaleType, getHolder().getSurface());

@@ -41,6 +41,7 @@ import com.readystatesoftware.systembartint.SystemBarTintManager;
 import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.R;
 import net.pierrox.lightning_launcher.api.ScreenIdentity;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.configuration.FolderConfig;
 import net.pierrox.lightning_launcher.configuration.GlobalConfig;
 import net.pierrox.lightning_launcher.configuration.ItemConfig;
@@ -346,21 +347,21 @@ public abstract class Screen implements ItemLayout.ItemLayoutListener, ItemView.
      * @param scriptExecutor
      */
     public void displayScriptPickImageDialog(ScriptExecutor scriptExecutor) {
-        Toast.makeText(mContext, "Unable to pick an image in this context.", Toast.LENGTH_SHORT).show();
+        Flash.show(mContext, "Unable to pick an image in this context.");
     }
 
     /**
      * Hook for the script executor
      */
     public void displayCropPickImageDialog(ScriptExecutor scriptExecutor, ImageBitmap image, boolean full_size) {
-        Toast.makeText(mContext, "Unable to crop an image in this context.", Toast.LENGTH_SHORT).show();
+        Flash.show(mContext, "Unable to crop an image in this context.");
     }
 
     /**
      * Hook for the script executor
      */
     public boolean startActivityForResultScript(ScriptExecutor scriptExecutor, Intent intent, int receiver_script_id, String token) {
-        Toast.makeText(mContext, "Unable to start an activity for result in this context.", Toast.LENGTH_SHORT).show();
+        Flash.show(mContext, "Unable to start an activity for result in this context.");
         return false;
     }
 
@@ -368,14 +369,14 @@ public abstract class Screen implements ItemLayout.ItemLayoutListener, ItemView.
      * What to do on activity start error
      */
     public void onShortcutLaunchError(Shortcut shortcut) {
-        Toast.makeText(mContext, "Unable to launch this item: " + shortcut.toString(), Toast.LENGTH_SHORT).show();
+        Flash.show(mContext, "Unable to launch this item: " + shortcut.toString());
     }
 
     /**
      * No LauncherApps host permission (Android 7.1)
      */
     public void onLauncherAppsNoHostPermission(ItemView itemView) {
-        Toast.makeText(mContext, R.string.as_no_hp_t, Toast.LENGTH_SHORT).show();
+        Flash.show(mContext, R.string.as_no_hp_t);
     }
 
     /**
@@ -385,7 +386,7 @@ public abstract class Screen implements ItemLayout.ItemLayoutListener, ItemView.
         if (msg == null) {
             msg = mContext.getString(R.string.as_nf);
         }
-        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+        Flash.show(mContext, msg);
     }
 
     /**
@@ -396,14 +397,14 @@ public abstract class Screen implements ItemLayout.ItemLayoutListener, ItemView.
         for (int m : msgs) {
             msg += "\n - " + getContext().getString(m);
         }
-        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+        Flash.show(mContext, msg);
     }
 
     /**
      * Fallback for future errors that have not specific handling
      */
     public void onUnhandledError(Error error) {
-        Toast.makeText(mContext, error.toString(), Toast.LENGTH_SHORT).show();
+        Flash.show(mContext, error.toString());
     }
 
     /**
@@ -424,7 +425,7 @@ public abstract class Screen implements ItemLayout.ItemLayoutListener, ItemView.
     }
 
     public void showAddItemDialog(ItemLayout il) {
-        Toast.makeText(mContext, "Unable to add an item in this context.", Toast.LENGTH_SHORT).show();
+        Flash.show(mContext, "Unable to add an item in this context.");
     }
 
     public ViewGroup getContentView() {

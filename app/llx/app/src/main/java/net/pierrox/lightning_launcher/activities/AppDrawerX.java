@@ -83,6 +83,7 @@ import net.pierrox.lightning_launcher.data.Utils;
 import net.pierrox.lightning_launcher.engine.LightningEngine;
 import net.pierrox.lightning_launcher.engine.Screen;
 import net.pierrox.lightning_launcher.util.AddItemDialog;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.PhoneUtils;
 import net.pierrox.lightning_launcher.views.EditTextIme;
 import net.pierrox.lightning_launcher.views.FolderView;
@@ -1329,7 +1330,7 @@ public class AppDrawerX extends Dashboard implements EditTextIme.OnEditTextImeLi
             case R.id.mi_add_to_launcher:
                 Shortcut shortcut = (Shortcut) mBubbleItemView.getItem();
                 addItemToLauncher(shortcut);
-                Toast.makeText(this, getString(R.string.app_added, shortcut.getLabel()), Toast.LENGTH_SHORT).show();
+                Flash.show(this, getString(R.string.app_added, shortcut.getLabel()));
                 break;
 
             case R.id.mi_kill:
@@ -1394,9 +1395,7 @@ public class AppDrawerX extends Dashboard implements EditTextIme.OnEditTextImeLi
     private void ensureMyDrawerMode() {
         if (mLayoutMode != Utils.LAYOUT_MODE_CUSTOM) {
             setLayoutMode(Utils.LAYOUT_MODE_CUSTOM, false, true);
-            Toast toast = Toast.makeText(this, R.string.ad_mdh, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER, 0, 0);
-            toast.show();
+            Flash.showCentered(this, getString(R.string.ad_mdh), Toast.LENGTH_SHORT);
         }
     }
 
@@ -1903,7 +1902,7 @@ public class AppDrawerX extends Dashboard implements EditTextIme.OnEditTextImeLi
 
         @Override
         protected FolderView openUserMenu(boolean prepareOnly) {
-            Toast.makeText(AppDrawerX.this, R.string.no_um_ad, Toast.LENGTH_SHORT).show();
+            Flash.show(AppDrawerX.this, R.string.no_um_ad);
             return null;
         }
 

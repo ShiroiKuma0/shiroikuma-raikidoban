@@ -1259,7 +1259,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                                 // pass
                             }
                         }
-                        Toast.makeText(this, ok ? R.string.ls_ok : R.string.ls_ko, Toast.LENGTH_SHORT).show();
+                        Flash.show(this, ok ? R.string.ls_ok : R.string.ls_ko);
                         break;
 
                     case REQUEST_FOR_SCRIPT:
@@ -1303,7 +1303,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                                         }
                                         copied = true;
                                     } catch (Throwable e) {
-                                        Toast.makeText(this, R.string.item_settings_icon_copy_failed, Toast.LENGTH_SHORT).show();
+                                        Flash.show(this, R.string.item_settings_icon_copy_failed);
                                     } finally {
                                         if (fos != null) try {
                                             fos.close();
@@ -1379,7 +1379,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         if (requestCode == REQUEST_PERMISSION_FONT_PICKER) {
             // should be transmitted to the CustomizeItemView instance
             if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                Toast.makeText(this, R.string.pr_f2, Toast.LENGTH_LONG).show();
+                Flash.show(this, R.string.pr_f2, Toast.LENGTH_LONG);
             }
         } else if (requestCode == REQUEST_PERMISSION_BASE) {
             if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
@@ -1711,7 +1711,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
 
             case R.id.mi_kill: {
                     if (!checkPermissions(new String[]{Manifest.permission.KILL_BACKGROUND_PROCESSES}, new int[]{R.string.pr_r9}, REQUEST_PERMISSION_BASE)) {
-                        Toast.makeText(this, R.string.pr_f5, Toast.LENGTH_LONG).show();
+                        Flash.show(this, R.string.pr_f5, Toast.LENGTH_LONG);
                         break;
                     }
                     final ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
@@ -1730,7 +1730,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                         }
                     }
                     if (killMe) {
-                        Toast.makeText(this, "I'll be back!", Toast.LENGTH_SHORT).show();
+                        Flash.show(this, "I'll be back!");
                         mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -1744,7 +1744,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                                 am.getMemoryInfo(mi);
                                 int freed = (int) ((mi.availMem - a) / 1048576L);
                                 String msg = freed > 0 ? getString(R.string.killed_freed, freed) : getString(R.string.killed);
-                                Toast.makeText(Dashboard.this, msg, Toast.LENGTH_SHORT).show();
+                                Flash.show(Dashboard.this, msg);
                             }
                         }, 1000);
                     }
@@ -1993,7 +1993,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 break;
 
             case R.id.mi_if:
-                Toast.makeText(this, "Not implemented yet", Toast.LENGTH_SHORT).show();
+                Flash.show(this, "Not implemented yet");
                 break;
 
             case R.id.mi_ic:
@@ -2166,9 +2166,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                         msg_res = R.string.mi_nos5;
                         break;
                 }
-                Toast toast = Toast.makeText(this, msg_res, Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
+                Flash.showCentered(this, getString(msg_res), Toast.LENGTH_LONG);
                 if (mNoScriptCounter == 5) {
                     ScriptManager sm = mEngine.getScriptManager();
                     Script easter_egg = sm.createScriptForFile(getString(R.string.mi_nost), "/" + getPackageName().replace('.', '/'));
@@ -2315,7 +2313,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
 
     private void menuActionCopyStyle() {
         mCopyStyleFromItem = mEditItemLayout.getMasterSelectedItem();
-        Toast.makeText(this, R.string.st_d, Toast.LENGTH_SHORT).show();
+        Flash.show(this, R.string.st_d);
     }
 
     private void menuActionPasteStyle() {
@@ -4657,7 +4655,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             }
         }
         if (list.isEmpty()) {
-            Toast.makeText(this, R.string.tasker_reinit_none, Toast.LENGTH_SHORT).show();
+            Flash.show(this, R.string.tasker_reinit_none);
             return;
         }
         mTaskerReinitQueue = list;
@@ -4752,7 +4750,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 cm.setPrimaryClip(android.content.ClipData.newPlainText(getString(R.string.tasker_widget_name_title), name));
             }
             if (!net.pierrox.lightning_launcher.util.TaskerWidgetAccessibilityService.isConnected()) {
-                Toast.makeText(this, getString(R.string.tasker_reinit_paste, name), Toast.LENGTH_LONG).show();
+                Flash.show(this, getString(R.string.tasker_reinit_paste, name), Toast.LENGTH_LONG);
             }
             try {
                 startActivityForResult(intent, REQUEST_TASKER_REINIT_CONFIGURE);
@@ -4764,7 +4762,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         mTaskerReinitQueue = null;
         net.pierrox.lightning_launcher.util.TaskerWidgetAccessibilityService.disarm();
         LLApp.get().getAppEngine().saveData();
-        Toast.makeText(this, R.string.tasker_reinit_done, Toast.LENGTH_SHORT).show();
+        Flash.show(this, R.string.tasker_reinit_done);
     }
 
     /** Re-bind a widget whose appWidgetId is no longer valid (post-restore) to its saved provider,
@@ -5260,7 +5258,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         }
 
         if (shortcuts == null || shortcuts.size() == 0) {
-            Toast.makeText(this, R.string.as_no_s, Toast.LENGTH_SHORT).show();
+            Flash.show(this, R.string.as_no_s);
         } else {
             openBubbleAppShortcuts(itemView, shortcuts);
         }
@@ -6304,7 +6302,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                         if (mDraggingHandle) {
                             mDraggingHandle = false;
                         } else {
-                            Toast.makeText(this, mEditPropertiesTitle.getText(), Toast.LENGTH_LONG).show();
+                            Flash.show(this, mEditPropertiesTitle.getText(), Toast.LENGTH_LONG);
                         }
                     }
                     break;
@@ -6364,9 +6362,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             if (label != null) {
                 int[] location = new int[2];
                 v.getLocationOnScreen(location);
-                Toast toast = Toast.makeText(Dashboard.this, label, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP | Gravity.LEFT, location[0], location[1]);
-                toast.show();
+                Flash.showAt(Dashboard.this, label, Toast.LENGTH_SHORT, Gravity.TOP | Gravity.LEFT, location[0], location[1]);
             }
             return true;
         }
@@ -6400,7 +6396,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     @Override
     public void onFirstTimeInitEnd(boolean success, boolean was_import, final Item all_apps_item) {
         mSetupInProgress = false;
-        Toast.makeText(Dashboard.this, success ? R.string.init_ok : R.string.init_ko, Toast.LENGTH_LONG).show();
+        Flash.show(Dashboard.this, success ? R.string.init_ok : R.string.init_ko, Toast.LENGTH_LONG);
         mScreen.getDesktopView().findViewById(R.id.setup_progress).setVisibility(View.GONE);
         setPagerPage(mGlobalConfig.homeScreen, Screen.PAGE_DIRECTION_HINT_AUTO);
 
@@ -7980,7 +7976,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                         PageConfig c = il.getPage().config;
                         if (mItemLongTappedInNormalMode == null && (c.wrapX || c.wrapY) && (mSystemConfig.hints & SystemConfig.HINT_WRAP) == 0) {
                             il.setAllowWrap(false);
-                            Toast.makeText(mContext, R.string.h_w, Toast.LENGTH_SHORT).show();
+                            Flash.show(mContext, R.string.h_w);
                         }
                         for (ItemView itemView : selectedItems) {
                             itemView.prepareDraggedBitmap();
@@ -8312,7 +8308,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
 
         @Override
         public void onItemViewAction(ItemView itemView, int action) {
-            Toast.makeText(mContext, R.string.nly, Toast.LENGTH_SHORT).show();
+            Flash.show(mContext, R.string.nly);
         }
 
         @Override

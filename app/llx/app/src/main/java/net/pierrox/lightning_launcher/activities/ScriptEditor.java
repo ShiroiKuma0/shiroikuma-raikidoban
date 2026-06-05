@@ -97,6 +97,7 @@ import net.pierrox.lightning_launcher.script.api.RectL;
 import net.pierrox.lightning_launcher.script.api.StopPoint;
 import net.pierrox.lightning_launcher.util.FileAndDirectoryPickerDialog;
 import net.pierrox.lightning_launcher.util.FileProvider;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.Indentation;
 import net.pierrox.lightning_launcher.util.Search;
 import net.pierrox.lightning_launcher_extreme.BuildConfig;
@@ -512,7 +513,7 @@ public class ScriptEditor extends ResourceWrapperActivity implements View.OnClic
                 goToLine = intent.getIntExtra(INTENT_EXTRA_SCRIPT_LINE, -1);
             }
             if (mScript == null && id != Script.NO_ID) {
-                Toast.makeText(this, R.string.sc_deleted, Toast.LENGTH_SHORT).show();
+                Flash.show(this, R.string.sc_deleted);
                 goToLine = 1;
             }
         } else if (savedInstanceState != null) {
@@ -583,7 +584,7 @@ public class ScriptEditor extends ResourceWrapperActivity implements View.OnClic
         }
 
         if (!engine.getGlobalConfig().runScripts) {
-            Toast.makeText(this, R.string.rs_w, Toast.LENGTH_SHORT).show();
+            Flash.show(this, R.string.rs_w);
         }
     }
 
@@ -890,7 +891,7 @@ public class ScriptEditor extends ResourceWrapperActivity implements View.OnClic
                 try {
                     startActivityForResult(intent, REQUEST_EDIT_SCRIPT);
                 } catch (ActivityNotFoundException e) {
-                    Toast.makeText(this, "No external editor", Toast.LENGTH_SHORT).show();
+                    Flash.show(this, "No external editor");
                 }
                 break;
 

@@ -68,6 +68,7 @@ import net.pierrox.lightning_launcher.engine.Screen;
 import net.pierrox.lightning_launcher.script.Script;
 import net.pierrox.lightning_launcher.util.AnimatedGifEncoder;
 import net.pierrox.lightning_launcher.util.AnimationDecoder;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.views.BoxLayout;
 import net.pierrox.lightning_launcher.views.Graphics;
 import net.pierrox.lightning_launcher.views.ItemLayout;
@@ -1517,7 +1518,7 @@ public class Utils {
             context.startActivity(intent);
             return true;
         } catch (Exception e) {
-            if (msg_id != 0) Toast.makeText(context, msg_id, Toast.LENGTH_SHORT).show();
+            if (msg_id != 0) Flash.show(context, msg_id, Toast.LENGTH_SHORT);
             return false;
         }
     }

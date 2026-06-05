@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.widget.Toast;
 
+import net.pierrox.lightning_launcher.util.Flash;
+
 /**
  * The Android object gives access to some platform services.
  *
@@ -32,7 +34,7 @@ public class Android {
      */
     @SuppressLint("ShowToast")
     public Toast makeNewToast(String text, boolean isShort) {
-        Toast t = Toast.makeText(mContext, text, isShort ? android.widget.Toast.LENGTH_SHORT : android.widget.Toast.LENGTH_LONG);
+        Toast t = Flash.makeToast(mContext, text, isShort ? android.widget.Toast.LENGTH_SHORT : android.widget.Toast.LENGTH_LONG);
         return t;
     }
 }

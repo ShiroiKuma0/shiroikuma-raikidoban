@@ -11,6 +11,7 @@ import android.widget.Toast;
 import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.R;
 import net.pierrox.lightning_launcher.api.ScreenIdentity;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.configuration.GlobalConfig;
 import net.pierrox.lightning_launcher.data.EventAction;
 import net.pierrox.lightning_launcher.script.Script;
@@ -72,7 +73,7 @@ public class MultiPurposeTransparentActivity extends ResourceWrapperActivity {
                         // should pass the base dir of the engine in the intent and use it instead of the default engine
                         LLApp llApp = LLApp.get();
                         llApp.getAppEngine().getScriptManager().getOrLoadScript(script_id).setFlag(Script.FLAG_DISABLED, true);
-                        Toast.makeText(llApp, R.string.sc_disable_toast, Toast.LENGTH_LONG).show();
+                        Flash.show(llApp, R.string.sc_disable_toast, Toast.LENGTH_LONG);
                         finish();
                     }
                 });

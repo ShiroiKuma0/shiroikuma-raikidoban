@@ -102,6 +102,7 @@ import net.pierrox.lightning_launcher.script.Script;
 import net.pierrox.lightning_launcher.util.BindingEditDialog;
 import net.pierrox.lightning_launcher.util.FileAndDirectoryPickerDialog;
 import net.pierrox.lightning_launcher.util.FilesHolder;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.PhoneUtils;
 import net.pierrox.lightning_launcher.util.ScriptPickerDialog;
 import net.pierrox.lightning_launcher_extreme.R;
@@ -1679,7 +1680,7 @@ public class CustomizeItemView extends MyViewPager implements LLPreferenceListVi
                     try {
                         new SimpleDateFormat(dynamicTextDateFormat);
                     } catch (IllegalArgumentException e) {
-                        Toast.makeText(getContext(), R.string.dt_format_error, Toast.LENGTH_SHORT).show();
+                        Flash.show(getContext(), R.string.dt_format_error);
                     }
                     break;
 
@@ -1687,7 +1688,7 @@ public class CustomizeItemView extends MyViewPager implements LLPreferenceListVi
                     try {
                         new DecimalFormat(mItemDtCountFormat.getValue());
                     } catch (IllegalArgumentException e) {
-                        Toast.makeText(getContext(), R.string.dt_format_error, Toast.LENGTH_SHORT).show();
+                        Flash.show(getContext(), R.string.dt_format_error);
                     }
                     break;
             }

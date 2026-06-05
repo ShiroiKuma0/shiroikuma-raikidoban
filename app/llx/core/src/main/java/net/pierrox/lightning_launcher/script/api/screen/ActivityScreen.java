@@ -9,6 +9,7 @@ import net.pierrox.lightning_launcher.script.api.Image;
 import net.pierrox.lightning_launcher.script.api.ImageBitmap;
 import net.pierrox.lightning_launcher.script.api.Lightning;
 import net.pierrox.lightning_launcher.script.api.Script;
+import net.pierrox.lightning_launcher.util.Flash;
 
 import org.mozilla.javascript.ContinuationPending;
 import org.mozilla.javascript.Function;
@@ -59,7 +60,7 @@ public class ActivityScreen extends Screen {
             throw pending;
         } catch (IllegalStateException e) {
             // not called with continuation support
-            android.widget.Toast.makeText(getContext(), "cannot display color picker in this context", android.widget.Toast.LENGTH_SHORT).show();
+            Flash.show(getContext(), "cannot display color picker in this context");
             return color;
         } finally {
             org.mozilla.javascript.Context.exit();
@@ -89,7 +90,7 @@ public class ActivityScreen extends Screen {
             throw pending;
         } catch (IllegalStateException e) {
             // not called with continuation support
-            android.widget.Toast.makeText(getContext(), "cannot display value picker in this context", android.widget.Toast.LENGTH_SHORT).show();
+            Flash.show(getContext(), "cannot display value picker in this context");
             return value;
         } finally {
             org.mozilla.javascript.Context.exit();
@@ -112,7 +113,7 @@ public class ActivityScreen extends Screen {
             throw pending;
         } catch (IllegalStateException e) {
             // not called with continuation support
-            android.widget.Toast.makeText(getContext(), "cannot display image picker in this context", android.widget.Toast.LENGTH_SHORT).show();
+            Flash.show(getContext(), "cannot display image picker in this context");
             return null;
         } finally {
             org.mozilla.javascript.Context.exit();
@@ -134,7 +135,7 @@ public class ActivityScreen extends Screen {
             throw pending;
         } catch (IllegalStateException e) {
             // not called with continuation support
-            android.widget.Toast.makeText(getContext(), "cannot display image cropper in this context", android.widget.Toast.LENGTH_SHORT).show();
+            Flash.show(getContext(), "cannot display image cropper in this context");
             return null;
         } finally {
             org.mozilla.javascript.Context.exit();

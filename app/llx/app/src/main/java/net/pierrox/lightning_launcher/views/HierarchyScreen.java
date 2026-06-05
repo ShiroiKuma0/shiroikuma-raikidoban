@@ -53,6 +53,7 @@ import net.pierrox.lightning_launcher.data.Page;
 import net.pierrox.lightning_launcher.data.Utils;
 import net.pierrox.lightning_launcher.engine.LightningEngine;
 import net.pierrox.lightning_launcher.engine.Screen;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher_extreme.R;
 
 import java.util.ArrayList;
@@ -120,7 +121,7 @@ public class HierarchyScreen {
                         } else {
                             name = Utils.formatItemName(which.item, 0, 0);
                         }
-                        Toast.makeText(context, name, Toast.LENGTH_SHORT).show();
+                        Flash.show(context, name);
                         return;
                     }
 
@@ -510,9 +511,7 @@ public class HierarchyScreen {
             if (label_res != 0) {
                 int[] location = new int[2];
                 v.getLocationOnScreen(location);
-                Toast toast = Toast.makeText(mContext, label_res, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP | Gravity.LEFT, location[0], location[1]);
-                toast.show();
+                Flash.showAt(mContext, mContext.getString(label_res), Toast.LENGTH_SHORT, Gravity.TOP | Gravity.LEFT, location[0], location[1]);
             }
             return true;
         }

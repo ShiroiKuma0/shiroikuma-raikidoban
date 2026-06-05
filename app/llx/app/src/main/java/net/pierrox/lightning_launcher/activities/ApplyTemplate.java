@@ -64,6 +64,7 @@ import net.pierrox.lightning_launcher.data.BackupRestoreTool;
 import net.pierrox.lightning_launcher.data.FileUtils;
 import net.pierrox.lightning_launcher.data.Item;
 import net.pierrox.lightning_launcher.util.BackupFolder;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.data.Page;
 import net.pierrox.lightning_launcher.data.PageProcessor;
 import net.pierrox.lightning_launcher.data.Utils;
@@ -358,7 +359,7 @@ public class ApplyTemplate extends ResourceWrapperActivity {
             protected void onPostExecute(JSONObject manifest) {
                 mDialog.dismiss();
                 if (manifest == null) {
-                    Toast.makeText(ApplyTemplate.this, R.string.tmpl_check_e, Toast.LENGTH_SHORT).show();
+                    Flash.show(ApplyTemplate.this, R.string.tmpl_check_e);
                     finish();
                 } else {
                     try {
@@ -639,7 +640,7 @@ public class ApplyTemplate extends ResourceWrapperActivity {
 
                     default:
                         mDialog.dismiss();
-                        Toast.makeText(ApplyTemplate.this, result == 1 ? R.string.backup_error : R.string.apply_tmpl_e, Toast.LENGTH_SHORT).show();
+                        Flash.show(ApplyTemplate.this, result == 1 ? R.string.backup_error : R.string.apply_tmpl_e);
                         finish();
                         break;
                 }

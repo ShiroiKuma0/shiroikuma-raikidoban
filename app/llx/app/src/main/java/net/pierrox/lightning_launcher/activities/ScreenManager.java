@@ -72,6 +72,7 @@ import net.pierrox.lightning_launcher.data.Shortcut;
 import net.pierrox.lightning_launcher.data.Utils;
 import net.pierrox.lightning_launcher.engine.LightningEngine;
 import net.pierrox.lightning_launcher.util.FilesHolder;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.PhoneUtils;
 import net.pierrox.lightning_launcher.views.ItemLayout;
 import net.pierrox.lightning_launcher.views.item.ItemView;
@@ -408,7 +409,7 @@ public class ScreenManager extends ResourceWrapperActivity implements OnClickLis
 
                     updateScreenShortcuts(screen, true, false, null);
                 } catch (Exception e) {
-                    Toast.makeText(this, R.string.item_settings_icon_copy_failed, Toast.LENGTH_SHORT).show();
+                    Flash.show(this, R.string.item_settings_icon_copy_failed);
                     e.printStackTrace();
                 } finally {
                     if (fos != null) try {
@@ -616,9 +617,7 @@ public class ScreenManager extends ResourceWrapperActivity implements OnClickLis
         if (label_res != 0) {
             int[] location = new int[2];
             view.getLocationOnScreen(location);
-            Toast toast = Toast.makeText(this, label_res, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP | Gravity.LEFT, location[0], location[1]);
-            toast.show();
+            Flash.showAt(this, getString(label_res), Toast.LENGTH_SHORT, Gravity.TOP | Gravity.LEFT, location[0], location[1]);
         }
         return true;
     }

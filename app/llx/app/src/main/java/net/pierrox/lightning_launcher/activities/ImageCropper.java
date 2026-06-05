@@ -44,6 +44,7 @@ import android.widget.Toast;
 
 import net.pierrox.lightning_launcher.data.Utils;
 import net.pierrox.lightning_launcher.util.FilesHolder;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.views.CropperView;
 import net.pierrox.lightning_launcher_extreme.R;
 
@@ -140,7 +141,7 @@ public class ImageCropper extends ResourceWrapperActivity implements View.OnClic
 //                          }
                                 return true;
                             } catch (Throwable t) {
-                                Toast.makeText(ImageCropper.this, R.string.tr_eu, Toast.LENGTH_SHORT).show();
+                                Flash.show(ImageCropper.this, R.string.tr_eu);
                                 return false;
                             } finally {
                                 if (fos != null) try {
@@ -171,7 +172,7 @@ public class ImageCropper extends ResourceWrapperActivity implements View.OnClic
     private void done(boolean success) {
         setResult(success ? RESULT_OK : RESULT_CANCELED);
         if (!success) {
-            Toast.makeText(this, R.string.tr_eu, Toast.LENGTH_SHORT).show();
+            Flash.show(this, R.string.tr_eu);
         }
         finish();
     }

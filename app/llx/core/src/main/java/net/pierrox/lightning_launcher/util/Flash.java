@@ -53,8 +53,29 @@ public final class Flash {
         show(ctx, ctx.getString(textResId), Toast.LENGTH_SHORT);
     }
 
+    public static void show(Context ctx, int textResId, int duration) {
+        show(ctx, ctx.getString(textResId), duration);
+    }
+
     public static void show(Context ctx, CharSequence text, int duration) {
-        make(ctx, text, duration).show();
+        makeToast(ctx, text, duration).show();
+    }
+
+    /** Like {@link #show}, but centred on the screen instead of along the bottom edge. */
+    public static void showCentered(Context ctx, CharSequence text, int duration) {
+        Toast toast = makeToast(ctx, text, duration);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+    }
+
+    /**
+     * Like {@link #show}, but positioned with an explicit {@link Gravity} and pixel offset — e.g. to
+     * anchor a label flash to a long-pressed toolbar button via its on-screen location.
+     */
+    public static void showAt(Context ctx, CharSequence text, int duration, int gravity, int xOffset, int yOffset) {
+        Toast toast = makeToast(ctx, text, duration);
+        toast.setGravity(gravity, xOffset, yOffset);
+        toast.show();
     }
 
     /**
@@ -65,13 +86,18 @@ public final class Flash {
      * tri-fold's different fold widths.
      */
     public static void showRaised(Context ctx, CharSequence text, int duration) {
-        Toast toast = make(ctx, text, duration);
+        Toast toast = makeToast(ctx, text, duration);
         int yOffset = Math.round(ctx.getResources().getDisplayMetrics().heightPixels * 0.2f);
         toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, yOffset);
         toast.show();
     }
 
-    private static Toast make(Context ctx, CharSequence text, int duration) {
+    /**
+     * Build a themed (black-yellow) toast in the same scheme as {@link #show} but without showing it —
+     * for callers that need the {@link Toast} object itself (e.g. the scripting API's
+     * {@code Android.makeNewToast}, which returns the toast for the script to configure and show).
+     */
+    public static Toast makeToast(Context ctx, CharSequence text, int duration) {
         float d = ctx.getResources().getDisplayMetrics().density;
         int fg = UiTheme.color(UiSlot.DIALOG_TEXT);
         int bgColor = UiTheme.color(UiSlot.DIALOG_BG);

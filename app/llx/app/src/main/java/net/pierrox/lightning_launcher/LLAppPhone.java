@@ -39,6 +39,7 @@ import net.pierrox.lightning_launcher.engine.Screen;
 import net.pierrox.lightning_launcher.overlay.WindowService;
 import net.pierrox.lightning_launcher.script.Script;
 import net.pierrox.lightning_launcher.util.EmptyService;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.MPReceiver;
 
 
@@ -104,7 +105,7 @@ public class LLAppPhone extends LLApp {
         if (LockScreen.sThis != null) {
             LockScreen.sThis.unlock(restore_previous_task);
         } else {
-            Toast.makeText(this, net.pierrox.lightning_launcher_extreme.R.string.nly, Toast.LENGTH_SHORT).show();
+            Flash.show(this, net.pierrox.lightning_launcher_extreme.R.string.nly);
         }
     }
 

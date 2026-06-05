@@ -11,6 +11,7 @@ import net.pierrox.android.lsvg.SvgPath;
 import net.pierrox.android.lsvg.SvgSvg;
 import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.configuration.ItemConfig;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.configuration.PageConfig;
 import net.pierrox.lightning_launcher.configuration.ShortcutConfig;
 import net.pierrox.lightning_launcher.configuration.ShortcutConfigStylable;
@@ -499,7 +500,7 @@ public class PropertyEditor {
                     if (new_index >= 0 && new_index < size) {
                         page.setItemZIndex(item, new_index);
                     } else {
-                        Toast.makeText(LLApp.get().getActiveScreen().getContext(), "z-index out of bounds for " + item + " (" + new_index + " not between 0 and " + size + ")", Toast.LENGTH_SHORT).show();
+                        Flash.show(LLApp.get().getActiveScreen().getContext(), "z-index out of bounds for " + item + " (" + new_index + " not between 0 and " + size + ")");
                     }
                 } else if (key.equals(Property.PROP_ITEM_ALPHA)) {
                     int a = (Integer) value;

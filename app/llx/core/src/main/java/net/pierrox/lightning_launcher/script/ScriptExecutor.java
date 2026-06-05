@@ -61,6 +61,7 @@ import net.pierrox.lightning_launcher.script.api.Menu;
 import net.pierrox.lightning_launcher.script.api.Property;
 import net.pierrox.lightning_launcher.script.api.RectL;
 import net.pierrox.lightning_launcher.util.AnimationDecoder;
+import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.views.Graphics;
 import net.pierrox.lightning_launcher.views.ItemLayout;
 import net.pierrox.lightning_launcher.views.SharedAsyncGraphicsDrawable;
@@ -343,7 +344,7 @@ public class ScriptExecutor {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     mCurrentScriptDialog = false;
                     mCurrentScript.setFlag(Script.FLAG_DISABLED, true);
-                    Toast.makeText(context, R.string.sc_disable_toast, Toast.LENGTH_LONG).show();
+                    Flash.show(context, R.string.sc_disable_toast, Toast.LENGTH_LONG);
                 }
             });
             builder.setCancelable(false);
@@ -406,7 +407,7 @@ public class ScriptExecutor {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     mCurrentScriptDialog = false;
                     script.setFlag(Script.FLAG_DISABLED, true);
-                    Toast.makeText(context, R.string.sc_disable_toast, Toast.LENGTH_LONG).show();
+                    Flash.show(context, R.string.sc_disable_toast, Toast.LENGTH_LONG);
                     continuePendingContinuation(pending, input == null ? false : null);
                 }
             });
