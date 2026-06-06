@@ -9,7 +9,8 @@ public enum UiGroup {
     DIALOGS(R.string.llui_group_dialogs),
     SETTINGS(R.string.llui_group_settings),
     TOOLBARS(R.string.llui_group_toolbars),
-    BUTTONS(R.string.llui_group_buttons);
+    BUTTONS(R.string.llui_group_buttons),
+    GEOMETRY(R.string.llui_group_geometry);
 
     public final int labelRes;
 

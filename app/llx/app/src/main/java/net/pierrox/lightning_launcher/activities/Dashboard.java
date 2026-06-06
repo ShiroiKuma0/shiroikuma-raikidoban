@@ -144,6 +144,7 @@ import net.pierrox.lightning_launcher.data.LightningIntent;
 import net.pierrox.lightning_launcher.util.ActionsOverviewDialog;
 import net.pierrox.lightning_launcher.util.BackupFolder;
 import net.pierrox.lightning_launcher.util.Flash;
+import net.pierrox.lightning_launcher.util.GeometryBoxStyler;
 import net.pierrox.lightning_launcher.util.ScriptPickerDialog;
 import net.pierrox.lightning_launcher.data.Page;
 import net.pierrox.lightning_launcher.data.PageIndicator;
@@ -3133,6 +3134,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             case R.id.gb_hp:
             case R.id.gb_vm:
             case R.id.gb_vp:
+                // Flash the help text, then keep the existing hold-to-repeat behaviour.
+                Flash.show(this, getGeometryStepDescription(view_id));
                 mUndoStack.storeGroupStart();
                 boolean masterOnGrid = mEditItemLayout.getMasterSelectedItem().getItemConfig().onGrid;
                 for (ItemView itemView : getSelectedItemViews()) {
@@ -3145,9 +3148,29 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 mGeometryRepeat.run();
                 return false;
 
+            case R.id.gb_e1:
+            case R.id.gb_e2:
+                Flash.show(this, getGeometryTileDescription(view_id));
+                return true;
+
             case R.id.gb_m:
-                mGeometryMode = (mGeometryMode == Item.GEOMETRY_CTRL_SIZE ? Item.GEOMETRY_CTRL_SKEW : mGeometryMode - 1);
-                updateGeometryBox();
+                Flash.show(this, R.string.gb_desc_mode);
+                return true;
+
+            case R.id.move_bottom:
+                Flash.show(this, R.string.gb_desc_to_back);
+                return true;
+
+            case R.id.move_down:
+                Flash.show(this, R.string.gb_desc_backward);
+                return true;
+
+            case R.id.move_up:
+                Flash.show(this, R.string.gb_desc_forward);
+                return true;
+
+            case R.id.move_top:
+                Flash.show(this, R.string.gb_desc_to_front);
                 return true;
 
             default:
@@ -5956,8 +5979,10 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             mGeometryBox.setOnTouchListener(this);
             mGeometryEdit1 = mGeometryBox.findViewById(R.id.gb_e1);
             mGeometryEdit1.setOnClickListener(this);
+            mGeometryEdit1.setOnLongClickListener(this);
             mGeometryEdit2 = mGeometryBox.findViewById(R.id.gb_e2);
             mGeometryEdit2.setOnClickListener(this);
+            mGeometryEdit2.setOnLongClickListener(this);
             mGeometryBox.findViewById(R.id.gb_hm).setOnClickListener(this);
             mGeometryBox.findViewById(R.id.gb_hm).setOnLongClickListener(this);
             mGeometryBox.findViewById(R.id.gb_hp).setOnClickListener(this);
@@ -5967,16 +5992,38 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             mGeometryBox.findViewById(R.id.gb_vp).setOnClickListener(this);
             mGeometryBox.findViewById(R.id.gb_vp).setOnLongClickListener(this);
             mGeometryBox.findViewById(R.id.gb_m).setOnClickListener(this);
+            mGeometryBox.findViewById(R.id.gb_m).setOnLongClickListener(this);
             mGeometryMode = Item.GEOMETRY_CTRL_SIZE;
 
             mGeometryBox.findViewById(R.id.move_bottom).setOnClickListener(this);
+            mGeometryBox.findViewById(R.id.move_bottom).setOnLongClickListener(this);
             mGeometryBox.findViewById(R.id.move_down).setOnClickListener(this);
+            mGeometryBox.findViewById(R.id.move_down).setOnLongClickListener(this);
             mGeometryBox.findViewById(R.id.move_up).setOnClickListener(this);
+            mGeometryBox.findViewById(R.id.move_up).setOnLongClickListener(this);
             mGeometryBox.findViewById(R.id.move_top).setOnClickListener(this);
+            mGeometryBox.findViewById(R.id.move_top).setOnLongClickListener(this);
         }
         mGeometryBox.setVisibility(View.VISIBLE);
+        // Re-style on every show so edits made in 「白い熊 雷起動盤 UI」 apply when the box reopens.
+        GeometryBoxStyler.style(mGeometryBox);
         adjustGeometryBoxPosition();
         updateGeometryBox();
+    }
+
+    // Long-tap help text for a value tile (gb_e1/gb_e2). Mode-aware: the label tracks the current mode
+    // (Width/Height, Left/Top, Angle, Scale X/Y, Skew X/Y).
+    private CharSequence getGeometryTileDescription(int geometry_edit) {
+        return getString(R.string.gb_desc_tile, getGeometryEditTitle(geometry_edit));
+    }
+
+    // Long-tap help text for a +/- button. Horizontal buttons act on the first value (gb_e1), vertical on
+    // the second (gb_e2); hm/vm decrease, hp/vp increase. Label is mode-aware via getGeometryEditTitle().
+    private CharSequence getGeometryStepDescription(int view_id) {
+        boolean increase = view_id == R.id.gb_hp || view_id == R.id.gb_vp;
+        boolean horizontal = view_id == R.id.gb_hm || view_id == R.id.gb_hp;
+        String label = getGeometryEditTitle(horizontal ? R.id.gb_e1 : R.id.gb_e2);
+        return getString(increase ? R.string.gb_desc_inc : R.string.gb_desc_dec, label);
     }
 
     private void hideGeometryBox() {

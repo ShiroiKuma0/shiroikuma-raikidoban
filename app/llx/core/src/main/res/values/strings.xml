@@ -769,6 +769,14 @@
 <string name="gb_sy">Scale Y</string>
 <string name="gb_kx">Skew X</string>
 <string name="gb_ky">Skew Y</string>
+<string name="gb_desc_tile">%1$s — tap to type an exact value.</string>
+<string name="gb_desc_inc">Increase %1$s by one step. Hold to repeat.</string>
+<string name="gb_desc_dec">Decrease %1$s by one step. Hold to repeat.</string>
+<string name="gb_desc_mode">Switch what these controls edit: size, position, rotation, scale, skew.</string>
+<string name="gb_desc_to_back">Send to back — behind all other elements.</string>
+<string name="gb_desc_backward">Send backward one layer.</string>
+<string name="gb_desc_forward">Bring forward one layer.</string>
+<string name="gb_desc_to_front">Bring to front — in front of all other elements.</string>
 <string name="mi_geometry">Geometry editor</string>
 
 <!-- added 134 -->
@@ -1138,6 +1146,7 @@
     <string name="llui_group_settings">Settings &amp; Customize</string>
     <string name="llui_group_toolbars">Toolbars &amp; bars</string>
     <string name="llui_group_buttons">Buttons</string>
+    <string name="llui_group_geometry">Geometry box</string>
     <string name="llui_background">Background</string>
     <string name="llui_text">Text &amp; default font</string>
     <string name="llui_accent">Accent</string>
@@ -1152,6 +1161,26 @@
     <string name="llui_button_bg">Button background</string>
     <string name="llui_button_text">Button text</string>
     <string name="llui_button_border">Button border</string>
+    <string name="llui_geom_sub_panel">Box</string>
+    <string name="llui_geom_sub_tiles">Top tiles</string>
+    <string name="llui_geom_sub_cross">Move cross (+/−)</string>
+    <string name="llui_geom_sub_zorder">Layer buttons</string>
+    <string name="llui_geom_panel_bg">Box background</string>
+    <string name="llui_geom_panel_border">Box border</string>
+    <string name="llui_geom_panel_width">Box width</string>
+    <string name="llui_geom_tile_bg">Tile background</string>
+    <string name="llui_geom_tile_border">Tile border</string>
+    <string name="llui_geom_tile_text">Tile text</string>
+    <string name="llui_geom_tile_size">Tile size</string>
+    <string name="llui_geom_cross_bg">Cross background</string>
+    <string name="llui_geom_cross_border">Cross border</string>
+    <string name="llui_geom_cross_glyph">Cross +/− colour</string>
+    <string name="llui_geom_cross_size">Cross button size</string>
+    <string name="llui_geom_zorder_bg">Layer button background</string>
+    <string name="llui_geom_zorder_border">Layer button border</string>
+    <string name="llui_geom_zorder_icon">Layer icon colour</string>
+    <string name="llui_geom_zorder_size">Layer button size</string>
+    <string name="llui_geom_auto">Auto</string>
     <string name="llui_pref_title">Title</string>
     <string name="llui_pref_summary">Summary</string>
     <string name="llui_pref_category">Category heading</string>

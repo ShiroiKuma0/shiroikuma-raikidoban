@@ -52,7 +52,23 @@ public enum UiSlot {
     // corner RADIUS (see UiConfig); width 0 = no border, radius 0 = square. ---
     BUTTON_BG("llui_button_bg", UiGroup.BUTTONS, R.string.llui_button_bg, false, false, "llui_background", 0),
     BUTTON_TEXT("llui_button_text", UiGroup.BUTTONS, R.string.llui_button_text, false, true, "llui_text", 0),
-    BUTTON_BORDER("llui_button_border", UiGroup.BUTTONS, R.string.llui_button_border, false, false, "llui_text", 0);
+    BUTTON_BORDER("llui_button_border", UiGroup.BUTTONS, R.string.llui_button_border, false, false, "llui_text", 0),
+
+    // --- Geometry box (the in-editor resize / reposition / re-layer panel). Split per region:
+    // the panel, the top value tiles, the +/- cross, and the bottom layer-ordering buttons. Each
+    // *_BORDER slot carries the border WIDTH + corner RADIUS; *_GLYPH / *_ICON tint the +/- text
+    // and the z-order icons. Per-element sizes are stored as dp sizes in UiConfig, not here. ---
+    GEOM_PANEL_BG("llui_geom_panel_bg", UiGroup.GEOMETRY, R.string.llui_geom_panel_bg, false, false, "llui_background", 0),
+    GEOM_PANEL_BORDER("llui_geom_panel_border", UiGroup.GEOMETRY, R.string.llui_geom_panel_border, false, false, "llui_text", 0),
+    GEOM_TILE_BG("llui_geom_tile_bg", UiGroup.GEOMETRY, R.string.llui_geom_tile_bg, false, false, "llui_background", 0),
+    GEOM_TILE_BORDER("llui_geom_tile_border", UiGroup.GEOMETRY, R.string.llui_geom_tile_border, false, false, "llui_text", 0),
+    GEOM_TILE_TEXT("llui_geom_tile_text", UiGroup.GEOMETRY, R.string.llui_geom_tile_text, false, true, "llui_text", 0),
+    GEOM_CROSS_BG("llui_geom_cross_bg", UiGroup.GEOMETRY, R.string.llui_geom_cross_bg, false, false, "llui_background", 0),
+    GEOM_CROSS_BORDER("llui_geom_cross_border", UiGroup.GEOMETRY, R.string.llui_geom_cross_border, false, false, "llui_text", 0),
+    GEOM_CROSS_GLYPH("llui_geom_cross_glyph", UiGroup.GEOMETRY, R.string.llui_geom_cross_glyph, false, false, "llui_text", 0),
+    GEOM_ZORDER_BG("llui_geom_zorder_bg", UiGroup.GEOMETRY, R.string.llui_geom_zorder_bg, false, false, "llui_background", 0),
+    GEOM_ZORDER_BORDER("llui_geom_zorder_border", UiGroup.GEOMETRY, R.string.llui_geom_zorder_border, false, false, "llui_text", 0),
+    GEOM_ZORDER_ICON("llui_geom_zorder_icon", UiGroup.GEOMETRY, R.string.llui_geom_zorder_icon, false, false, "llui_text", 0);
 
     public final String key;
     public final UiGroup group;
@@ -78,6 +94,11 @@ public enum UiSlot {
 
     public UiSlot parent() {
         return parentKey == null ? null : byKey(parentKey);
+    }
+
+    /** A frame/stroke slot — it carries a border WIDTH and a corner RADIUS in addition to a colour. */
+    public boolean isBorder() {
+        return key.endsWith("_border");
     }
 
     public static UiSlot byKey(String key) {

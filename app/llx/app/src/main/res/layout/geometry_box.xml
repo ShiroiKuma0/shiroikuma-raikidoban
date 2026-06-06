@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Geometry box: the in-editor panel to resize / reposition / re-layer the selected element.
+     Top row = two value tiles (gb_e1/gb_e2); a +/- cross (gb_vm/gb_hm/gb_m/gb_hp/gb_vp); a bottom
+     row of z-order buttons (move_*). The black-yellow chrome AND the per-element sizes are applied
+     at runtime by GeometryBoxStyler.style() from the 「白い熊 雷起動盤 UI」 config — the dp/sp values
+     here are only fallbacks. Used both inline in edit_controls.xml and as the live preview in
+     UiSettingsActivity. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/gb"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    style="@style/bubble_bg"
+    android:visibility="gone"
+    tools:visibility="visible">
+    <LinearLayout
+        android:id="@+id/gb_tile_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/gb_e1"
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:textAllCaps="false"
+            android:textSize="22sp"/>
+        <Button
+            android:id="@+id/gb_e2"
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:textAllCaps="false"
+            android:textSize="22sp"/>
+    </LinearLayout>
+    <Button
+        android:id="@+id/gb_vm"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_margin="3dp"
+        android:textSize="44sp"
+        android:text="-"/>
+    <LinearLayout
+        android:id="@+id/gb_cross_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/gb_hm"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_margin="3dp"
+            android:textSize="44sp"
+            android:text="-"/>
+        <Button
+            android:id="@+id/gb_m"
+            android:layout_width="104dp"
+            android:layout_height="96dp"
+            android:layout_margin="3dp"
+            android:textSize="40sp"
+            android:text="•"/>
+        <Button
+            android:id="@+id/gb_hp"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_margin="3dp"
+            android:textSize="44sp"
+            android:text="+"/>
+    </LinearLayout>
+    <Button
+        android:id="@+id/gb_vp"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_margin="3dp"
+        android:textSize="44sp"
+        android:text="+"/>
+    <LinearLayout
+        android:id="@+id/gb_zorder_row"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:weightSum="4">
+
+        <ImageButton
+            android:id="@+id/move_bottom"
+            android:src="@drawable/move_bottom"
+            android:layout_margin="3dp"
+            style="@style/zorder_btn" />
+
+        <ImageButton
+            android:id="@+id/move_down"
+            android:src="@drawable/move_down"
+            android:layout_margin="3dp"
+            style="@style/zorder_btn" />
+
+        <ImageButton
+            android:id="@+id/move_up"
+            android:src="@drawable/move_up"
+            android:layout_margin="3dp"
+            style="@style/zorder_btn" />
+
+        <ImageButton
+            android:id="@+id/move_top"
+            android:src="@drawable/move_top"
+            android:layout_margin="3dp"
+            style="@style/zorder_btn" />
+    </LinearLayout>
+</LinearLayout>

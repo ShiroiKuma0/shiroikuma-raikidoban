@@ -58,9 +58,10 @@ public final class UiTheme {
         return v < 0 ? defaultCornerDp(slot) : v;
     }
 
-    /** Unset-default corner radius (dp): dialog panels round more (12) than buttons (6). */
+    /** Unset-default corner radius (dp): panels round more (12) than buttons (6). */
     public static int defaultCornerDp(UiSlot slot) {
-        return slot == UiSlot.DIALOG_BORDER ? DEFAULT_DIALOG_CORNER_DP : DEFAULT_BUTTON_CORNER_DP;
+        boolean panel = slot == UiSlot.DIALOG_BORDER || slot == UiSlot.GEOM_PANEL_BORDER;
+        return panel ? DEFAULT_DIALOG_CORNER_DP : DEFAULT_BUTTON_CORNER_DP;
     }
 
     public static int adjustAlpha(int color, float factor) {

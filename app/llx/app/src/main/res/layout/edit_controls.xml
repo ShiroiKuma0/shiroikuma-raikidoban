@@ -122,87 +122,10 @@
              style="@style/eb_btn.h"/>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/gb"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        style="@style/bubble_bg"
-        android:visibility="gone"
-        tools:visibility="visible">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <Button
-                android:id="@+id/gb_e1"
-                android:layout_width="0dp"
-                android:layout_weight="0.5"
-                android:layout_height="wrap_content"
-                android:textSize="9dp"/>
-            <Button
-                android:id="@+id/gb_e2"
-                android:layout_width="0dp"
-                android:layout_weight="0.5"
-                android:layout_height="wrap_content"
-                android:textSize="9dp"/>
-        </LinearLayout>
-        <Button
-            android:id="@+id/gb_vm"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:text="-"/>
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-            <Button
-                android:id="@+id/gb_hm"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:text="-"/>
-            <Button
-                android:id="@+id/gb_m"
-                android:layout_width="52dp"
-                android:layout_height="48dp"
-                android:text="•"/>
-            <Button
-                android:id="@+id/gb_hp"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:text="+"/>
-        </LinearLayout>
-        <Button
-            android:id="@+id/gb_vp"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:text="+"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:weightSum="4">
-
-            <ImageButton
-                android:id="@+id/move_bottom"
-                android:src="@drawable/move_bottom"
-                style="@style/zorder_btn" />
-
-            <ImageButton
-                android:id="@+id/move_down"
-                android:src="@drawable/move_down"
-                style="@style/zorder_btn" />
-
-            <ImageButton
-                android:id="@+id/move_up"
-                android:src="@drawable/move_up"
-                style="@style/zorder_btn" />
-
-            <ImageButton
-                android:id="@+id/move_top"
-                android:src="@drawable/move_top"
-                style="@style/zorder_btn" />
-        </LinearLayout>
-    </LinearLayout>
+    <!-- Geometry box (resize / reposition / re-layer the selected element). Extracted to its own
+         layout so the 「白い熊 雷起動盤 UI」 settings screen can reuse it as a live preview; both the
+         chrome and the per-element sizes are applied at runtime by GeometryBoxStyler.style(). -->
+    <include layout="@layout/geometry_box"/>
 
     <LinearLayout
         android:id="@+id/edit_prop_cont"

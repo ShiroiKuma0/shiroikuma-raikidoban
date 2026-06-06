@@ -28,6 +28,10 @@ public final class UiConfig {
     public static final int MAX_BORDER_WIDTH_DP = 12;
     /** Upper bound of the corner-roundness seekbar, in dp. 0 means "square corners". */
     public static final int MAX_CORNER_RADIUS_DP = 28;
+    /** Upper bound of a geometry-box per-element size seekbar (cross / layer button / tile), in dp. */
+    public static final int MAX_GEOM_ELEMENT_DP = 160;
+    /** Upper bound of the geometry-box panel width seekbar, in dp. 0 means "auto (wrap to content)". */
+    public static final int MAX_GEOM_PANEL_WIDTH_DP = 800;
 
     private static final String PREFS = "llui";
     /** In-app UI locale: "" = follow the system, else a BCP-47 tag ("en", "ja"). */
@@ -37,6 +41,7 @@ public final class UiConfig {
     private static final String FONT_SIZE_PREFIX = "font_size_";
     private static final String BORDER_WIDTH_PREFIX = "border_width_";
     private static final String CORNER_RADIUS_PREFIX = "corner_radius_";
+    private static final String SIZE_PREFIX = "size_";
 
     private static UiConfig sInstance;
 
@@ -149,6 +154,26 @@ public final class UiConfig {
 
     public void clearCornerRadius(String key) {
         mPrefs.edit().remove(CORNER_RADIUS_PREFIX + key).apply();
+    }
+
+    // --- generic dp size (e.g. geometry-box element sizes / panel width). A missing key means
+    // "inherit the default" (caller resolves); a present key (including 0) is an explicit value. ---
+
+    public boolean hasSize(String key) {
+        return mPrefs.contains(SIZE_PREFIX + key);
+    }
+
+    /** Stored size in dp, or -1 when unset (caller resolves the default). */
+    public int getSize(String key) {
+        return mPrefs.getInt(SIZE_PREFIX + key, -1);
+    }
+
+    public void setSize(String key, int dp) {
+        mPrefs.edit().putInt(SIZE_PREFIX + key, dp).apply();
+    }
+
+    public void clearSize(String key) {
+        mPrefs.edit().remove(SIZE_PREFIX + key).apply();
     }
 
     // --- recently picked colours (a small shared MRU list powering the colour picker's one-tap swatches) ---

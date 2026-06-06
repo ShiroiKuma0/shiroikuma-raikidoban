@@ -37,6 +37,8 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
@@ -54,9 +56,11 @@ import net.pierrox.lightning_launcher.configuration.UiGroup;
 import net.pierrox.lightning_launcher.configuration.UiSlot;
 import net.pierrox.lightning_launcher.configuration.UiTheme;
 import net.pierrox.lightning_launcher.util.Flash;
+import net.pierrox.lightning_launcher.util.GeometryBoxStyler;
 import net.pierrox.lightning_launcher.util.UiFontPickerDialog;
 import net.pierrox.lightning_launcher_extreme.R;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +85,14 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
 
     private final Map<UiSlot, View> mSwatches = new HashMap<>();
     private final Map<UiSlot, TextSlotViews> mTextSlots = new HashMap<>();
+
+    /** One inline geometry-box preview per region, each above its sub-section, re-styled live. */
+    private static final class GeomPreview {
+        View view;
+        int forceWidthDp; // 0 = let the styler decide the width (else a fixed preview width)
+    }
+
+    private final List<GeomPreview> mGeometryPreviews = new ArrayList<>();
 
     private UiSlot mPendingFontSlot;
     private final ActivityResultLauncher<String[]> mFontImport =
@@ -165,14 +177,20 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         mHolder.removeAllViews();
         mSwatches.clear();
         mTextSlots.clear();
+        mGeometryPreviews.clear();
 
         addLanguageSection();
 
         for (UiGroup group : UiGroup.values()) {
             addSection(group);
+            if (group == UiGroup.GEOMETRY) {
+                // Bespoke layout: a live preview, per-region sub-headers, and dp size sliders.
+                addGeometrySection();
+                continue;
+            }
             List<UiSlot> slots = UiSlot.forGroup(group);
             for (UiSlot slot : slots) {
-                if (slot == UiSlot.DIALOG_BORDER || slot == UiSlot.BUTTON_BORDER) {
+                if (slot.isBorder()) {
                     // Border slots = colour + width slider + corner-roundness slider.
                     addBorderSlot(slot, mStepPx);
                     addCornerRow(slot, mStepPx);
@@ -215,6 +233,189 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         box.addView(rule);
 
         mHolder.addView(box);
+    }
+
+    // --- geometry box (split per region: panel / top tiles / cross / layer buttons) + live preview ---
+
+    private void addGeometrySection() {
+        // Sub-sections are indented inside the group, with a rule-less heading (the group already drew
+        // the only separator). Each region shows its own preview just above its controls, so it visibly
+        // changes as the sliders move. Rows sit one step deeper than their sub-heading.
+        int sub = mStepPx / 2;
+
+        // Box (panel): background, border (colour + width + corner), and panel pixel width (0 = auto).
+        // Preview = the whole box, honouring the configured width so the Box-width slider moves it.
+        addRegionPreview(true, true, true, 0);
+        addSubHeader(getString(R.string.llui_geom_sub_panel), sub);
+        addColorRow(UiSlot.GEOM_PANEL_BG, mStepPx);
+        addBorderSlot(UiSlot.GEOM_PANEL_BORDER, mStepPx);
+        addCornerRow(UiSlot.GEOM_PANEL_BORDER, mStepPx);
+        addSizeRow(getString(R.string.llui_geom_panel_width), GeometryBoxStyler.KEY_PANEL_WIDTH,
+                GeometryBoxStyler.DEFAULT_PANEL_WIDTH_DP, UiConfig.MAX_GEOM_PANEL_WIDTH_DP, mStepPx, true);
+
+        // Top value tiles: background, border, text (colour + font + size), and tile size.
+        addRegionPreview(true, false, false, GEOM_PREVIEW_WIDTH_DP);
+        addSubHeader(getString(R.string.llui_geom_sub_tiles), sub);
+        addColorRow(UiSlot.GEOM_TILE_BG, mStepPx);
+        addBorderSlot(UiSlot.GEOM_TILE_BORDER, mStepPx);
+        addCornerRow(UiSlot.GEOM_TILE_BORDER, mStepPx);
+        addTextSlot(UiSlot.GEOM_TILE_TEXT, mStepPx);
+        addSizeRow(getString(R.string.llui_geom_tile_size), GeometryBoxStyler.KEY_TILE,
+                GeometryBoxStyler.DEFAULT_TILE_DP, UiConfig.MAX_GEOM_ELEMENT_DP, mStepPx, false);
+
+        // +/- cross: background, border, glyph colour, and button size.
+        addRegionPreview(false, true, false, 0);
+        addSubHeader(getString(R.string.llui_geom_sub_cross), sub);
+        addColorRow(UiSlot.GEOM_CROSS_BG, mStepPx);
+        addBorderSlot(UiSlot.GEOM_CROSS_BORDER, mStepPx);
+        addCornerRow(UiSlot.GEOM_CROSS_BORDER, mStepPx);
+        addColorRow(UiSlot.GEOM_CROSS_GLYPH, mStepPx);
+        addSizeRow(getString(R.string.llui_geom_cross_size), GeometryBoxStyler.KEY_CROSS,
+                GeometryBoxStyler.DEFAULT_CROSS_DP, UiConfig.MAX_GEOM_ELEMENT_DP, mStepPx, false);
+
+        // Bottom layer-ordering buttons: background, border, icon colour, and button size.
+        addRegionPreview(false, false, true, GEOM_PREVIEW_WIDTH_DP);
+        addSubHeader(getString(R.string.llui_geom_sub_zorder), sub);
+        addColorRow(UiSlot.GEOM_ZORDER_BG, mStepPx);
+        addBorderSlot(UiSlot.GEOM_ZORDER_BORDER, mStepPx);
+        addCornerRow(UiSlot.GEOM_ZORDER_BORDER, mStepPx);
+        addColorRow(UiSlot.GEOM_ZORDER_ICON, mStepPx);
+        addSizeRow(getString(R.string.llui_geom_zorder_size), GeometryBoxStyler.KEY_ZORDER,
+                GeometryBoxStyler.DEFAULT_ZORDER_DP, UiConfig.MAX_GEOM_ELEMENT_DP, mStepPx, false);
+    }
+
+    // A rule-less, indented heading for a geometry sub-section (it lives inside the Geometry box group,
+    // which already drew the only separator line).
+    private void addSubHeader(String text, int indent) {
+        TextView label = makeLabel(text, UiTheme.color(UiSlot.ACCENT));
+        label.setTextSize(16);
+        label.setTypeface(label.getTypeface(), Typeface.BOLD);
+        label.setPadding(indent + dp(8), dp(12), dp(8), dp(2));
+        mHolder.addView(label);
+    }
+
+    // Fixed preview width for regions whose buttons use layout weights (tiles, z-order row) so they have
+    // a width to distribute; the cross uses fixed-width buttons and the box honours the configured width.
+    private static final int GEOM_PREVIEW_WIDTH_DP = 240;
+
+    // Inflate a geometry box showing only the requested region(s) and style it; this is the live preview
+    // shown above that region's controls. forceWidthDp > 0 pins the width (re-applied after each restyle).
+    private void addRegionPreview(boolean tiles, boolean cross, boolean zorder, int forceWidthDp) {
+        HorizontalScrollView scroll = new HorizontalScrollView(this);
+        scroll.setHorizontalScrollBarEnabled(false);
+        LinearLayout.LayoutParams hlp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        hlp.topMargin = dp(10);
+        hlp.bottomMargin = dp(2);
+        scroll.setLayoutParams(hlp);
+
+        View gb = getLayoutInflater().inflate(R.layout.geometry_box, scroll, false);
+        gb.setVisibility(View.VISIBLE);
+        // Centre the box when it is narrower than the screen; scroll horizontally when wider.
+        if (gb.getLayoutParams() instanceof FrameLayout.LayoutParams) {
+            ((FrameLayout.LayoutParams) gb.getLayoutParams()).gravity = Gravity.CENTER_HORIZONTAL;
+        }
+        setRegionVisible(gb, R.id.gb_tile_row, tiles);
+        setRegionVisible(gb, R.id.gb_vm, cross);
+        setRegionVisible(gb, R.id.gb_cross_row, cross);
+        setRegionVisible(gb, R.id.gb_vp, cross);
+        setRegionVisible(gb, R.id.gb_zorder_row, zorder);
+        TextView e1 = gb.findViewById(R.id.gb_e1);
+        TextView e2 = gb.findViewById(R.id.gb_e2);
+        if (e1 != null) {
+            e1.setText(getString(R.string.gb_w) + "\n6");
+        }
+        if (e2 != null) {
+            e2.setText(getString(R.string.gb_h) + "\n3");
+        }
+
+        GeomPreview p = new GeomPreview();
+        p.view = gb;
+        p.forceWidthDp = forceWidthDp;
+        styleGeomPreview(p);
+
+        scroll.addView(gb);
+        mGeometryPreviews.add(p);
+        mHolder.addView(scroll);
+    }
+
+    private void setRegionVisible(View root, int id, boolean visible) {
+        View v = root.findViewById(id);
+        if (v != null) {
+            v.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void styleGeomPreview(GeomPreview p) {
+        GeometryBoxStyler.style(p.view);
+        if (p.forceWidthDp > 0) {
+            ViewGroup.LayoutParams lp = p.view.getLayoutParams();
+            if (lp != null) {
+                lp.width = dp(p.forceWidthDp);
+                p.view.setLayoutParams(lp);
+            }
+        }
+    }
+
+    private void restyleGeometryPreview() {
+        for (GeomPreview p : mGeometryPreviews) {
+            styleGeomPreview(p);
+        }
+    }
+
+    // A dp-size slider (geometry element size / panel width). 0 shows "Auto" when autoAtZero; long-press
+    // resets to the default. Writes UiConfig.setSize and live-restyles the preview.
+    private void addSizeRow(String title, final String sizeKey, final int defaultDp, final int maxDp,
+                            int indent, final boolean autoAtZero) {
+        int textColor = UiTheme.color(UiSlot.TEXT);
+        LinearLayout row = makeRowContainer(indent);
+        TextView label = makeLabel(title, textColor);
+        row.addView(label);
+        final SeekBar seek = new SeekBar(this);
+        LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        slp.leftMargin = dp(8);
+        slp.rightMargin = dp(8);
+        seek.setLayoutParams(slp);
+        seek.setMax(maxDp);
+        int cur = UiConfig.get().getSize(sizeKey);
+        if (cur < 0) {
+            cur = defaultDp;
+        }
+        seek.setProgress(Math.max(0, Math.min(maxDp, cur)));
+        row.addView(seek);
+        final TextView value = makeLabel(sizeValueLabel(cur, autoAtZero), textColor);
+        value.setMinWidth(dp(64));
+        value.setGravity(Gravity.END);
+        row.addView(value);
+        seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                UiConfig.get().setSize(sizeKey, progress);
+                value.setText(sizeValueLabel(progress, autoAtZero));
+                restyleGeometryPreview();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+        row.setOnLongClickListener(v -> {
+            UiConfig.get().clearSize(sizeKey);
+            seek.setProgress(Math.max(0, Math.min(maxDp, defaultDp)));
+            return true;
+        });
+        mHolder.addView(row);
+    }
+
+    private String sizeValueLabel(int dp, boolean autoAtZero) {
+        if (autoAtZero && dp <= 0) {
+            return getString(R.string.llui_geom_auto);
+        }
+        return getString(R.string.theme_border_width_value, dp);
     }
 
     // --- language (in-app, independent of the system locale) ---
@@ -374,6 +575,7 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 UiConfig.get().setBorderWidth(slot.key, progress);
                 widthValue.setText(borderLabel(progress));
+                restyleGeometryPreview();
             }
 
             @Override
@@ -416,6 +618,7 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 UiConfig.get().setCornerRadius(slot.key, progress);
                 value.setText(getString(R.string.theme_border_width_value, progress));
+                restyleGeometryPreview();
             }
 
             @Override
@@ -479,6 +682,7 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
                 UiConfig.get().setFontSize(slot.key, progress);
                 sizeValue.setText(sizeLabel(progress));
                 refreshSample(slot);
+                restyleGeometryPreview();
             }
 
             @Override
@@ -597,6 +801,7 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         if (mTextSlots.containsKey(slot)) {
             refreshTextSlot(slot);
         }
+        restyleGeometryPreview();
     }
 
     private void openFontPicker(final UiSlot slot) {
@@ -648,6 +853,7 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
             recreate();
         } else {
             refreshTextSlot(slot);
+            restyleGeometryPreview();
         }
     }
 
