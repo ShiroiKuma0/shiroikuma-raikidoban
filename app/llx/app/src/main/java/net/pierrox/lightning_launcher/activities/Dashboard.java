@@ -1886,6 +1886,10 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 startActivity(new Intent(this, FoldMatrixActivity.class));
                 break;
 
+            case R.id.mi_llui:
+                startActivity(new Intent(this, UiSettingsActivity.class));
+                break;
+
             case R.id.mi_fold_migrate:
                 confirmFoldMigration();
                 break;
@@ -5193,6 +5197,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             if (!foldGrid().isEmpty() && !foldGrid().migrated) {
                 addBubbleItem(R.id.mi_fold_migrate, R.string.fm_migrate);
             }
+            addBubbleItem(R.id.mi_llui, R.string.llui_title);
             addBubbleItem(R.id.mi_dm_customize, R.string.mi_es_settings);
         } else if (mode == BUBBLE_MODE_LIGHTNING_MENU_NO_EM) {
             addBubbleItem(R.id.mi_l, mGlobalConfig.itemLongTap.action == GlobalConfig.NOTHING ? R.string.mi_ul : R.string.mi_l);
@@ -5207,6 +5212,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             if (!foldGrid().isEmpty() && !foldGrid().migrated) {
                 addBubbleItem(R.id.mi_fold_migrate, R.string.fm_migrate);
             }
+            addBubbleItem(R.id.mi_llui, R.string.llui_title);
             addBubbleItem(R.id.mi_dm_customize, R.string.mi_es_settings);
         } else if (mode == BUBBLE_MODE_SETTINGS) {
             int text_res_id;
