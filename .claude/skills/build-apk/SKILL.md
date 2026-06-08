@@ -84,3 +84,7 @@ The `namespace` stays `net.pierrox.lightning_launcher_extreme` (build-time R/Bui
 JDK 17 and the SDK were installed user-locally (no sudo). If a fresh machine needs them: Temurin JDK 17 → `~/android-build/jdk17`; Android cmdline-tools → `~/Android/Sdk`, then `sdkmanager "platform-tools" "platforms;android-33" "build-tools;34.0.0"`; write `app/llx/local.properties` with `sdk.dir=$HOME/Android/Sdk`.
 
 > Note: `lsvg` (`net.pierrox.android:lsvg`) is vendored as a local `:lsvg` module — its jcenter artifact is dead. Don't re-add it as a remote dependency.
+
+---
+
+**Commit convention — no Claude attribution.** Never add a `Co-Authored-By: Claude …` / "Generated with Claude" trailer to commit messages or PR bodies; end the message at the last line of the body. This overrides the harness default. (Global rule: `~/.claude/CLAUDE.md`.)
