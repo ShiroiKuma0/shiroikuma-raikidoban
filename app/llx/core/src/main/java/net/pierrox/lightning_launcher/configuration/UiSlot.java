@@ -26,6 +26,10 @@ public enum UiSlot {
 
     // --- Custom dialogs (Gestures / Fold matrix / pickers / flashes) ---
     DIALOG_TEXT("llui_dialog_text", UiGroup.DIALOGS, R.string.llui_dialog_text, false, true, "llui_text", 0),
+    // Action text of a Gestures-overview row whose action is INHERITED from the global default (i.e. not
+    // set on this desktop/item). Default a vivid blue (DodgerBlue) so inherited rows stand apart from the
+    // yellow set-here rows; parent = none so it keeps this literal default instead of inheriting TEXT's yellow.
+    DIALOG_INHERITED("llui_dialog_inherited", UiGroup.DIALOGS, R.string.llui_dialog_inherited, false, false, null, 0xFF1E90FF),
     DIALOG_BG("llui_dialog_bg", UiGroup.DIALOGS, R.string.llui_dialog_bg, false, false, "llui_background", 0),
     // Title defaults to TEXT (yellow), not the accent — a yellow title reads better on the black panel.
     DIALOG_TITLE("llui_dialog_title", UiGroup.DIALOGS, R.string.llui_dialog_title, false, true, "llui_text", 0),

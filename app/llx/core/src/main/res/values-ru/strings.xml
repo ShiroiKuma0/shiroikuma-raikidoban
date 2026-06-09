@@ -1184,7 +1184,7 @@ Support the developer and help making Lightning the best launcher ever!"</string
     <string name="acd_actions">Жесты…</string>
     <string name="acd_actions_title">Действия жестов</string>
     <string name="acd_none">(нет)</string>
-    <string name="acd_default_suffix">%1$s (по умолчанию)</string>
+    <string name="acd_inherited_format">унаследовано ⇨ %1$s</string>
     <string name="acd_cat_keys">Клавиши</string>
     <string name="acd_cat_touch">Касание и свайп</string>
     <string name="acd_cat_screen">Экран и ориентация</string>
@@ -1221,6 +1221,7 @@ Support the developer and help making Lightning the best launcher ever!"</string
     <string name="llui_menu_bg">Фон меню</string>
     <string name="llui_menu_accent">Акцент меню</string>
     <string name="llui_dialog_text">Текст диалога</string>
+    <string name="llui_dialog_inherited">Унаследованное действие</string>
     <string name="llui_dialog_bg">Фон диалога</string>
     <string name="llui_dialog_title">Заголовок диалога</string>
     <string name="llui_dialog_button">Кнопки диалога</string>

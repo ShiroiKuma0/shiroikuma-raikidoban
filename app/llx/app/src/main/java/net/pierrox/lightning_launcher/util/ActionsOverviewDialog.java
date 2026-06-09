@@ -196,11 +196,27 @@ public class ActionsOverviewDialog {
     private String valueText(Slot slot) {
         EventAction resolved = slot.resolved();
         String txt = describeValue(resolved);
-        if (slot.isInherited() && resolved != null
-                && resolved.action != GlobalConfig.UNSET && resolved.action != GlobalConfig.NOTHING) {
-            txt = mActivity.getString(R.string.acd_default_suffix, txt);
+        if (showsInheritedDefault(slot)) {
+            txt = mActivity.getString(R.string.acd_inherited_format, txt);
         }
         return txt;
+    }
+
+    /**
+     * True when the row's effective action is a real action inherited from the global default — nothing
+     * is set on this desktop/item, yet the default supplies a concrete action (e.g. Home → "go to main
+     * desktop"). This single condition drives the leading inherited marker, the distinct inherited colour, and
+     * the hiding of the clear (X) — an inherited row has no local binding to clear. A row whose default
+     * is itself empty/"nothing" is NOT treated as inherited: it is just an empty row.
+     */
+    private boolean showsInheritedDefault(Slot slot) {
+        if (!slot.isInherited()) {
+            return false;
+        }
+        EventAction resolved = slot.resolved();
+        return resolved != null
+                && resolved.action != GlobalConfig.UNSET
+                && resolved.action != GlobalConfig.NOTHING;
     }
 
     private String describeValue(EventAction ea) {
@@ -495,14 +511,23 @@ public class ActionsOverviewDialog {
             value.setText(valueText(slot));
             net.pierrox.lightning_launcher.configuration.UiTheme.applyTo(label,
                     net.pierrox.lightning_launcher.configuration.UiSlot.DIALOG_TEXT);
-            value.setTextColor(net.pierrox.lightning_launcher.configuration.UiTheme.color(
-                    net.pierrox.lightning_launcher.configuration.UiSlot.DIALOG_TEXT));
-            ((TextView) convertView.findViewById(R.id.delete)).setTextColor(
-                    net.pierrox.lightning_launcher.configuration.UiTheme.color(
-                            net.pierrox.lightning_launcher.configuration.UiSlot.DIALOG_TEXT));
 
-            View delete = convertView.findViewById(R.id.delete);
-            delete.setOnClickListener(new View.OnClickListener() {
+            // An inherited row shows the GLOBAL default, not a value set on this desktop/item: paint its
+            // action text in the distinct DIALOG_INHERITED colour (blue by default, settable in the
+            // appearance config) at full opacity, and hide the X — there is no local binding to clear. A
+            // row actually set here keeps the normal yellow at the dim 0.7 alpha and shows the X to clear
+            // it. (convertView is recycled, so every branch is set explicitly on each bind.)
+            boolean inherited = showsInheritedDefault(slot);
+            value.setTextColor(net.pierrox.lightning_launcher.configuration.UiTheme.color(inherited
+                    ? net.pierrox.lightning_launcher.configuration.UiSlot.DIALOG_INHERITED
+                    : net.pierrox.lightning_launcher.configuration.UiSlot.DIALOG_TEXT));
+            value.setAlpha(inherited ? 1f : 0.7f);
+
+            TextView delete = convertView.findViewById(R.id.delete);
+            delete.setTextColor(net.pierrox.lightning_launcher.configuration.UiTheme.color(
+                    net.pierrox.lightning_launcher.configuration.UiSlot.DIALOG_TEXT));
+            delete.setVisibility(inherited ? View.GONE : View.VISIBLE);
+            delete.setOnClickListener(inherited ? null : new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (mCallback != null) {

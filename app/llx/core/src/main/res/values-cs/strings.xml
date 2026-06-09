@@ -1204,7 +1204,7 @@ Oprávnění:
     <string name="acd_actions">Gesta…</string>
     <string name="acd_actions_title">Akce gest</string>
     <string name="acd_none">(žádná)</string>
-    <string name="acd_default_suffix">%1$s (výchozí)</string>
+    <string name="acd_inherited_format">zděděno ⇨ %1$s</string>
     <string name="acd_cat_keys">Klávesy</string>
     <string name="acd_cat_touch">Dotyk a tažení</string>
     <string name="acd_cat_screen">Obrazovka a orientace</string>
@@ -1241,6 +1241,7 @@ Oprávnění:
     <string name="llui_menu_bg">Pozadí nabídky</string>
     <string name="llui_menu_accent">Akcent nabídky</string>
     <string name="llui_dialog_text">Text dialogu</string>
+    <string name="llui_dialog_inherited">Zděděná akce</string>
     <string name="llui_dialog_bg">Pozadí dialogu</string>
     <string name="llui_dialog_title">Název dialogu</string>
     <string name="llui_dialog_button">Tlačítka dialogu</string>

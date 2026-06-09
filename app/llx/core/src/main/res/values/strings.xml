@@ -1112,7 +1112,7 @@
     <string name="acd_actions">Gestures…</string>
     <string name="acd_actions_title">Gesture actions</string>
     <string name="acd_none">(none)</string>
-    <string name="acd_default_suffix">%1$s (default)</string>
+    <string name="acd_inherited_format">inherited ⇨ %1$s</string>
     <string name="acd_tasker_prefix">Tasker: %1$s</string>
     <string name="acd_cat_keys">Keys</string>
     <string name="acd_cat_touch">Touch &amp; swipe</string>
@@ -1154,6 +1154,7 @@
     <string name="llui_menu_bg">Menu background</string>
     <string name="llui_menu_accent">Menu accent</string>
     <string name="llui_dialog_text">Dialog text</string>
+    <string name="llui_dialog_inherited">Inherited action</string>
     <string name="llui_dialog_bg">Dialog background</string>
     <string name="llui_dialog_title">Dialog title</string>
     <string name="llui_dialog_button">Dialog buttons</string>
