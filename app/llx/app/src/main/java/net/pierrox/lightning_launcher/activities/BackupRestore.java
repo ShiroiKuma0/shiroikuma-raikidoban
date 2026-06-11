@@ -58,6 +58,7 @@ import net.pierrox.lightning_launcher.API;
 import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.data.BackupRestoreTool;
 import net.pierrox.lightning_launcher.data.FileUtils;
+import net.pierrox.lightning_launcher.data.LightningIntent;
 import net.pierrox.lightning_launcher.data.Folder;
 import net.pierrox.lightning_launcher.data.Item;
 import net.pierrox.lightning_launcher.data.Page;
@@ -173,6 +174,19 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Launched as a launcher action (the gesture binding carries the shortcut label): the screen
+        // underneath may be the app drawer, not the desktop. Go home explicitly instead of finishing —
+        // Dashboard is singleTask, so this also pops the drawer above it.
+        if (getIntent().hasExtra(LightningIntent.INTENT_EXTRA_SHORTCUT_LABEL)) {
+            startActivity(new Intent(this, Dashboard.class));
+            finish();
+            return;
+        }
+        super.onBackPressed();
     }
 
     @Override
