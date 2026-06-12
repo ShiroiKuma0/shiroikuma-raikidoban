@@ -1,9 +1,9 @@
 ---
 name: build-apk
-description: Build the 白い熊 雷起動盤 (shiroikuma.raikidoban) debug APK for Android with the buildApk Gradle task, which versions it, names it shiroikuma-raikidoban_<version>_arm64-v8a.apk, copies it to ~/tmp, and bumps the build counter. Then always ask ONLY whether to adb push the APK to /sdcard/tmp (never offer to install/deploy/launch it); after pushing, wait — the user installs and tests it themselves and confirms with the literal word "Push.", which is the signal to commit and git-push to origin/main. Use whenever the user asks to build the app, build the APK, make a build, or build and push for this LightningLauncher fork (shiroikuma-raikidoban).
+description: Build the 白い熊 雷起動盤 (shiroikuma.raikidoban) debug APK for Android with the buildApk Gradle task, which versions it, names it shiroikuma-raikidoban_<version>_arm64-v8a.apk, copies it to ~/tmp, and bumps the build counter. Then always ask whether to scp it to skhw (first choice) or adb push it to /sdcard/tmp (never offer to install/deploy/launch it); after pushing, wait — the user installs and tests it themselves and confirms with the literal word "Push.", which is the signal to commit and git-push to origin/main. Use whenever the user asks to build the app, build the APK, make a build, or build and push for this LightningLauncher fork (shiroikuma-raikidoban).
 ---
 
-# Build the 白い熊 雷起動盤 APK and optionally push to phone
+# Build the 白い熊 雷起動盤 APK and optionally send to phone
 
 This is the user's fork of LightningLauncher (TrianguloY → pierrehebert). It is re-branded to install **side-by-side** with the original. Same model as the user's other Android forks (shiroikuma-denwa, shiroikuma-futokxkb): bump a `+N` build counter on every build, name the APK `shiroikuma-raikidoban_<versionName>_arm64-v8a.apk`, sideload it.
 
@@ -54,13 +54,15 @@ Derived in `app/build.gradle`:
    ```
    `buildApk` runs `assembleExtremeDebug`, copies the APK to `~/tmp/<apk name>`, and increments `BUILD_NUMBER` in `gradle.properties`. It prints `>>> ~/tmp/<apk name>` and `>>> BUILD_NUMBER bumped to <n>`. Confirm `BUILD SUCCESSFUL`. (Network is needed on a cold cache for Gradle/deps; this may require running outside the sandbox.)
 
-3. **Always ask first — hard gate, every single build.** After a successful build the very next action MUST be an AskUserQuestion: "adb push the APK to /sdcard/tmp?" with options "Yes, adb push" / "No". Do **NOT** run `adb push` (or anything else on the device) until the user picks "Yes" — never auto-push, even though adb access is available and even mid-flow on a fix iteration. The ONLY action ever offered is the `adb push` to `/sdcard/tmp`; **never** offer to `adb install`, deploy, or launch — the user installs and tests it themselves.
+3. **Always ask first — hard gate, every single build.** After a successful build the very next action MUST be an AskUserQuestion asking how to transfer the APK, with options, in this order: "Scp to skhw" (FIRST choice) / "adb push" / "No, just build". Do **NOT** run `adb push`, `scp`, or anything else on the device until the user picks a transfer option — never auto-push, even though adb access is available and even mid-flow on a fix iteration. The ONLY actions ever offered are the scp to skhw and the `adb push` to `/sdcard/tmp`; **never** offer to `adb install`, deploy, or launch — the user installs and tests it themselves.
 
-4. **If yes, adb push it yourself** (`adb` is at `/usr/bin/adb`):
-   - `adb devices` — confirm a device is connected.
-   - `adb shell mkdir -p /sdcard/tmp`
-   - `adb push ~/tmp/<apk name> /sdcard/tmp/<apk name>`
-   - Verify with `adb shell ls -l /sdcard/tmp/<apk name>` (size matches the local file).
+4. **Transfer per the answer:**
+   - **Scp to skhw** — invoke the global **scp** skill (copies the newest APK in `~/tmp/` to `skhw:~/tmp/`). If skhw is unreachable (its tunnel is served by the phone's sshd and may be down), report that and offer the adb push instead.
+   - **adb push:** (`adb` is at `/usr/bin/adb`)
+     - `adb devices` — confirm a device is connected.
+     - `adb shell mkdir -p /sdcard/tmp`
+     - `adb push ~/tmp/<apk name> /sdcard/tmp/<apk name>`
+     - Verify with `adb shell ls -l /sdcard/tmp/<apk name>` (size matches the local file).
 
 5. **Then stop and wait — do NOT commit or git-push yet.** The user installs the pushed APK and tests it on the device. Wait until they confirm with the literal word **`Push.`**. Anything other than `Push.` (a tweak, a bug report, silence) means keep waiting / fix first.
 
