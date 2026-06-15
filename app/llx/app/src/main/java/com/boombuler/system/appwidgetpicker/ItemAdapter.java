@@ -23,6 +23,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import net.pierrox.lightning_launcher.configuration.UiSlot;
+import net.pierrox.lightning_launcher.configuration.UiTheme;
 import net.pierrox.lightning_launcher_extreme.R;
 
 import java.util.ArrayList;
@@ -53,8 +55,12 @@ public class ItemAdapter extends ArrayAdapter<SubItem> {
             ImageView iv = v.findViewById(R.id.appwidgetpicker_imageview);
             if (tv != null) {
                 tv.setText(o.getName());
+                UiTheme.applyTo(tv, UiSlot.DIALOG_TEXT);
             }
             if (count_view != null) {
+                // Dimmed yellow subtitle, matching the PREF_SUMMARY hierarchy convention.
+                count_view.setTextColor(UiTheme.adjustAlpha(UiTheme.color(UiSlot.DIALOG_TEXT), 0.7f));
+                UiTheme.applyFont(count_view, UiSlot.DIALOG_TEXT);
                 if (o instanceof Item) {
                     int cnt = ((Item) o).getItems().size();
                     if (cnt > 1) {

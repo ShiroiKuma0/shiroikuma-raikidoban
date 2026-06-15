@@ -19,6 +19,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
+
 public class PickWidgetDialog {
 
 	AlertDialog fDialog;
@@ -89,6 +91,8 @@ public class PickWidgetDialog {
 			ab.setOnCancelListener(new CancelListener(subItem == null));
 			fDialog =  ab.create();
 			fDialog.show();
+			// Black panel + yellow border/title, matching the rest of the chrome.
+			UiDialogStyler.style(fDialog);
 		}
 		else
 			fOwner.finishOk(subItem);
