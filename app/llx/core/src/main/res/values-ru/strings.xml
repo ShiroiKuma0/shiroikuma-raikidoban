@@ -1287,4 +1287,8 @@ Support the developer and help making Lightning the best launcher ever!"</string
     <string name="mi_reinit_tasker_widgets">Переинициализировать виджеты Tasker</string>
     <string name="mi_tasker_a11y_settings">Автозаполнение Tasker (спец. возможности)…</string>
     <string name="tasker_widget_name_title">Внутреннее имя Tasker (напр. test.item.1)</string>
+    <string name="mi_set_jiyu_widget_name">Задать имя виджета 自由作業盤</string>
+    <string name="mi_reinit_jiyu_widgets">Переинициализировать виджеты 自由作業盤</string>
+    <string name="jiyu_widget_name_title">Имя виджета 自由作業盤</string>
+    <string name="jiyu_name_unset">(Имя 自由作業盤 не задано)</string>
 </resources>

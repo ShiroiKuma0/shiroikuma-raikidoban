@@ -114,6 +114,16 @@
     <string name="mi_tasker_a11y_settings">Tasker 自動入力（ユーザー補助）…</string>
     <string name="tasker_widget_name_title">Tasker 内部名（例: test.item.1）</string>
 
+    <string name="mi_set_jiyu_widget_name">白い熊 自由作業盤 ウィジェット名を設定</string>
+    <string name="mi_reinit_jiyu_widgets">白い熊 自由作業盤 ウィジェット名を再初期化</string>
+    <string name="jiyu_widget_name_title">自由作業盤 ウィジェット名</string>
+    <string name="jiyu_name_unset">（自由作業盤 名称が未設定）</string>
+    <string name="jiyu_reinit_none">再初期化する 自由作業盤 ウィジェットがありません</string>
+    <string name="jiyu_reinit_result">自由作業盤 再初期化: 成功 %1$d / 失敗 %2$d</string>
+    <string name="jiyu_reinit_offer_title">自由作業盤 ウィジェットを再初期化しますか？</string>
+    <string name="jiyu_reinit_offer_msg">再起動または復元後、一部の 自由作業盤 ウィジェットの再初期化が必要です。今すぐ実行しますか？</string>
+    <string name="jiyu_not_installed">白い熊 自由作業盤 がインストールされていません</string>
+
     <!-- Bundled Japanese (from the legacy lp.jp pack) so JA is self-contained. -->
     <string name="all_apps">全てのアプリ</string>
     <string name="anim_glitch_fix_s">Androidの一部バージョンで見られる不具合を、パディングを1ピクセル増やすことで改善します。</string>

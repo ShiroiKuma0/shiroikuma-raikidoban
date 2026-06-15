@@ -94,6 +94,15 @@
 <string name="tasker_a11y_open_settings">Open Accessibility settings</string>
 <string name="tasker_reinit_offer_title">Reinitialize Tasker widgets?</string>
 <string name="tasker_reinit_offer_msg">Some Tasker widgets need reinitializing after the restart or restore. Do it now?</string>
+<string name="mi_set_jiyu_widget_name">Set 自由作業盤 widget name</string>
+<string name="mi_reinit_jiyu_widgets">Reinitialize 自由作業盤 widgets</string>
+<string name="jiyu_widget_name_title">自由作業盤 widget name</string>
+<string name="jiyu_name_unset">(自由作業盤 name not set)</string>
+<string name="jiyu_reinit_none">No named 自由作業盤 widgets here to reinitialize</string>
+<string name="jiyu_reinit_result">自由作業盤 reinitialize: %1$d ok / %2$d failed</string>
+<string name="jiyu_reinit_offer_title">Reinitialize 自由作業盤 widgets?</string>
+<string name="jiyu_reinit_offer_msg">Some 自由作業盤 widgets need reinitializing after the restart or restore. Do it now?</string>
+<string name="jiyu_not_installed">白い熊 自由作業盤 is not installed</string>
 <string name="mi_move_out_of_folder">Move out of folder</string>
     <string name="first_use_title">Welcome!</string>
     <string name="first_use_message">Lightning Launcher is a lightweight and extremely customizable home screen replacement for Android.\n\nYou are now running in normal mode, meaning that some advanced options are hidden. Switch to expert mode to access all features and options (General settings).\n\nLL is now preparing the list of apps once and for all.\n\nThank you for reading and using LL!</string>

@@ -1307,4 +1307,8 @@ Oprávnění:
     <string name="mi_reinit_tasker_widgets">Znovu inicializovat widgety Tasker</string>
     <string name="mi_tasker_a11y_settings">Automatické vyplnění Tasker (přístupnost)…</string>
     <string name="tasker_widget_name_title">Interní název Tasker (např. test.item.1)</string>
+    <string name="mi_set_jiyu_widget_name">Nastavit název widgetu 自由作業盤</string>
+    <string name="mi_reinit_jiyu_widgets">Znovu inicializovat widgety 自由作業盤</string>
+    <string name="jiyu_widget_name_title">Název widgetu 自由作業盤</string>
+    <string name="jiyu_name_unset">(Název 自由作業盤 není nastaven)</string>
 </resources>

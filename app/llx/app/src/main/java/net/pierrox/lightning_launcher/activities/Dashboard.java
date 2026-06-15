@@ -844,6 +844,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         updateLightningLiveWallpaperVisibility();
 
         maybeOfferTaskerReinit();
+
+        maybeOfferJiyuReinit();
     }
 
     @Override
@@ -1921,6 +1923,14 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
 
             case R.id.mi_reinit_tasker_widgets:
                 reinitTaskerWidgets();
+                break;
+
+            case R.id.mi_set_jiyu_widget_name:
+                setJiyuWidgetName((Widget) targetItem);
+                break;
+
+            case R.id.mi_reinit_jiyu_widgets:
+                reinitJiyuWidgets();
                 break;
 
             case R.id.mi_tasker_a11y_settings:
@@ -4497,6 +4507,10 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                     // Show the recorded Tasker name on a second line so it can be checked at a glance.
                     String taskerName = net.pierrox.lightning_launcher.util.TaskerWidgets.getStoredName(titleItem);
                     text = text + "\n" + (taskerName != null ? taskerName : getString(R.string.tasker_name_unset));
+                } else if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.isJiyuWidget(titleItem)) {
+                    // Same idea for jiyusagyoban widgets: recorded name on a second line.
+                    String jiyuName = net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.getStoredName(titleItem);
+                    text = text + "\n" + (jiyuName != null ? jiyuName : getString(R.string.jiyu_name_unset));
                 }
                 configureBubbleForItem(mode, itemView, shortcuts);
             }
@@ -4759,7 +4773,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         while (mTaskerReinitIndex < mTaskerReinitQueue.size()) {
             Widget w = mTaskerReinitQueue.get(mTaskerReinitIndex);
             // after a restore the saved appWidgetId is dead -> rebind to a fresh one first
-            if (awm.getAppWidgetInfo(w.getAppWidgetId()) == null && !rebindTaskerWidget(w)) {
+            if (awm.getAppWidgetInfo(w.getAppWidgetId()) == null && !rebindWidget(w)) {
                 mTaskerReinitIndex++;
                 continue;
             }
@@ -4793,8 +4807,9 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     }
 
     /** Re-bind a widget whose appWidgetId is no longer valid (post-restore) to its saved provider,
-     * allocating a fresh appWidgetId. @return true if it is now bound. */
-    private boolean rebindTaskerWidget(Widget w) {
+     * allocating a fresh appWidgetId. Provider-agnostic — shared by the Tasker and jiyusagyoban
+     * re-init flows. @return true if it is now bound. */
+    private boolean rebindWidget(Widget w) {
         ComponentName cn = w.getComponentName();
         if (cn == null || sBindAppWidgetIdIfAllowed == null) {
             return false;
@@ -4817,6 +4832,153 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         }
         LLApp.get().getAppWidgetHost().deleteAppWidgetId(new_id);
         return false;
+    }
+
+    // ---- 自由作業盤 (jiyusagyoban) widget re-initialization (headless; see util/JiyusagyobanWidgets) ----
+    private int mJiyuReinitExpected;
+    private int mJiyuReinitReplied;
+    private int mJiyuReinitOk;
+    private int mJiyuReinitFail;
+    private static boolean sJiyuAutoOfferChecked = false;
+
+    /** Prompt for / edit the jiyusagyoban name stored on a widget item (mirrors setTaskerWidgetName).
+     * Kept on the item tag so it survives Lightning backups; the headless re-init uses it after a restore. */
+    private void setJiyuWidgetName(final Widget w) {
+        final EditText edit = new EditText(this);
+        String current = net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.getStoredName(w);
+        if (current != null) {
+            edit.setText(current);
+            edit.setSelection(current.length());
+        }
+        FrameLayout fl = new FrameLayout(this);
+        fl.setPadding(30, 10, 30, 10);
+        fl.addView(edit);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.mi_set_jiyu_widget_name)
+                .setMessage(R.string.jiyu_widget_name_title)
+                .setView(fl)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.setStoredName(w, edit.getText().toString());
+                        w.notifyChanged();
+                        LLApp.get().getAppEngine().saveData();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    /** Re-establish each named jiyusagyoban widget's name -> appWidgetId binding: rebind any dead
+     * appWidgetId, then push the stored name to jiyusagyoban with an explicit ordered broadcast. Fully
+     * headless — no config UI, no accessibility. A per-widget ACK tallies into a summary Flash; the
+     * initial RESULT_CANCELED means a missing / old jiyusagyoban automatically counts as a failure. */
+    public void reinitJiyuWidgets() {
+        try {
+            getPackageManager().getPackageInfo(
+                    net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.JIYU_PACKAGE, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            Flash.show(this, R.string.jiyu_not_installed);
+            return;
+        }
+        java.util.ArrayList<Widget> list = new java.util.ArrayList<>();
+        // Scan ALL pages (every desktop and folder), not just the loaded ones, so one run covers everything.
+        String[] pageNames = FileUtils.getPagesDir(LLApp.get().getAppEngine().getBaseDir()).list();
+        if (pageNames != null) {
+            for (String pageName : pageNames) {
+                int pageId;
+                try {
+                    pageId = Integer.parseInt(pageName);
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+                Page page = LLApp.get().getAppEngine().getOrLoadPage(pageId);
+                if (page == null || page.items == null) {
+                    continue;
+                }
+                for (Item it : page.items) {
+                    if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.hasStoredName(it)) {
+                        list.add((Widget) it);
+                    }
+                }
+            }
+        }
+        if (list.isEmpty()) {
+            Flash.show(this, R.string.jiyu_reinit_none);
+            return;
+        }
+        AppWidgetManager awm = AppWidgetManager.getInstance(this);
+        mJiyuReinitExpected = list.size();
+        mJiyuReinitReplied = 0;
+        mJiyuReinitOk = 0;
+        mJiyuReinitFail = 0;
+        // scheduler=null -> the ACK runs on the main thread, so Flash is safe here.
+        BroadcastReceiver ack = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (getResultCode() == RESULT_OK) {
+                    mJiyuReinitOk++;
+                } else {
+                    mJiyuReinitFail++;
+                }
+                mJiyuReinitReplied++;
+                if (mJiyuReinitReplied >= mJiyuReinitExpected) {
+                    Flash.show(Dashboard.this,
+                            getString(R.string.jiyu_reinit_result, mJiyuReinitOk, mJiyuReinitFail));
+                }
+            }
+        };
+        for (Widget w : list) {
+            // After a restore the saved appWidgetId is dead -> rebind to a fresh one first.
+            if (awm.getAppWidgetInfo(w.getAppWidgetId()) == null) {
+                rebindWidget(w);
+            }
+            sendOrderedBroadcast(
+                    net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.buildSetNameIntent(w),
+                    null, ack, null, RESULT_CANCELED, null, null);
+        }
+        // rebinds changed appWidgetIds on the items -> persist.
+        LLApp.get().getAppEngine().saveData();
+    }
+
+    /** Once per launch, if any named jiyusagyoban widget has a dead appWidgetId (the post-restore /
+     * post-crash state), offer a one-tap reinitialization. */
+    private void maybeOfferJiyuReinit() {
+        if (getClass() != Dashboard.class || sJiyuAutoOfferChecked) {
+            return;
+        }
+        sJiyuAutoOfferChecked = true;
+        AppWidgetManager awm = AppWidgetManager.getInstance(this);
+        boolean anyDead = false;
+        for (Page page : LLApp.get().getAppEngine().getPageManager().getLoadedPages()) {
+            if (page == null || page.items == null) {
+                continue;
+            }
+            for (Item it : page.items) {
+                if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.hasStoredName(it)
+                        && awm.getAppWidgetInfo(((Widget) it).getAppWidgetId()) == null) {
+                    anyDead = true;
+                    break;
+                }
+            }
+            if (anyDead) {
+                break;
+            }
+        }
+        if (!anyDead) {
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.jiyu_reinit_offer_title)
+                .setMessage(R.string.jiyu_reinit_offer_msg)
+                .setPositiveButton(R.string.mi_reinit_jiyu_widgets, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        reinitJiyuWidgets();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     protected View addBubbleItem(int id, int title) {
@@ -5064,6 +5226,9 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 addBubbleItem(R.id.mi_set_tasker_widget_name, R.string.mi_set_tasker_widget_name);
                 addBubbleItem(R.id.mi_reinit_tasker_widgets, R.string.mi_reinit_tasker_widgets);
                 addBubbleItem(R.id.mi_tasker_a11y_settings, R.string.mi_tasker_a11y_settings);
+            } else if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.isJiyuWidget(item)) {
+                addBubbleItem(R.id.mi_set_jiyu_widget_name, R.string.mi_set_jiyu_widget_name);
+                addBubbleItem(R.id.mi_reinit_jiyu_widgets, R.string.mi_reinit_jiyu_widgets);
             }
         } else if (mode == BUBBLE_MODE_ITEM_NO_EM) {
             Page page = item.getPage();
@@ -5086,6 +5251,9 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                     addBubbleItem(R.id.mi_set_tasker_widget_name, R.string.mi_set_tasker_widget_name);
                     addBubbleItem(R.id.mi_reinit_tasker_widgets, R.string.mi_reinit_tasker_widgets);
                     addBubbleItem(R.id.mi_tasker_a11y_settings, R.string.mi_tasker_a11y_settings);
+                } else if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.isJiyuWidget(item)) {
+                    addBubbleItem(R.id.mi_set_jiyu_widget_name, R.string.mi_set_jiyu_widget_name);
+                    addBubbleItem(R.id.mi_reinit_jiyu_widgets, R.string.mi_reinit_jiyu_widgets);
                 }
 
                 String pkg = Utils.getPackageNameForItem(item);
