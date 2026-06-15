@@ -138,7 +138,6 @@ public class Customize extends ResourceWrapperActivity implements
     /* package */public static final String INTENT_EXTRA_LAUNCHED_FROM = "f";
     public static final String INTENT_EXTRA_GOTO = "g";
     public static final String INTENT_EXTRA_GOTO_GENERAL_LOCK_SCREEN = "gc";
-    /* package */static final String INTENT_EXTRA_GOTO_GENERAL_LANGUAGE = "g1";
     /* package */static final String INTENT_EXTRA_GOTO_GENERAL_EVENTS = "g2";
     /* package */static final String INTENT_EXTRA_GOTO_DASHBOARD_BACKGROUND = "g4";
     /* package */static final String INTENT_EXTRA_GOTO_DASHBOARD_GRID = "g5";
@@ -155,7 +154,6 @@ public class Customize extends ResourceWrapperActivity implements
     private static final int REQUEST_EDIT_EVENT_ACTION = 1;
     private static final int REQUEST_LOAD_STYLE = 2;
     private static final int REQUEST_SAVE_STYLE = 3;
-    private static final int REQUEST_PICK_LANGUAGE_PACK = 8;
     private static final int REQUEST_PICK_SCREEN_WALLPAPER = 10;
     private static final int REQUEST_PICK_ICON_PACK_FOR_APPLY = 12;
     private static final int REQUEST_PICK_DESKTOP_LOCK_SCREEN = 15;
@@ -221,7 +219,6 @@ public class Customize extends ResourceWrapperActivity implements
     private static final int ID_mGCKeepInMemory = 102;
     private static final int ID_mGCAutoEdit = 103;
     private static final int ID_mGCPageAnimation = 104;
-    private static final int ID_mGCLanguageCategory = 105;
     private static final int ID_mGCEventsCategory = 106;
     private static final int ID_mPGSystemBarsTransparentStatusBar = 109;
     private static final int ID_mPGMiscSwapItems = 110;
@@ -312,12 +309,10 @@ public class Customize extends ResourceWrapperActivity implements
     private boolean mDontSaveOnNextPause;
     /**************************************** GLOBAL CONFIG *************************************/
     private ArrayList<LLPreference> mPreferencesGlobalConfig;
-    private ArrayList<LLPreference> mPreferencesGlobalConfigLanguage;
     private ArrayList<LLPreference> mPreferencesGlobalConfigEvents;
     private ArrayList<LLPreference> mPreferencesGlobalConfigLockScreen;
     private ArrayList<LLPreference> mPreferencesGlobalConfigOverlay;
     private LLPreferenceCheckBox mGCExpertMode;
-    private LLPreference mGCLanguageCategory;
     private LLPreference mGCEventsCategory;
     private LLPreference mGCLockScreenCategory;
     private LLPreference mGCOverlayCategory;
@@ -330,9 +325,6 @@ public class Customize extends ResourceWrapperActivity implements
     private LLPreferenceList mGCAppStyle;
     private LLPreferenceCheckBox mGCKeepInMemory;
     private LLPreferenceSlider mGCImagePoolSize;
-    private LLPreference mGCLanguageSelect;
-    private LLPreference mGCLanguageInstall;
-    private LLPreference mGCLanguageContribute;
     private LLPreferenceEventAction mGCEventHomeKey;
     private LLPreferenceEventAction mGCEventMenuKey;
     private LLPreferenceEventAction mGCEventLongMenuKey;
@@ -625,8 +617,6 @@ public class Customize extends ResourceWrapperActivity implements
         if (mIntentGoto != null) {
             if (mIntentGoto.equals(INTENT_EXTRA_GOTO_GENERAL_EVENTS)) {
                 pushPreferenceScreen(mPreferencesGlobalConfigEvents);
-            } else if (mIntentGoto.equals(INTENT_EXTRA_GOTO_GENERAL_LANGUAGE)) {
-                pushPreferenceScreen(mPreferencesGlobalConfigLanguage);
             } else if (mIntentGoto.equals(INTENT_EXTRA_GOTO_GENERAL_LOCK_SCREEN)) {
                 pushPreferenceScreen(mPreferencesGlobalConfigLockScreen);
             } else if (mIntentGoto.equals(INTENT_EXTRA_GOTO_GENERAL_OVERLAY)) {
@@ -774,30 +764,10 @@ public class Customize extends ResourceWrapperActivity implements
             Intent intent = new Intent(this, ScreenManager.class);
             intent.setAction(Intent.ACTION_PICK);
             startActivityForResult(intent, REQUEST_PICK_DESKTOP_OVERLAY);
-        } else if (preference == mGCLanguageCategory) {
-            pushPreferenceScreen(mPreferencesGlobalConfigLanguage);
         } else if (preference == mGCLockScreenCategory) {
             pushPreferenceScreen(mPreferencesGlobalConfigLockScreen);
         } else if (preference == mGCOverlayCategory) {
             pushPreferenceScreen(mPreferencesGlobalConfigOverlay);
-        } else if (preference == mGCLanguageSelect) {
-            Intent i = new Intent(Intent.ACTION_PICK_ACTIVITY);
-            i.putExtra(Intent.EXTRA_TITLE, getString(R.string.lg_pick_t));
-            Intent filter = new Intent("net.pierrox.lightning_launcher.lp.ENUMERATE");
-            i.putExtra(Intent.EXTRA_INTENT, filter);
-            try {
-                startActivityForResult(i, REQUEST_PICK_LANGUAGE_PACK);
-            } catch (Exception e) {
-            }
-        } else if (preference == mGCLanguageInstall) {
-            try {
-                startActivity(new Intent(Intent.ACTION_VIEW,
-                        Version.LANGUAGE_PACK_INSTALL_URI));
-            } catch (Exception e) {
-            }
-        } else if (preference == mGCLanguageContribute) {
-            Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse("http://goo.gl/1RzBI"));
-            startActivity(intent);
         } else if (preference == mPGIcons) {
             pushPreferenceScreen(mPreferencesPageIcons);
         } else if (preference == mPGBackground) {
@@ -1088,13 +1058,6 @@ public class Customize extends ResourceWrapperActivity implements
                     } catch (Exception e) {
                     }
                 }
-            }
-        } else if (requestCode == REQUEST_PICK_LANGUAGE_PACK) {
-            if (resultCode == RESULT_OK) {
-                String pkg_name = data.getComponent().getPackageName();
-                mSystemConfig.language = pkg_name;
-                saveSystemAndGlobalConfig();
-                LLApp.get().restart(true);
             }
         } else if (requestCode == REQUEST_PICK_ICON_PACK_FOR_APPLY) {
             if (resultCode == RESULT_OK) {
@@ -1645,8 +1608,6 @@ public class Customize extends ResourceWrapperActivity implements
     private void loadGlobalConfig() {
         mPreferencesGlobalConfig = new ArrayList<LLPreference>(4);
         mPreferencesGlobalConfig.add(mGCExpertMode = new LLPreferenceCheckBox(this, ID_mGCExpertMode, R.string.em_t, R.string.em_s, mSystemConfig.expertMode, null));
-        mPreferencesGlobalConfig.add(mGCLanguageCategory = new LLPreference(
-                this, ID_mGCLanguageCategory, R.string.language_t, R.string.language_s));
 
         mPreferencesGlobalConfig.add(mGCAppStyle = new LLPreferenceList(this, ID_mGCAppStyle, R.string.gc_as_t, R.array.gc_as_e, mSystemConfig.appStyle, null));
 
@@ -1695,11 +1656,6 @@ public class Customize extends ResourceWrapperActivity implements
             mPreferencesGlobalConfig.add(mGCAlwaysShowStopPoints = new LLPreferenceCheckBox(this, ID_mGCAlwaysShowStopPoints, R.string.assp_t, R.string.assp_s, mSystemConfig.alwaysShowStopPoints, null));
         }
 
-
-        mPreferencesGlobalConfigLanguage = new ArrayList<LLPreference>(3);
-        mPreferencesGlobalConfigLanguage.add(mGCLanguageSelect = new LLPreference(this, ID_NONE, R.string.lg_pick_t, R.string.lg_pick_s));
-        mPreferencesGlobalConfigLanguage.add(mGCLanguageInstall = new LLPreference(this, ID_NONE, R.string.lg_install_t, R.string.lg_install_s));
-        mPreferencesGlobalConfigLanguage.add(mGCLanguageContribute = new LLPreference(this, ID_NONE, R.string.lg_contrib_t, R.string.lg_contrib_s));
 
         ActionsDescription desktopActions = new ActionsDescription(this, Action.FLAG_TYPE_DESKTOP, false);
         ActionsDescription itemActions = new ActionsDescription(this, Action.FLAG_TYPE_DESKTOP, true);

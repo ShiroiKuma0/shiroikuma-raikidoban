@@ -105,35 +105,34 @@ public class Shortcuts extends ResourceWrapperListActivity {
             mItems = new String[]{
                     getString(R.string.settings),                            // 0
                     getString(R.string.general_t),                            // 1
-                    INDENT + getString(R.string.language_t),                    // 2
-                    INDENT + getString(R.string.events_t),                    // 3
-                    INDENT + getString(R.string.s_ls_t),                        // 4
-                    INDENT + getString(R.string.ov_t),                        // 5
-                    getString(R.string.dashboard_t),                        // 6
-                    INDENT + getString(R.string.icons_t),                        // 7
-                    INDENT + getString(R.string.background_t),                // 8
-                    INDENT + getString(R.string.grid_t),                        // 9
-                    INDENT + getString(R.string.folder_look_t),                // 10
-                    INDENT + getString(R.string.sb_t),                        // 11
-                    INDENT + getString(R.string.layout_t),                    // 12
-                    INDENT + getString(R.string.zoom_scroll_t),                // 13
-                    INDENT + getString(R.string.events_t),                    // 14
-                    INDENT + getString(R.string.folder_feel_t),                // 15
-                    INDENT + getString(R.string.pg_misc_t),                    // 16
-                    getString(R.string.app_drawer_t),                        // 17
-                    INDENT + getString(R.string.icons_t),                        // 18
-                    INDENT + getString(R.string.background_t),                // 19
-                    INDENT + getString(R.string.grid_t),                        // 20
-                    INDENT + getString(R.string.folder_look_t),                // 21
-                    INDENT + getString(R.string.sb_t),                        // 22
-                    INDENT + getString(R.string.layout_t),                    // 23
-                    INDENT + getString(R.string.zoom_scroll_t),                // 24
-                    INDENT + getString(R.string.events_t),                    // 25
-                    INDENT + getString(R.string.folder_feel_t),                // 26
-                    INDENT + getString(R.string.adm_t),                // 27
-                    INDENT + getString(R.string.pg_misc_t),                    // 28
-                    getString(R.string.configure_pages_t),                    // 29
-                    getString(R.string.backup_restore_t)                    // 30
+                    INDENT + getString(R.string.events_t),                    // 2
+                    INDENT + getString(R.string.s_ls_t),                        // 3
+                    INDENT + getString(R.string.ov_t),                        // 4
+                    getString(R.string.dashboard_t),                        // 5
+                    INDENT + getString(R.string.icons_t),                        // 6
+                    INDENT + getString(R.string.background_t),                // 7
+                    INDENT + getString(R.string.grid_t),                        // 8
+                    INDENT + getString(R.string.folder_look_t),                // 9
+                    INDENT + getString(R.string.sb_t),                        // 10
+                    INDENT + getString(R.string.layout_t),                    // 11
+                    INDENT + getString(R.string.zoom_scroll_t),                // 12
+                    INDENT + getString(R.string.events_t),                    // 13
+                    INDENT + getString(R.string.folder_feel_t),                // 14
+                    INDENT + getString(R.string.pg_misc_t),                    // 15
+                    getString(R.string.app_drawer_t),                        // 16
+                    INDENT + getString(R.string.icons_t),                        // 17
+                    INDENT + getString(R.string.background_t),                // 18
+                    INDENT + getString(R.string.grid_t),                        // 19
+                    INDENT + getString(R.string.folder_look_t),                // 20
+                    INDENT + getString(R.string.sb_t),                        // 21
+                    INDENT + getString(R.string.layout_t),                    // 22
+                    INDENT + getString(R.string.zoom_scroll_t),                // 23
+                    INDENT + getString(R.string.events_t),                    // 24
+                    INDENT + getString(R.string.folder_feel_t),                // 25
+                    INDENT + getString(R.string.adm_t),                // 26
+                    INDENT + getString(R.string.pg_misc_t),                    // 27
+                    getString(R.string.configure_pages_t),                    // 28
+                    getString(R.string.backup_restore_t)                    // 29
             };
 
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mItems);
@@ -146,11 +145,11 @@ public class Shortcuts extends ResourceWrapperListActivity {
         Intent intent;
         String name;
 
-        if (position == 29) {
+        if (position == 28) {
             intent = new Intent(this, ScreenManager.class);
             intent.setAction(Intent.ACTION_EDIT);
             name = mItems[position].trim();
-        } else if (position == 30) {
+        } else if (position == 29) {
             intent = new Intent(this, BackupRestore.class);
             name = mItems[position].trim();
         } else {
@@ -160,59 +159,56 @@ public class Shortcuts extends ResourceWrapperListActivity {
             String goto_ = null;
             switch (position) {
                 case 2:
-                    goto_ = Customize.INTENT_EXTRA_GOTO_GENERAL_LANGUAGE;
-                    break;
-                case 3:
                     goto_ = Customize.INTENT_EXTRA_GOTO_GENERAL_EVENTS;
                     break;
-                case 4:
+                case 3:
                     goto_ = Customize.INTENT_EXTRA_GOTO_GENERAL_LOCK_SCREEN;
                     break;
-                case 5:
+                case 4:
                     goto_ = Customize.INTENT_EXTRA_GOTO_GENERAL_OVERLAY;
+                    break;
+                case 6:
+                case 17:
+                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_ICONS;
                     break;
                 case 7:
                 case 18:
-                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_ICONS;
+                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_BACKGROUND;
                     break;
                 case 8:
                 case 19:
-                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_BACKGROUND;
+                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_GRID;
                     break;
                 case 9:
                 case 20:
-                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_GRID;
+                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_FOLDER_LOOK;
                     break;
                 case 10:
                 case 21:
-                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_FOLDER_LOOK;
+                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_SYSTEM_BARS;
                     break;
                 case 11:
                 case 22:
-                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_SYSTEM_BARS;
+                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_LAYOUT;
                     break;
                 case 12:
                 case 23:
-                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_LAYOUT;
+                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_ZOOM_SCROLL;
                     break;
                 case 13:
                 case 24:
-                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_ZOOM_SCROLL;
+                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_EVENTS;
                     break;
                 case 14:
                 case 25:
-                    goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_EVENTS;
-                    break;
-                case 15:
-                case 26:
                     goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_FOLDER_FEEL;
                     break;
-                case 27:
+                case 26:
                     goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_AD_MODES;
                     break;
 
-                case 16:
-                case 28:
+                case 15:
+                case 27:
                     goto_ = Customize.INTENT_EXTRA_GOTO_DASHBOARD_MISC;
                     break;
             }
@@ -220,10 +216,10 @@ public class Shortcuts extends ResourceWrapperListActivity {
                 intent.putExtra(Customize.INTENT_EXTRA_GOTO, goto_);
             }
 
-            if (position >= 6 && position < 17) {
+            if (position >= 5 && position < 16) {
                 int current_page = LLApp.get().getAppEngine().readCurrentPage(Page.FIRST_DASHBOARD_PAGE);
                 intent.putExtra(Customize.INTENT_EXTRA_PAGE_PATH, new ContainerPath(current_page).toString());
-            } else if (position >= 17 && position < 29) {
+            } else if (position >= 16 && position < 28) {
                 intent.putExtra(Customize.INTENT_EXTRA_PAGE_ID, new ContainerPath(Page.APP_DRAWER_PAGE).toString());
             }
         }
