@@ -2,6 +2,7 @@ package net.pierrox.lightning_launcher.util;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.util.TypedValue;
 import android.view.View;
@@ -114,6 +115,14 @@ public final class GeometryBoxStyler {
                 rlp.height = Math.round(resolve(cfg.getSize(KEY_ZORDER), DEFAULT_ZORDER_DP) * d);
                 row.setLayoutParams(rlp);
             }
+        }
+
+        // --- stacking-level readout: tile text colour + chrome font, kept bold for prominence (and the
+        // XML 26sp size, since applyTo would only override it when a global font size is configured). ---
+        TextView level = gb.findViewById(R.id.gb_level);
+        if (level != null) {
+            level.setTextColor(UiTheme.color(UiSlot.GEOM_TILE_TEXT));
+            level.setTypeface(UiTheme.typeface(UiSlot.GEOM_TILE_TEXT, Typeface.BOLD));
         }
     }
 

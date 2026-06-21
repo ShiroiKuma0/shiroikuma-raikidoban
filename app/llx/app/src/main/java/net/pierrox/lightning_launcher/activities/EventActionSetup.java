@@ -517,7 +517,7 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
             });
             dialog.show();
         } else if (new_action == GlobalConfig.OPEN_FOLDER) {
-            Utils.createFolderSelectionDialog(this, LLApp.get().getAppEngine(), new Utils.OnFolderSelectionDialogDone() {
+            AlertDialog folderDialog = Utils.createFolderSelectionDialog(this, LLApp.get().getAppEngine(), new Utils.OnFolderSelectionDialogDone() {
                 @Override
                 public void onFolderSelected(String name, int page) {
                     mEventActionForPick.data = String.valueOf(page);
@@ -531,7 +531,9 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
                         mAdapter.notifyDataSetChanged();
                     }
                 }
-            }).show();
+            });
+            folderDialog.show();
+            UiDialogStyler.style(folderDialog);
         } else if (new_action == GlobalConfig.GO_DESKTOP_POSITION) {
             Intent intent = new Intent(Intent.ACTION_CREATE_SHORTCUT);
             intent.setClass(this, ScreenManager.class);

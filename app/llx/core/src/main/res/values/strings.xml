@@ -786,6 +786,8 @@
 <string name="gb_desc_backward">Send backward one layer.</string>
 <string name="gb_desc_forward">Bring forward one layer.</string>
 <string name="gb_desc_to_front">Bring to front — in front of all other elements.</string>
+<string name="gb_level">Layer %1$d/%2$d</string>
+<string name="gb_desc_level">Stacking level of the selected element: 1 = backmost; higher numbers come forward and cover lower ones.</string>
 <string name="mi_geometry">Geometry editor</string>
 
 <!-- added 134 -->

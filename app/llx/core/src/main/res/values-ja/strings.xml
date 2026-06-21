@@ -632,6 +632,8 @@
     <string name="gb_desc_backward">1つ背面へ移動。</string>
     <string name="gb_desc_forward">1つ前面へ移動。</string>
     <string name="gb_desc_to_front">最前面へ — 他のすべての要素の前に移動。</string>
+    <string name="gb_level">層 %1$d/%2$d</string>
+    <string name="gb_desc_level">選択中の要素の重なり順：1が最背面で、数字が大きいほど前面に出て他を覆います。</string>
     <string name="mi_geometry">座標</string>
     <string name="f_af">フェード</string>
     <string name="efolder">パネル</string>

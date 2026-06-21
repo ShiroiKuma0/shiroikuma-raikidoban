@@ -505,6 +505,8 @@ Lightning сейчас подготовит список приложений.
     <string name="gb_desc_backward">На один слой назад.</string>
     <string name="gb_desc_forward">На один слой вперёд.</string>
     <string name="gb_desc_to_front">На передний план — перед всеми остальными элементами.</string>
+    <string name="gb_level">Слой %1$d/%2$d</string>
+    <string name="gb_desc_level">Порядок наложения выбранного элемента: 1 — самый задний; бóльшие числа выходят вперёд и перекрывают меньшие.</string>
     <string name="mi_geometry">Геометрия</string>
     <string name="f_af">Появление/Затухание</string>
     <string name="efolder">Панель</string>

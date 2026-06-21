@@ -78,6 +78,18 @@
         android:layout_margin="3dp"
         android:textSize="44sp"
         android:text="+"/>
+    <!-- Stacking-level readout for the selected element (z-order index / total). Filled and coloured at
+         runtime by Dashboard.updateGeometryBox() + GeometryBoxStyler; updated on every move_* press. -->
+    <TextView
+        android:id="@+id/gb_level"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="3dp"
+        android:gravity="center"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        tools:text="層 3/12"/>
     <LinearLayout
         android:id="@+id/gb_zorder_row"
         android:layout_width="match_parent"

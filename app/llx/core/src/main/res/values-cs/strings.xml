@@ -508,6 +508,8 @@ Klepnutím můžeš vybrat jiný"</string>
     <string name="gb_desc_backward">O vrstvu dozadu.</string>
     <string name="gb_desc_forward">O vrstvu dopředu.</string>
     <string name="gb_desc_to_front">Úplně dopředu — před všechny ostatní prvky.</string>
+    <string name="gb_level">Vrstva %1$d/%2$d</string>
+    <string name="gb_desc_level">Pořadí překrytí vybraného prvku: 1 = úplně vzadu; vyšší čísla jsou více vpředu a překrývají nižší.</string>
     <string name="mi_geometry">Editor pro deformaci položky</string>
     <string name="f_af">Povolit přibližování/oddalování</string>
     <string name="efolder">Panel</string>

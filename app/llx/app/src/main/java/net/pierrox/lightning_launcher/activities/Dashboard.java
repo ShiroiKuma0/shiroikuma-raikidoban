@@ -146,6 +146,7 @@ import net.pierrox.lightning_launcher.util.BackupFolder;
 import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.GeometryBoxStyler;
 import net.pierrox.lightning_launcher.util.ScriptPickerDialog;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 import net.pierrox.lightning_launcher.data.Page;
 import net.pierrox.lightning_launcher.data.PageIndicator;
 import net.pierrox.lightning_launcher.data.SavedItemGeometry;
@@ -442,6 +443,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     private int mGeometryMode;
     private Button mGeometryEdit1;
     private Button mGeometryEdit2;
+    private TextView mGeometryLevel;
     private int mGeometryEdit;
     private boolean mHasGeometryRepeat;
     private int mNoScriptCounter;
@@ -1992,6 +1994,9 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                     }
                 }
                 mUndoStack.storeGroupEnd();
+                // Keep the geometry box open and refresh its level readout to reflect the new z-order.
+                close_bubble = false;
+                updateGeometryBox();
                 break;
 
             case R.id.mi_dm_add:
@@ -3171,6 +3176,10 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 Flash.show(this, R.string.gb_desc_mode);
                 return true;
 
+            case R.id.gb_level:
+                Flash.show(this, R.string.gb_desc_level);
+                return true;
+
             case R.id.move_bottom:
                 Flash.show(this, R.string.gb_desc_to_back);
                 return true;
@@ -3685,7 +3694,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 }
             }).show();
         } else if (a == GlobalConfig.OPEN_FOLDER) {
-            Utils.createFolderSelectionDialog(this, mEngine, new Utils.OnFolderSelectionDialogDone() {
+            AlertDialog folderDialog = Utils.createFolderSelectionDialog(this, mEngine, new Utils.OnFolderSelectionDialogDone() {
                 @Override
                 public void onFolderSelected(String name, int page) {
                     applyActionsSlotEdit(new EventAction(GlobalConfig.OPEN_FOLDER, String.valueOf(page)));
@@ -3695,7 +3704,9 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 public void onNoFolderSelected() {
                     // keep the existing value
                 }
-            }).show();
+            });
+            folderDialog.show();
+            UiDialogStyler.style(folderDialog);
         } else if (a == GlobalConfig.GO_DESKTOP_POSITION) {
             Intent intent = new Intent(Intent.ACTION_CREATE_SHORTCUT);
             intent.setClass(this, ScreenManager.class);
@@ -6068,6 +6079,18 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             mGeometryBox.findViewById(R.id.move_down).setEnabled(zorder_enable);
             mGeometryBox.findViewById(R.id.move_up).setEnabled(zorder_enable);
             mGeometryBox.findViewById(R.id.move_top).setEnabled(zorder_enable);
+
+            // Stacking-level readout: 1-based z-index from the back, plus the total count, so it is
+            // immediately clear whether a moved item still covers (or is covered by) others.
+            if (mGeometryLevel != null) {
+                if (masterSelectedItem != null) {
+                    ArrayList<Item> pageItems = masterSelectedItem.getPage().items;
+                    int idx = pageItems.indexOf(masterSelectedItem);
+                    mGeometryLevel.setText(idx < 0 ? "" : getString(R.string.gb_level, idx + 1, pageItems.size()));
+                } else {
+                    mGeometryLevel.setText("");
+                }
+            }
         }
     }
 
@@ -6157,6 +6180,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             mGeometryEdit2 = mGeometryBox.findViewById(R.id.gb_e2);
             mGeometryEdit2.setOnClickListener(this);
             mGeometryEdit2.setOnLongClickListener(this);
+            mGeometryLevel = mGeometryBox.findViewById(R.id.gb_level);
+            mGeometryLevel.setOnLongClickListener(this);
             mGeometryBox.findViewById(R.id.gb_hm).setOnClickListener(this);
             mGeometryBox.findViewById(R.id.gb_hm).setOnLongClickListener(this);
             mGeometryBox.findViewById(R.id.gb_hp).setOnClickListener(this);
@@ -8401,19 +8426,15 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 boolean is_stop_point = item.getClass() == StopPoint.class;
                 Item masterSelectedItem = mEditItemLayout.getMasterSelectedItem();
                 if (!itemView.isSelected()) {
-                    if (mSystemConfig.hasSwitch(SystemConfig.SWITCH_MULTI_SELECTION)) {
-                        mEditItemLayout.setMasterSelectedItem(item);
-                        itemView.setSelected(true);
-                        configureHandlesForItemView(itemView, HandleView.Mode.CONTENT_SIZE, true);
-                    } else {
-                        if (masterSelectedItem != null) {
-                            mEditItemLayout.getMasterSelectedItemView().setSelected(false);
-                            mEditItemLayout.setMasterSelectedItem(null);
-                        }
-                        mEditItemLayout.setMasterSelectedItem(item);
-                        itemView.setSelected(true);
-                        configureHandlesForItemView(itemView, HandleView.Mode.CONTENT_SIZE, true);
+                    // Single selection: a tap always makes the tapped item the sole selection, clearing
+                    // any others first. (Previously, with multi-selection on, taps accumulated, leaving
+                    // several items selected at once — which obscured which item the controls act on.)
+                    for (ItemView selectedItemView : getSelectedItemViews()) {
+                        selectedItemView.setSelected(false);
                     }
+                    mEditItemLayout.setMasterSelectedItem(item);
+                    itemView.setSelected(true);
+                    configureHandlesForItemView(itemView, HandleView.Mode.CONTENT_SIZE, true);
                 } else {
                     if (!mMoveStarted) {
                         if (item == masterSelectedItem) {

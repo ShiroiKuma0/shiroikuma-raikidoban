@@ -43,12 +43,15 @@ import android.text.Spanned;
 import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import net.pierrox.android.lsvg.SvgDrawable;
@@ -63,6 +66,8 @@ import net.pierrox.lightning_launcher.configuration.ItemConfig;
 import net.pierrox.lightning_launcher.configuration.JsonFields;
 import net.pierrox.lightning_launcher.configuration.PageConfig;
 import net.pierrox.lightning_launcher.configuration.ShortcutConfig;
+import net.pierrox.lightning_launcher.configuration.UiSlot;
+import net.pierrox.lightning_launcher.configuration.UiTheme;
 import net.pierrox.lightning_launcher.engine.LightningEngine;
 import net.pierrox.lightning_launcher.engine.Screen;
 import net.pierrox.lightning_launcher.script.Script;
@@ -2130,7 +2135,7 @@ public class Utils {
         return builder.create();
     }
 
-    public static Dialog createFolderSelectionDialog(Context context, LightningEngine engine, final OnFolderSelectionDialogDone listener) {
+    public static AlertDialog createFolderSelectionDialog(Context context, LightningEngine engine, final OnFolderSelectionDialogDone listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         final ArrayList<String> folders_name = new ArrayList<String>();
         final ArrayList<Integer> folders_page = new ArrayList<Integer>();
@@ -2146,9 +2151,22 @@ public class Utils {
             }
         }
 
-        String[] items = new String[folders_name.size()];
-        folders_name.toArray(items);
-        builder.setItems(items, new DialogInterface.OnClickListener() {
+        // Theme each row yellow-on-black: builder.setItems(...) would use the framework's default
+        // adapter whose text stays white, so build a DIALOG_TEXT-styled adapter like ThemedShortcutPicker.
+        final LayoutInflater inflater = LayoutInflater.from(context);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,
+                android.R.layout.simple_list_item_1, android.R.id.text1, folders_name) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View v = convertView != null ? convertView
+                        : inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
+                TextView label = v.findViewById(android.R.id.text1);
+                label.setText(folders_name.get(position));
+                UiTheme.applyTo(label, UiSlot.DIALOG_TEXT);
+                return v;
+            }
+        };
+        builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 listener.onFolderSelected(folders_name.get(i), folders_page.get(i));
