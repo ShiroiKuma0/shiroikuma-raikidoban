@@ -74,6 +74,8 @@ public class AddItemDialog extends AlertDialog implements View.OnClickListener, 
     public static final int AI_BOOKMARK = 16;
     public static final int AI_LIGHTNING_ACTION = 17;
     public static final int AI_CUSTOM_VIEW = 18;
+    // Fork-only: add a 「白い熊 自由作業盤」 shortcut item straight from jiyusagyoban's own creator.
+    public static final int AI_JIYU_SHORTCUT = 19;
     private final AddItemDialogInterface mAddItemDialogInterface;
     private final LayoutInflater mInflater;
 
@@ -158,6 +160,7 @@ public class AddItemDialog extends AlertDialog implements View.OnClickListener, 
 
         cat = addDialogAddCategory(builtinsView, R.string.ac_s);
         addDialogAddItem(cat, labels[0], "h", AI_APP);
+        addDialogAddItem(cat, context.getString(R.string.an_ls_jiyu), "e", AI_JIYU_SHORTCUT);
         addDialogAddItem(cat, labels[1], "e", AI_SHORTCUT);
         addDialogAddItem(cat, context.getString(R.string.ai_t), "k", AI_TEXT);
         addDialogAddItem(cat, context.getString(R.string.ai_i), "X", AI_ICON);
@@ -183,6 +186,13 @@ public class AddItemDialog extends AlertDialog implements View.OnClickListener, 
         addDialogAddItem(cat, context.getString(R.string.i_ul), "b", AI_UNLOCKER);
         addDialogAddItem(cat, context.getString(R.string.cv), "1", AI_CUSTOM_VIEW);
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // 「白い熊 雷起動盤 UI」: give the picker the same yellow chrome border as the themed dialogs.
+        UiDialogStyler.style(this);
     }
 
     @Override

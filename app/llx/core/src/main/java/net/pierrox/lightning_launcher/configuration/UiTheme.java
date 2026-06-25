@@ -22,6 +22,8 @@ public final class UiTheme {
     public static final int DEFAULT_BUTTON_CORNER_DP = 6;
     /** Default corner radius (dp) for a dialog panel when the user has not set one. */
     public static final int DEFAULT_DIALOG_CORNER_DP = 12;
+    /** Default corner radius (dp) for the bubble/menu panel — its native rounding. */
+    public static final int DEFAULT_MENU_CORNER_DP = 8;
 
     private UiTheme() {
     }
@@ -60,6 +62,9 @@ public final class UiTheme {
 
     /** Unset-default corner radius (dp): panels round more (12) than buttons (6). */
     public static int defaultCornerDp(UiSlot slot) {
+        if (slot == UiSlot.MENU_BORDER) {
+            return DEFAULT_MENU_CORNER_DP;
+        }
         boolean panel = slot == UiSlot.DIALOG_BORDER || slot == UiSlot.GEOM_PANEL_BORDER;
         return panel ? DEFAULT_DIALOG_CORNER_DP : DEFAULT_BUTTON_CORNER_DP;
     }

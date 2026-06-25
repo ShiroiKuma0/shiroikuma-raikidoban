@@ -263,7 +263,6 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     private static final int REQUEST_PICK_CUSTOM_ICON = 18;
     private static final int REQUEST_SCRIPT_CROP_IMAGE = 19;
     private static final int REQUEST_EDIT_LAUNCH_ACTION = 20;
-    private static final int REQUEST_TASKER_REINIT_CONFIGURE = 201;
     // Gesture-actions overview: pick results are handled at the top of onActivityResult.
     private static final int REQUEST_ACTIONS_PICK_APP = 9101;
     private static final int REQUEST_ACTIONS_PICK_SHORTCUT = 9102;
@@ -845,8 +844,6 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
 
         updateLightningLiveWallpaperVisibility();
 
-        maybeOfferTaskerReinit();
-
         maybeOfferJiyuReinit();
     }
 
@@ -1013,12 +1010,6 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_TASKER_REINIT_CONFIGURE) {
-            // a Tasker widget config dialog finished (OK or back) -> move to the next one
-            mTaskerReinitIndex++;
-            processNextTaskerWidget();
-            return;
-        }
         if (requestCode == REQUEST_ACTIONS_PICK_APP) {
             if (resultCode == RESULT_OK && data != null) {
                 applyActionsSlotEdit(new EventAction(GlobalConfig.LAUNCH_APP, data.toUri(0)));
@@ -1519,14 +1510,9 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 .show();
     }
 
-    private static boolean isTaskerAction(EventAction ea) {
-        return ea != null && ea.action == GlobalConfig.LAUNCH_SHORTCUT && ea.data != null
-                && (ea.data.contains("taskerm") || ea.data.contains("dinglisch"));
-    }
-
     // Backs up first, then binds single-finger swipes to the matrix and clears the now-redundant
-    // per-page Tasker on-load checks and hand-wired GO_DESKTOP_POSITION swipes. Runs off the main
-    // thread (heavy backup); returns true on success. Idempotent via foldGrid.migrated.
+    // hand-wired GO_DESKTOP_POSITION swipes. Runs off the main thread (heavy backup); returns true on
+    // success. Idempotent via foldGrid.migrated.
     private boolean performFoldMigration() {
         FoldGrid g = foldGrid();
         if (g.isEmpty() || g.migrated) {
@@ -1567,10 +1553,6 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                     }
                     Page page = mEngine.getOrLoadPage(pageId);
                     boolean changed = false;
-                    if (isTaskerAction(page.config.load)) {
-                        page.config.load = EventAction.UNSET();
-                        changed = true;
-                    }
                     if (page.config.swipeLeft != null && page.config.swipeLeft.action == GlobalConfig.GO_DESKTOP_POSITION) {
                         page.config.swipeLeft = EventAction.UNSET();
                         changed = true;
@@ -1919,28 +1901,12 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 ((Widget) targetItem).onConfigure(this);
                 break;
 
-            case R.id.mi_set_tasker_widget_name:
-                setTaskerWidgetName((Widget) targetItem);
-                break;
-
-            case R.id.mi_reinit_tasker_widgets:
-                reinitTaskerWidgets();
-                break;
-
             case R.id.mi_set_jiyu_widget_name:
                 setJiyuWidgetName((Widget) targetItem);
                 break;
 
             case R.id.mi_reinit_jiyu_widgets:
                 reinitJiyuWidgets();
-                break;
-
-            case R.id.mi_tasker_a11y_settings:
-                try {
-                    startActivity(new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS));
-                } catch (Exception e) {
-                    // pass
-                }
                 break;
 
             case R.id.mi_ef_edit_layout:
@@ -2702,14 +2668,14 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             case DIALOG_APP_NOT_INSTALLED:
                 if (mNotValidShortcut != null) {
                     final ComponentName cn = mNotValidShortcut.getIntent().getComponent();
-                    // A 4th choice ("Tasker shortcut") won't fit AlertDialog's three buttons, so offer the
-                    // choices as a themed list: pick another app, repoint at a Tasker shortcut, or (when the
-                    // missing component is known) open the store. Cancel stays a button.
+                    // A 4th choice ("白い熊 自由作業盤 shortcut") won't fit AlertDialog's three buttons, so offer
+                    // the choices as a themed list: pick another app, repoint at a jiyusagyoban shortcut, or
+                    // (when the missing component is known) open the store. Cancel stays a button.
                     final java.util.ArrayList<CharSequence> labels = new java.util.ArrayList<>();
                     final java.util.ArrayList<Integer> kinds = new java.util.ArrayList<>();
                     labels.add(getString(R.string.mi_pick_app));
                     kinds.add(0);
-                    labels.add(getString(R.string.an_ls_tasker));
+                    labels.add(getString(R.string.an_ls_jiyu));
                     kinds.add(1);
                     labels.add(getString(R.string.ll_action_shortcut));
                     kinds.add(3);
@@ -2745,7 +2711,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                                     replaceShortcutApp(target);
                                     break;
                                 case 1:
-                                    pickTaskerShortcutForItem(target);
+                                    pickJiyuShortcutForItem(target);
                                     break;
                                 case 3:
                                     pickLightningActionForItem(target);
@@ -2812,6 +2778,9 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                         switch (id) {
                             case AddItemDialog.AI_APP:
                                 selectAppForAdd();
+                                break;
+                            case AddItemDialog.AI_JIYU_SHORTCUT:
+                                selectJiyuShortcutForAdd();
                                 break;
                             case AddItemDialog.AI_SHORTCUT:
                                 selectShortcutForAddOrPick(null);
@@ -3549,14 +3518,14 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         startActivityForResult(picker, REQUEST_SELECT_APP_FOR_PICK);
     }
 
-    // From the "app not installed" dialog: repoint the item straight at a Tasker shortcut via Tasker's own
-    // creator (reusing the item-replace result path, REQUEST_SELECT_SHORTCUT_FOR_PICK2). Falls back to the
-    // generic shortcut picker when Tasker is not installed.
-    private void pickTaskerShortcutForItem(Item item) {
+    // From the "app not installed" dialog: repoint the item straight at a 「白い熊 自由作業盤」 shortcut via
+    // jiyusagyoban's own creator (reusing the item-replace result path, REQUEST_SELECT_SHORTCUT_FOR_PICK2).
+    // Falls back to the generic shortcut picker when jiyusagyoban is not installed.
+    private void pickJiyuShortcutForItem(Item item) {
         mTmpItem = item;
         PackageManager pm = getPackageManager();
         for (ResolveInfo ri : pm.queryIntentActivities(new Intent(Intent.ACTION_CREATE_SHORTCUT), 0)) {
-            if (net.pierrox.lightning_launcher.util.TaskerWidgets.TASKER_PACKAGE.equals(ri.activityInfo.packageName)) {
+            if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.JIYU_PACKAGE.equals(ri.activityInfo.packageName)) {
                 Intent chosen = new Intent(Intent.ACTION_CREATE_SHORTCUT);
                 chosen.setComponent(new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name));
                 try {
@@ -3568,6 +3537,23 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             }
         }
         selectShortcutForAddOrPick(item);
+    }
+
+    // From the "add item" picker: add a new 「白い熊 自由作業盤」 shortcut item by jumping straight into
+    // jiyusagyoban's creator, then reuse the normal add-shortcut result path. Falls back to the generic
+    // shortcut-app picker when jiyusagyoban is not installed.
+    private void selectJiyuShortcutForAdd() {
+        mTmpItem = null;
+        PackageManager pm = getPackageManager();
+        for (ResolveInfo ri : pm.queryIntentActivities(new Intent(Intent.ACTION_CREATE_SHORTCUT), 0)) {
+            if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.JIYU_PACKAGE.equals(ri.activityInfo.packageName)) {
+                Intent chosen = new Intent(Intent.ACTION_CREATE_SHORTCUT);
+                chosen.setComponent(new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name));
+                onActivityResult(REQUEST_SELECT_SHORTCUT_FOR_ADD1, RESULT_OK, chosen);
+                return;
+            }
+        }
+        selectShortcutForAddOrPick(null);
     }
 
     // From the "app not installed" dialog: repoint the item at a 「白い熊 雷起動盤」 (Lightning) action by
@@ -4514,12 +4500,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             } else {
                 Item titleItem = itemView.getItem();
                 text = Utils.formatItemName(titleItem, 20, getSelectedItemViews().size());
-                if (net.pierrox.lightning_launcher.util.TaskerWidgets.isTaskerWidgetV2(titleItem)) {
-                    // Show the recorded Tasker name on a second line so it can be checked at a glance.
-                    String taskerName = net.pierrox.lightning_launcher.util.TaskerWidgets.getStoredName(titleItem);
-                    text = text + "\n" + (taskerName != null ? taskerName : getString(R.string.tasker_name_unset));
-                } else if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.isJiyuWidget(titleItem)) {
-                    // Same idea for jiyusagyoban widgets: recorded name on a second line.
+                if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.isJiyuWidget(titleItem)) {
+                    // Show the recorded jiyusagyoban name on a second line so it can be checked at a glance.
                     String jiyuName = net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.getStoredName(titleItem);
                     text = text + "\n" + (jiyuName != null ? jiyuName : getString(R.string.jiyu_name_unset));
                 }
@@ -4642,184 +4624,9 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         mBubbleContent.addView(view);
     }
 
-    // ---- Tasker Widget V2 re-initialization (see util/TaskerWidgets + .claude/skills/build-apk) ----
-    private java.util.ArrayList<Widget> mTaskerReinitQueue;
-    private int mTaskerReinitIndex;
-
-    /** Prompt for / edit the Tasker name stored on a widget item. Captured once here, then kept on
-     * the item (tag) so it survives Lightning backups; the re-init flow uses it after a restore. */
-    private void setTaskerWidgetName(final Widget w) {
-        final EditText edit = new EditText(this);
-        String current = net.pierrox.lightning_launcher.util.TaskerWidgets.getStoredName(w);
-        if (current != null) {
-            edit.setText(current);
-            edit.setSelection(current.length());
-        }
-        FrameLayout fl = new FrameLayout(this);
-        fl.setPadding(30, 10, 30, 10);
-        fl.addView(edit);
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.mi_set_tasker_widget_name)
-                .setMessage(R.string.tasker_widget_name_title)
-                .setView(fl)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface d, int which) {
-                        net.pierrox.lightning_launcher.util.TaskerWidgets.setStoredName(w, edit.getText().toString());
-                        w.notifyChanged();
-                        LLApp.get().getAppEngine().saveData();
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
-    }
-
-    /** Collect every named Tasker widget on the loaded desktops, then sequentially re-bind (if its
-     * appWidgetId died on restore) and re-open each one's Tasker config with its name on the clipboard. */
-    public void reinitTaskerWidgets() {
-        // Auto-fill needs the accessibility service; if it's off, warn and route to its settings
-        // instead of silently falling back to manual paste.
-        if (!net.pierrox.lightning_launcher.util.TaskerWidgetAccessibilityService.isConnected()) {
-            promptEnableTaskerAccessibility();
-            return;
-        }
-        java.util.ArrayList<Widget> list = new java.util.ArrayList<>();
-        // Scan ALL pages (every desktop and folder), not just the ones currently loaded, so a single
-        // run covers Tasker widgets across all desktops.
-        String[] pageNames = FileUtils.getPagesDir(LLApp.get().getAppEngine().getBaseDir()).list();
-        if (pageNames != null) {
-            for (String pageName : pageNames) {
-                int pageId;
-                try {
-                    pageId = Integer.parseInt(pageName);
-                } catch (NumberFormatException e) {
-                    continue;
-                }
-                Page page = LLApp.get().getAppEngine().getOrLoadPage(pageId);
-                if (page == null || page.items == null) {
-                    continue;
-                }
-                for (Item it : page.items) {
-                    if (net.pierrox.lightning_launcher.util.TaskerWidgets.hasStoredName(it)) {
-                        list.add((Widget) it);
-                    }
-                }
-            }
-        }
-        if (list.isEmpty()) {
-            Flash.show(this, R.string.tasker_reinit_none);
-            return;
-        }
-        mTaskerReinitQueue = list;
-        mTaskerReinitIndex = 0;
-        processNextTaskerWidget();
-    }
-
-    private static boolean sTaskerAutoOfferChecked = false;
-
-    /** Once per launch, if any named Tasker widget has a dead appWidgetId (the post-restore /
-     * post-crash state), offer a one-tap reinitialization. */
-    private void maybeOfferTaskerReinit() {
-        if (getClass() != Dashboard.class || sTaskerAutoOfferChecked) {
-            return;
-        }
-        sTaskerAutoOfferChecked = true;
-        AppWidgetManager awm = AppWidgetManager.getInstance(this);
-        boolean anyDead = false;
-        for (Page page : LLApp.get().getAppEngine().getPageManager().getLoadedPages()) {
-            if (page == null || page.items == null) {
-                continue;
-            }
-            for (Item it : page.items) {
-                if (net.pierrox.lightning_launcher.util.TaskerWidgets.hasStoredName(it)
-                        && awm.getAppWidgetInfo(((Widget) it).getAppWidgetId()) == null) {
-                    anyDead = true;
-                    break;
-                }
-            }
-            if (anyDead) {
-                break;
-            }
-        }
-        if (!anyDead) {
-            return;
-        }
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.tasker_reinit_offer_title)
-                .setMessage(R.string.tasker_reinit_offer_msg)
-                .setPositiveButton(R.string.mi_reinit_tasker_widgets, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface d, int which) {
-                        reinitTaskerWidgets();
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
-    }
-
-    /** Warn that the accessibility auto-fill service is required, and offer to open its settings. */
-    private void promptEnableTaskerAccessibility() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.tasker_a11y_required_title)
-                .setMessage(getString(R.string.tasker_a11y_required_msg, getString(R.string.tasker_a11y_label)))
-                .setPositiveButton(R.string.tasker_a11y_open_settings, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface d, int which) {
-                        try {
-                            startActivity(new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS));
-                        } catch (Exception e) {
-                            // pass
-                        }
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
-    }
-
-    private void processNextTaskerWidget() {
-        if (mTaskerReinitQueue == null) {
-            return;
-        }
-        AppWidgetManager awm = AppWidgetManager.getInstance(this);
-        while (mTaskerReinitIndex < mTaskerReinitQueue.size()) {
-            Widget w = mTaskerReinitQueue.get(mTaskerReinitIndex);
-            // after a restore the saved appWidgetId is dead -> rebind to a fresh one first
-            if (awm.getAppWidgetInfo(w.getAppWidgetId()) == null && !rebindWidget(w)) {
-                mTaskerReinitIndex++;
-                continue;
-            }
-            Intent intent = w.getConfigureIntent();
-            if (intent == null) {
-                mTaskerReinitIndex++;
-                continue;
-            }
-            String name = net.pierrox.lightning_launcher.util.TaskerWidgets.getStoredName(w);
-            // Auto-fill via the accessibility service if the user enabled it; the clipboard copy
-            // (and the paste toast below) stay as the fallback when it is off.
-            net.pierrox.lightning_launcher.util.TaskerWidgetAccessibilityService.arm(name);
-            android.content.ClipboardManager cm = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-            if (cm != null && name != null) {
-                cm.setPrimaryClip(android.content.ClipData.newPlainText(getString(R.string.tasker_widget_name_title), name));
-            }
-            if (!net.pierrox.lightning_launcher.util.TaskerWidgetAccessibilityService.isConnected()) {
-                Flash.show(this, getString(R.string.tasker_reinit_paste, name), Toast.LENGTH_LONG);
-            }
-            try {
-                startActivityForResult(intent, REQUEST_TASKER_REINIT_CONFIGURE);
-                return;
-            } catch (Exception e) {
-                mTaskerReinitIndex++;
-            }
-        }
-        mTaskerReinitQueue = null;
-        net.pierrox.lightning_launcher.util.TaskerWidgetAccessibilityService.disarm();
-        LLApp.get().getAppEngine().saveData();
-        Flash.show(this, R.string.tasker_reinit_done);
-    }
-
     /** Re-bind a widget whose appWidgetId is no longer valid (post-restore) to its saved provider,
-     * allocating a fresh appWidgetId. Provider-agnostic — shared by the Tasker and jiyusagyoban
-     * re-init flows. @return true if it is now bound. */
+     * allocating a fresh appWidgetId. Provider-agnostic — used by the jiyusagyoban re-init flow.
+     * @return true if it is now bound. */
     private boolean rebindWidget(Widget w) {
         ComponentName cn = w.getComponentName();
         if (cn == null || sBindAppWidgetIdIfAllowed == null) {
@@ -4852,7 +4659,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     private int mJiyuReinitFail;
     private static boolean sJiyuAutoOfferChecked = false;
 
-    /** Prompt for / edit the jiyusagyoban name stored on a widget item (mirrors setTaskerWidgetName).
+    /** Prompt for / edit the jiyusagyoban name stored on a widget item.
      * Kept on the item tag so it survives Lightning backups; the headless re-init uses it after a restore. */
     private void setJiyuWidgetName(final Widget w) {
         final EditText edit = new EditText(this);
@@ -5027,8 +4834,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         UiTheme.applyFont(b, UiSlot.MENU_TEXT);
     }
 
-    // 「白い熊 雷起動盤 UI」: the static bubble chrome (title, icon buttons, and — when overridden — the
-    // menu background panel + arrows + item cells). Re-applied on every open so config edits take effect.
+    // 「白い熊 雷起動盤 UI」: the bubble chrome — title, icon buttons, and the menu panel + border (and,
+    // when the bg is overridden, the arrows + item cells). Re-applied on every open so config edits apply.
     private void applyBubbleChrome() {
         if (mBubble == null) {
             return;
@@ -5050,19 +4857,51 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             }
         }
 
-        // Background only when the user actually overrode it (else the theme's black panel is kept).
+        // Panel: MENU_BG fill framed by the configurable MENU_BORDER (colour + width + corner). Built
+        // fresh each open so 「白い熊 雷起動盤 UI」 edits apply; replaces the static bubble_bg drawable.
+        applyBubblePanel();
+        // When the menu background is overridden, also retint the pointer arrows + content cells to match.
         if (UiConfig.get().hasOverride(UiSlot.MENU_BG.key)) {
-            int bg = UiTheme.color(UiSlot.MENU_BG);
-            tintBubbleBackground(mBubble, bg);
+            tintBubbleBackground(mBubble, UiTheme.color(UiSlot.MENU_BG));
         }
+    }
+
+    // Give the bubble's ScrollView (the panel) a rounded MENU_BG fill framed by the MENU_BORDER stroke,
+    // inset to leave room for the pointer arrow (mirrors the old bubble_bg layer-list: 8dp inset + 8dp
+    // content padding + rounded fill). Built fresh each open so border/colour edits take effect.
+    private void applyBubblePanel() {
+        android.widget.ScrollView sv = null;
+        for (int i = 0; i < mBubble.getChildCount(); i++) {
+            if (mBubble.getChildAt(i) instanceof android.widget.ScrollView) {
+                sv = (android.widget.ScrollView) mBubble.getChildAt(i);
+                break;
+            }
+        }
+        if (sv == null) {
+            return;
+        }
+        float d = getResources().getDisplayMetrics().density;
+        int inset = Math.round(8 * d);   // arrow gap (was the bubble_bg layer-list inset)
+        int pad = Math.round(8 * d);     // content padding (was the shape <padding>)
+        android.graphics.drawable.GradientDrawable panel = new android.graphics.drawable.GradientDrawable();
+        panel.setColor(UiTheme.color(UiSlot.MENU_BG));
+        panel.setCornerRadius(UiTheme.cornerRadiusDp(UiSlot.MENU_BORDER) * d);
+        int bw = UiTheme.borderWidthDp(UiSlot.MENU_BORDER);
+        if (bw > 0) {
+            panel.setStroke(Math.round(bw * d), UiTheme.color(UiSlot.MENU_BORDER));
+        }
+        sv.setBackground(new android.graphics.drawable.InsetDrawable(panel, inset));
+        // setBackground resets padding to the inset only; restore inset + content padding so items keep
+        // their gap inside the panel.
+        int total = inset + pad;
+        sv.setPadding(total, total, total, total);
     }
 
     private void tintBubbleBackground(android.view.ViewGroup root, int bg) {
         for (int i = 0; i < root.getChildCount(); i++) {
             View c = root.getChildAt(i);
-            if (c instanceof android.widget.ScrollView) {
-                tintDrawable(c.getBackground(), bg);
-            } else if (c instanceof ImageView) {
+            // The panel (ScrollView) is painted by applyBubblePanel; here only the pointer arrows.
+            if (c instanceof ImageView) {
                 tintDrawable(((ImageView) c).getDrawable(), bg);
             }
         }
@@ -5230,14 +5069,10 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             addBubbleItem(R.id.mi_position, R.string.mi_position);
             addBubbleItem(R.id.mi_actions, R.string.mi_actions);
             addBubbleItem(R.id.mi_gesture_actions, R.string.acd_actions);
-            // A live Tasker Widget V2 swallows the normal-mode long-press, so its labeling / re-init /
-            // accessibility entries are unreachable from the no-edit menu. Surface them here too: in edit
-            // mode you tap the widget to select it and get this bubble.
-            if (net.pierrox.lightning_launcher.util.TaskerWidgets.isTaskerWidgetV2(item)) {
-                addBubbleItem(R.id.mi_set_tasker_widget_name, R.string.mi_set_tasker_widget_name);
-                addBubbleItem(R.id.mi_reinit_tasker_widgets, R.string.mi_reinit_tasker_widgets);
-                addBubbleItem(R.id.mi_tasker_a11y_settings, R.string.mi_tasker_a11y_settings);
-            } else if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.isJiyuWidget(item)) {
+            // A live jiyusagyoban widget swallows the normal-mode long-press, so its labeling / re-init
+            // entries are unreachable from the no-edit menu. Surface them here too: in edit mode you tap
+            // the widget to select it and get this bubble.
+            if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.isJiyuWidget(item)) {
                 addBubbleItem(R.id.mi_set_jiyu_widget_name, R.string.mi_set_jiyu_widget_name);
                 addBubbleItem(R.id.mi_reinit_jiyu_widgets, R.string.mi_reinit_jiyu_widgets);
             }
@@ -5258,11 +5093,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 if (has_widget_options)
                     addBubbleItem(R.id.mi_widget_options, R.string.mi_widget_options);
 
-                if (net.pierrox.lightning_launcher.util.TaskerWidgets.isTaskerWidgetV2(item)) {
-                    addBubbleItem(R.id.mi_set_tasker_widget_name, R.string.mi_set_tasker_widget_name);
-                    addBubbleItem(R.id.mi_reinit_tasker_widgets, R.string.mi_reinit_tasker_widgets);
-                    addBubbleItem(R.id.mi_tasker_a11y_settings, R.string.mi_tasker_a11y_settings);
-                } else if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.isJiyuWidget(item)) {
+                if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.isJiyuWidget(item)) {
                     addBubbleItem(R.id.mi_set_jiyu_widget_name, R.string.mi_set_jiyu_widget_name);
                     addBubbleItem(R.id.mi_reinit_jiyu_widgets, R.string.mi_reinit_jiyu_widgets);
                 }
@@ -8656,10 +8487,6 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
 
                 case GlobalConfig.SHOW_APP_SHORTCUTS:
                     showAppShortcuts(itemView);
-                    break;
-
-                case GlobalConfig.REINIT_TASKER_WIDGETS:
-                    reinitTaskerWidgets();
                     break;
 
                 case GlobalConfig.SEARCH:

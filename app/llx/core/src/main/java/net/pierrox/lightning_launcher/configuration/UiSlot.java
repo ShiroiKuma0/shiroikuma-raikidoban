@@ -23,6 +23,10 @@ public enum UiSlot {
     MENU_TEXT("llui_menu_text", UiGroup.MENUS, R.string.llui_menu_text, false, true, "llui_text", 0),
     MENU_BG("llui_menu_bg", UiGroup.MENUS, R.string.llui_menu_bg, false, false, "llui_background", 0),
     MENU_ACCENT("llui_menu_accent", UiGroup.MENUS, R.string.llui_menu_accent, false, false, "llui_accent", 0),
+    // Frame around the bubble/menu panel. Colour cascades from TEXT (yellow by default); its WIDTH and
+    // corner RADIUS are stored separately (defaults {@link UiTheme#DEFAULT_BORDER_DP} / the bubble's
+    // native {@link UiTheme#DEFAULT_MENU_CORNER_DP}). Width 0 = no border, radius 0 = square.
+    MENU_BORDER("llui_menu_border", UiGroup.MENUS, R.string.llui_menu_border, false, false, "llui_text", 0),
 
     // --- Custom dialogs (Gestures / Fold matrix / pickers / flashes) ---
     DIALOG_TEXT("llui_dialog_text", UiGroup.DIALOGS, R.string.llui_dialog_text, false, true, "llui_text", 0),

@@ -53,7 +53,7 @@ public class GlobalConfig extends JsonLoader {
     public static final int HIDE_FLOATING_DESKTOP = 43;
     public static final int OPEN_HIERARCHY_SCREEN = 44;
     public static final int SHOW_APP_SHORTCUTS = 45;
-    public static final int REINIT_TASKER_WIDGETS = 46;
+    // 46 (REINIT_TASKER_WIDGETS) retired — the Tasker widget re-init feature was removed.
     // Move within the current fold-matrix row (see FoldGrid): previous / next horizontal slot.
     public static final int MATRIX_PREV_IN_ROW = 47;
     public static final int MATRIX_NEXT_IN_ROW = 48;

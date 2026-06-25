@@ -55,6 +55,31 @@ public class EventAction {
         return (this.next != null || ea.next == null) && (this.next == null || this.next.equals(ea.next));
     }
 
+    private static final String JIYU_PACKAGE = "shiroikuma.jiyusagyoban";
+    private static final String JIYU_SHORTCUT_TASK_NAME_EXTRA = "com.opentasker.widget.TASK_NAME";
+
+    /** Prepend the 「白い熊 自由作業盤: 」 marker to a shortcut's label when its launch intent is a
+     * jiyusagyoban run-task shortcut (component package {@code shiroikuma.jiyusagyoban} carrying the
+     * task-name extra), mirroring the "Tasker: <task>" prefix. Idempotent; else returns {@code label}. */
+    public static String decorateJiyuShortcutLabel(android.content.Context ctx, Intent intent, String label) {
+        if (ctx == null || label == null || intent == null
+                || !intent.hasExtra(JIYU_SHORTCUT_TASK_NAME_EXTRA)) {
+            return label;
+        }
+        String pkg = intent.getPackage();
+        if (pkg == null && intent.getComponent() != null) {
+            pkg = intent.getComponent().getPackageName();
+        }
+        if (!JIYU_PACKAGE.equals(pkg)) {
+            return label;
+        }
+        String marker = ctx.getString(net.pierrox.lightning_launcher.R.string.acd_jiyu_prefix, "");
+        if (label.startsWith(marker)) {
+            return label;
+        }
+        return ctx.getString(net.pierrox.lightning_launcher.R.string.acd_jiyu_prefix, label);
+    }
+
     public String describe(LightningEngine engine) {
         if (data != null) {
             switch (action) {
@@ -76,12 +101,12 @@ public class EventAction {
                         // a Tasker task shows "Tasker: <Task>" rather than just the resolved app label.
                         String label = intent.getStringExtra(LightningIntent.INTENT_EXTRA_SHORTCUT_LABEL);
                         if (label != null) {
-                            return label;
+                            return decorateJiyuShortcutLabel(engine.getContext(), intent, label);
                         }
                         PackageManager packageManager = engine.getContext().getPackageManager();
                         ResolveInfo activity = packageManager.resolveActivity(intent, 0);
                         if (activity != null) {
-                            return activity.loadLabel(packageManager).toString();
+                            return decorateJiyuShortcutLabel(engine.getContext(), intent, activity.loadLabel(packageManager).toString());
                         }
                     } catch (URISyntaxException e) {
                         // pass

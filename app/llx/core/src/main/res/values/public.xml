@@ -22,9 +22,6 @@
 	<item type="id" name="mi_app_details" />
 	<item type="id" name="mi_app_store" />
 	<item type="id" name="mi_widget_options" />
-	<item type="id" name="mi_set_tasker_widget_name" />
-	<item type="id" name="mi_reinit_tasker_widgets" />
-	<item type="id" name="mi_tasker_a11y_settings" />
 	<item type="id" name="mi_set_jiyu_widget_name" />
 	<item type="id" name="mi_reinit_jiyu_widgets" />
 	<item type="id" name="mi_folder_options" />

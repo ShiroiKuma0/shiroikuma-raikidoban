@@ -13,6 +13,9 @@
                 android:right="8dp" />
             <corners android:radius="8dp" />
             <solid android:color="?android:colorBackgroundFloating" />
+            <!-- The yellow chrome border is applied at runtime (Dashboard.applyBubblePanel, MENU_BORDER)
+                 so it follows the 「白い熊 雷起動盤 UI」 colour + width sliders. -->
+            <!-- (default fallback only; runtime overrides this drawable) -->
         </shape>
     </item>
 </layer-list>

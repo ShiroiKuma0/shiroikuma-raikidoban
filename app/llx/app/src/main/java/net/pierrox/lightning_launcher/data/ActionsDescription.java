@@ -99,7 +99,6 @@ public final class ActionsDescription {
             new Action(GlobalConfig.CATEGORY, R.string.acd_a, Action.CAT_ADVANCED, Action.FLAG_TYPE_DESKTOP | Action.FLAG_TYPE_APP_DRAWER | Action.FLAG_TYPE_SCRIPT, Build.VERSION_CODES.FROYO),
             new Action(GlobalConfig.RUN_SCRIPT, R.string.an_rs, Action.CAT_ADVANCED, Action.FLAG_TYPE_DESKTOP | Action.FLAG_TYPE_APP_DRAWER | Action.FLAG_TYPE_SCRIPT, Build.VERSION_CODES.FROYO),
             new Action(GlobalConfig.SET_VARIABLE, R.string.an_sv, Action.CAT_ADVANCED, Action.FLAG_TYPE_DESKTOP | Action.FLAG_TYPE_APP_DRAWER, Build.VERSION_CODES.FROYO),
-            new Action(GlobalConfig.REINIT_TASKER_WIDGETS, R.string.mi_reinit_tasker_widgets, Action.CAT_ADVANCED, Action.FLAG_TYPE_DESKTOP | Action.FLAG_TYPE_APP_DRAWER | Action.FLAG_TYPE_SCRIPT, Build.VERSION_CODES.FROYO),
             new Action(GlobalConfig.UNSET, R.string.an_u, Action.CAT_ADVANCED, Action.FLAG_TYPE_DESKTOP | Action.FLAG_TYPE_APP_DRAWER | Action.FLAG_TYPE_SCRIPT, Build.VERSION_CODES.FROYO),
     };
 

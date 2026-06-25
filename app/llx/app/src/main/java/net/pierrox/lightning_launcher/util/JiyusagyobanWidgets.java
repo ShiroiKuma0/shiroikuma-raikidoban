@@ -35,7 +35,7 @@ import net.pierrox.lightning_launcher.data.Widget;
 
 /**
  * Helpers for 白い熊 自由作業盤 (jiyusagyoban) widgets — the same crash/restore name-survival problem
- * as Tasker (see {@link TaskerWidgets}), but solved cleanly because jiyusagyoban is ours.
+ * Tasker widgets have, but solved cleanly because jiyusagyoban is ours.
  *
  * jiyusagyoban stores each widget's name (e.g. "test-jiyu") in its own private state, keyed by the
  * live appWidgetId. That binding is lost whenever Lightning re-allocates appWidgetIds — on a crash, a

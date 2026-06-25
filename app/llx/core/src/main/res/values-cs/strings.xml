@@ -360,9 +360,8 @@ Všechny akce jsou zakázány"</string>
     <string name="an_cd">Přizpůsobit současný kontejner</string>
     <string name="an_la">Spustit aplikaci</string>
     <string name="an_ls">Spustit zástupce</string>
-    <string name="an_ls_tasker">Zkratka Tasker</string>
+    <string name="an_ls_jiyu">Zkratka 白い熊 自由作業盤</string>
     <string name="an_backup_restore">Záloha / obnovení</string>
-    <string name="tasker_not_ready">Data Taskeru nejsou připravena. Otevřete Tasker, ukončete jej a přidejte zkratku Tasker znovu.</string>
     <string name="an_sw">Vybrat tapetu pozadí</string>
     <string name="an_lm">Nabídka Lightningu</string>
     <string name="an_ssb">Ukázat/skrýt stavovou lištu</string>
@@ -1242,6 +1241,7 @@ Oprávnění:
     <string name="llui_menu_text">Text nabídky</string>
     <string name="llui_menu_bg">Pozadí nabídky</string>
     <string name="llui_menu_accent">Akcent nabídky</string>
+    <string name="llui_menu_border">Ohraničení nabídky</string>
     <string name="llui_dialog_text">Text dialogu</string>
     <string name="llui_dialog_inherited">Zděděná akce</string>
     <string name="llui_dialog_bg">Pozadí dialogu</string>
@@ -1304,11 +1304,6 @@ Oprávnění:
     <string name="font_weight_semibold">Polotučné</string>
     <string name="font_weight_bold">Tučné</string>
     <string name="font_weight_black">Černé</string>
-    <string name="tasker_name_unset">(Název Tasker není nastaven)</string>
-    <string name="mi_set_tasker_widget_name">Nastavit název widgetu Tasker</string>
-    <string name="mi_reinit_tasker_widgets">Znovu inicializovat widgety Tasker</string>
-    <string name="mi_tasker_a11y_settings">Automatické vyplnění Tasker (přístupnost)…</string>
-    <string name="tasker_widget_name_title">Interní název Tasker (např. test.item.1)</string>
     <string name="mi_set_jiyu_widget_name">Nastavit název widgetu 自由作業盤</string>
     <string name="mi_reinit_jiyu_widgets">Znovu inicializovat widgety 自由作業盤</string>
     <string name="jiyu_widget_name_title">Název widgetu 自由作業盤</string>

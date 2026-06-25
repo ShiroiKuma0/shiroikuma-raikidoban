@@ -240,11 +240,11 @@ public class ActionsOverviewDialog {
                 Intent i = Intent.parseUri(ea.data, 0);
                 String lbl = i.getStringExtra(LightningIntent.INTENT_EXTRA_SHORTCUT_LABEL);
                 if (lbl != null) {
-                    return lbl;
+                    return EventAction.decorateJiyuShortcutLabel(mActivity, i, lbl);
                 }
                 String be = shortcutLaunchLabel(mActivity, i, null);
                 if (be != null) {
-                    return be;
+                    return EventAction.decorateJiyuShortcutLabel(mActivity, i, be);
                 }
             } catch (Exception e) {
                 // pass
@@ -275,11 +275,11 @@ public class ActionsOverviewDialog {
                 } else {
                     String lbl = intent.getStringExtra(LightningIntent.INTENT_EXTRA_SHORTCUT_LABEL);
                     if (lbl != null) {
-                        return lbl;
+                        return EventAction.decorateJiyuShortcutLabel(mActivity, intent, lbl);
                     }
                     String be = shortcutLaunchLabel(mActivity, intent, null);
                     if (be != null) {
-                        return be;
+                        return EventAction.decorateJiyuShortcutLabel(mActivity, intent, be);
                     }
                     PackageManager pm = mActivity.getPackageManager();
                     ResolveInfo act = pm.resolveActivity(intent, 0);

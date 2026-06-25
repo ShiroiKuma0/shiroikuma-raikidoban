@@ -46,15 +46,16 @@ public final class ThemedShortcutPicker {
     public static void show(final Activity activity, final Listener listener) {
         final PackageManager pm = activity.getPackageManager();
         final List<ResolveInfo> shortcuts = pm.queryIntentActivities(new Intent(Intent.ACTION_CREATE_SHORTCUT), 0);
-        // Tasker is the #1 choice -> pin it to the top; everything else follows alphabetically.
+        // 白い熊 自由作業盤 (jiyusagyoban) is the #1 choice -> pin it to the top; everything else follows
+        // alphabetically.
         final ResolveInfo.DisplayNameComparator nameComparator = new ResolveInfo.DisplayNameComparator(pm);
         Collections.sort(shortcuts, new Comparator<ResolveInfo>() {
             @Override
             public int compare(ResolveInfo a, ResolveInfo b) {
-                boolean aTasker = TaskerWidgets.TASKER_PACKAGE.equals(a.activityInfo.packageName);
-                boolean bTasker = TaskerWidgets.TASKER_PACKAGE.equals(b.activityInfo.packageName);
-                if (aTasker != bTasker) {
-                    return aTasker ? -1 : 1;
+                boolean aJiyu = JiyusagyobanWidgets.JIYU_PACKAGE.equals(a.activityInfo.packageName);
+                boolean bJiyu = JiyusagyobanWidgets.JIYU_PACKAGE.equals(b.activityInfo.packageName);
+                if (aJiyu != bJiyu) {
+                    return aJiyu ? -1 : 1;
                 }
                 return nameComparator.compare(a, b);
             }

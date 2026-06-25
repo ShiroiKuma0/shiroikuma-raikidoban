@@ -45,6 +45,7 @@
     <string name="llui_menu_text">メニュー文字</string>
     <string name="llui_menu_bg">メニュー背景</string>
     <string name="llui_menu_accent">メニューアクセント</string>
+    <string name="llui_menu_border">メニューの枠線</string>
     <string name="llui_dialog_text">ダイアログ文字</string>
     <string name="llui_dialog_inherited">継承されたアクション</string>
     <string name="llui_dialog_bg">ダイアログ背景</string>
@@ -107,12 +108,7 @@
     <string name="font_weight_semibold">半太</string>
     <string name="font_weight_bold">太</string>
     <string name="font_weight_black">極太</string>
-    <string name="tasker_name_unset">（Tasker 名称が未設定）</string>
 
-    <string name="mi_set_tasker_widget_name">Tasker ウィジェット名を設定</string>
-    <string name="mi_reinit_tasker_widgets">Tasker ウィジェットを再初期化</string>
-    <string name="mi_tasker_a11y_settings">Tasker 自動入力（ユーザー補助）…</string>
-    <string name="tasker_widget_name_title">Tasker 内部名（例: test.item.1）</string>
 
     <string name="mi_set_jiyu_widget_name">白い熊 自由作業盤 ウィジェット名を設定</string>
     <string name="mi_reinit_jiyu_widgets">白い熊 自由作業盤 ウィジェット名を再初期化</string>
@@ -483,9 +479,8 @@
     <string name="an_cd">現在のデスクトップまたはフォルダをカスタマイズ</string>
     <string name="an_la">アプリ起動</string>
     <string name="an_ls">ショートカットを起動</string>
-    <string name="an_ls_tasker">Tasker ショートカット</string>
+    <string name="an_ls_jiyu">白い熊 自由作業盤 ショートカット</string>
     <string name="an_backup_restore">バックアップ／復元</string>
-    <string name="tasker_not_ready">Tasker のデータが未準備です。Tasker を一度開いて閉じてから、もう一度 Tasker ショートカットを追加してください。</string>
     <string name="an_sw">壁紙を選択</string>
     <string name="an_lm">LLメニューを開く</string>
     <string name="an_ssb">ステータスバーを表示</string>
