@@ -1,14 +1,68 @@
-# LightningLauncher
+<div align="center">
 
-This is a fork of the [Original Lightning Launcher repository](https://github.com/pierrehebert/LightningLauncher).
-Even though it may be considered the 'primary fork' (as I helped Pierre a bit with the app) I'm unfortunately not very active 'in the development' of it. But I can try to assist with any issue if needed. Feel free to open an issue, and I'll try to assist if I can.
+<img src="app/llx/app/src/main/res/drawable-hdpi/ic_launcher.png" width="96" alt="白い熊 雷起動盤 app icon" />
 
-The differences between the original are:
+# 白い熊 雷起動盤
 
-- [developer branch](https://github.com/TrianguloY/LightningLauncher/tree/developer): Where ideally a new version/update of Lightning launcher for newer android devices should happen. Currently it only contains changes from SnowVolf that I have reviewed. It's not yet prepared as a replacement, although it should be stable. The main issue is that you cannot create backups with it (you can restore them though). You can try it if you want from the [Debug apks pre-release](https://github.com/TrianguloY/LightningLauncher/releases/tag/debug). This version is not signed.
+**The most customizable Android home screen — re-themed black-and-yellow, made fold-aware, and fully self-contained.**
 
-- [patch](https://github.com/TrianguloY/LightningLauncher/releases/tag/patch): This is a minimal-change from the original code to remove the Play Store check and allow to continue using the app (it was removed from Play Store so the original apk is locked in a trial state). This is intended as a drop-in replacement, but unfortunately you need to uninstall the original apk. Remember to create a backup first (if you still can)! Or alternatively use [adb](https://github.com/TrianguloY/LightningLauncher/issues/24#issuecomment-2016823553) to replace the app without removing the data. Alternatively use the patch (community). This version is signed with my own developer keys.
-- [patch (community)](https://github.com/TrianguloY/LightningLauncher/releases/tag/patch_community): This is the same as the patch version, but with an additional change to use a different package id, which allows it to install alongside the original (for those of us who still want to keep it). If you have already uninstalled Pierre's version, or you don't mind uninstalling it, the patched version should be preferred, since this one may break some scripts. This version is signed with my own developer keys.
-- [extra permissions](https://github.com/TrianguloY/LightningLauncher/releases/tag/permissions): The extra permissions, which you need instead of the original since they require to be signed with the same keys. If you don't know what this is, you never used it so you can ignore it. Note that this is a single package with all the permissions, instead of one package for each. You should be able to enable/disable individual ones from Android settings. This version is signed with my own developer keys.
-- [extra permissions (community)](https://github.com/TrianguloY/LightningLauncher/releases/tag/permissions_community): The extra permissions apk for the community version. 
+A fork of [Lightning Launcher](https://github.com/pierrehebert/LightningLauncher) with **major additions**: a launcher-wide font / colour / border theming system, a native tri-fold desktop matrix, an at-a-glance gesture editor, bundled in-app languages, backups that work on modern Android, and tight integration with 白い熊's own [自由作業盤](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban) automation app.
 
+Installs **side-by-side** with the original Lightning Launcher (package `shiroikuma.raikidoban`).
+
+**📥 Latest release: [`14.3.0+82`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases)
+
+*(雷起動盤 — “raikidōban”, the “lightning launch board”.)*
+
+</div>
+
+---
+
+## 🎨 「白い熊 雷起動盤 UI」 — theme every piece of chrome
+
+A single appearance screen at the top of Lightning Settings recolours and re-fonts **every** surface of the launcher — bubble menus, dialogs, the Settings & Customize pages, toolbars, push buttons and the in-editor geometry box. Pick a global chrome font (or import your own `.ttf` / `.otf`), set colours per slot with a foundation cascade so one change ripples everywhere, and tune **border width + corner roundness** on the dialog, menu, button and geometry panels. Out of the box it's a crisp **black background with yellow text and borders**.
+
+## ⚡ Black-and-yellow, everywhere
+
+Every visible element follows the theme — including toasts and progress dialogs, re-routed through a custom `Flash` helper so nothing ever pops up white-on-grey. A proper yellow-on-black dark mode covers the menus and configuration pages, and even the launcher icon was restyled to match.
+
+## 📐 Fold-aware desktop matrix (for the tri-fold)
+
+Built for the Huawei Mate XT and other foldables: a native **fold → desktop** selector that switches to the right desktop for the current fold width — replacing the fragile external scripting it used to need. Lay it out visually in a **drag-and-drop grid of desktop miniatures**.
+
+## ✋ Gestures overview
+
+Long-tap any desktop or item and open **「ジェスチャー」** to see every event-action binding — tap, long-tap, the four swipes, lifecycle hooks — in one themed list, each row showing what it actually launches. View, edit or clear any binding from there; inherited (global-default) actions are marked and coloured distinctly.
+
+## 🤖 白い熊 自由作業盤 integration
+
+Tight, headless integration with 白い熊's own automation app, **[自由作業盤 (jiyusagyoban)](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban)** — the in-house successor to Tasker. Drop a **自由作業盤 task shortcut** straight from the item / action pickers, and have widget names survive crashes and restores through a cross-app re-init handshake (no accessibility hacks needed). Such shortcuts are labelled 「白い熊 自由作業盤: …」 throughout.
+
+## 🌐 Self-contained, in-app languages
+
+English, **Japanese, Czech and Russian** are bundled right into the app — no external language pack required. Switch language from inside the app (it restarts cleanly to apply), the fork's own custom strings included.
+
+## 💾 Backups that work on modern Android
+
+Restores the ability to **create** backups on Android 13 (targetSdk 33), which scoped storage had blocked, by writing to a folder you choose through the system file picker. Also stops a restore from wiping your system wallpaper.
+
+## 🧰 Themed pickers & dialogs
+
+Black-and-yellow replacements for the framework choosers: the shortcut-app picker, the “Select action” chooser, a redesigned **“app not installed”** dialog (re-point the icon, or jump to F-Droid / Aurora Store), a colour picker with recent-colour swatches, and a fully configurable geometry box with a live preview.
+
+---
+
+## Built on Lightning Launcher
+
+This is a personal fork of **[Lightning Launcher](https://github.com/pierrehebert/LightningLauncher)** by Pierre Hébert, continued on the [TrianguloY](https://github.com/TrianguloY/LightningLauncher) `developer` line — a famously fast, light and *extremely* customizable home screen. All upstream credit belongs to Pierre and the Lightning Launcher contributors; see the upstream repository for the canonical source, issues and licence.
+
+The fork re-brands its `applicationId` to `shiroikuma.raikidoban` so it installs **alongside** the original (the build-time `namespace` is left unchanged, so the original install keeps answering its own scripting API). It is built and debug-signed for personal sideloading.
+
+## Building
+
+```
+cd app/llx
+JAVA_HOME=<jdk17> ANDROID_HOME=<android-sdk> ./gradlew assembleExtremeDebug
+```
+
+This produces an arm64-v8a debug APK under `app/llx/app/build/outputs/apk/extreme/debug/`. (Day-to-day builds use the in-repo `build-apk` skill / `buildApk` Gradle task, which also versions and archives the APK.)
