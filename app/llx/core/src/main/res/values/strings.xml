@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-<string name="pack_name">Lightning Launcher- English</string>
+<string name="pack_name">白い熊 雷起動盤- English</string>
 <string name="pack_name_short">English</string>
 <string name="tranlator_name">Josh Gray</string>
 
-<string name="description">Lightning is a blazing fast launcher that is customizable to the extreme.
+<string name="description">白い熊 雷起動盤 is a blazing fast launcher that is customizable to the extreme.
 \nIt\'s light on memory and never slows down.
 \n
 \nYou\'re not restricted to pages anymore. Instead, your desktop is a beautiful work of art on an infinite canvas.
@@ -20,7 +20,7 @@
 \n•Multiple desktop grids
 \n•22 different gestures with 29 different actions (which can also be launched with shortcuts)
 \n•Use one of your desktops as your lockscreen! (beta only)
-\n•Stop points: tell Lightning when to stop scrolling
+\n•Stop points: tell 白い熊 雷起動盤 when to stop scrolling
 \n•Custom scroll directions
 \n•Full control over any item, including:
 \n1. text font, shadow and color
@@ -31,9 +31,9 @@
 \n•Save your custom desktop to either a full backup or as a style option
 \n•Export your setup as an APK
 \n------
-\nLightning does support transparency of the status and navigation bars available in KitKat.
+\n白い熊 雷起動盤 does support transparency of the status and navigation bars available in KitKat.
 \n------
-\nAs with most power tools like Tasker and such, Lightning has a bit of a learning curve. But there\'s no other launcher which offers the power of Lightning.
+\nAs with most power tools like Tasker and such, 白い熊 雷起動盤 has a bit of a learning curve. But there\'s no other launcher which offers the power of 白い熊 雷起動盤.
 \n
 \nZap!
 \n
@@ -48,7 +48,7 @@
     <string name="start_activity_error">Could not start this app</string>
 <string name="menu_add">Add item…</string>
 <string name="menu_settings">Android</string>
-<string name="menu_customize">Lightning settings</string>
+<string name="menu_customize">白い熊 雷起動盤 settings</string>
 <string name="menu_customize_folder">Folder</string>
 <string name="menu_objects_layout">Edit layout</string>
 <string name="dialog_action_title">Add item…</string>
@@ -57,7 +57,7 @@
 <item>App</item>
 <item>Shortcut</item>
 <item>Widget</item>
-<item>LL Widget</item>
+<item>白い熊 雷起動盤 Widget</item>
 <item>Folder</item>
 <item>Stop point</item>
 </string-array>
@@ -89,7 +89,7 @@
 <string name="jiyu_not_installed">白い熊 自由作業盤 is not installed</string>
 <string name="mi_move_out_of_folder">Move out of folder</string>
     <string name="first_use_title">Welcome!</string>
-    <string name="first_use_message">Lightning Launcher is a lightweight and extremely customizable home screen replacement for Android.\n\nYou are now running in normal mode, meaning that some advanced options are hidden. Switch to expert mode to access all features and options (General settings).\n\nLL is now preparing the list of apps once and for all.\n\nThank you for reading and using LL!</string>
+    <string name="first_use_message">白い熊 雷起動盤 is a lightweight and extremely customizable home screen replacement for Android.\n\nYou are now running in normal mode, meaning that some advanced options are hidden. Switch to expert mode to access all features and options (General settings).\n\n白い熊 雷起動盤 is now preparing the list of apps once and for all.\n\nThank you for reading and using 白い熊 雷起動盤!</string>
 <string name="all_apps">All Apps</string>
 <string name="menu_refresh">Refresh</string>
 <string name="menu_zoom">Zoom</string>
@@ -108,21 +108,21 @@
 <string name="app_drawer_t">App Drawer</string>
 <string name="app_drawer_s">App drawer settings</string>
 <string name="app_killer_t">Force stop apps</string>
-<string name="app_killer_s">Kill apps with Lightning</string>
+<string name="app_killer_s">Kill apps with 白い熊 雷起動盤</string>
 <string name="donate_t">Donate</string>
-<string name="donate_s">Want to support Lightning?</string>
+<string name="donate_s">Want to support 白い熊 雷起動盤?</string>
 <string name="backup_t">Create a backup</string>
 <string name="import_t">Load an external file</string>
 <string name="import_e">Import failed!</string>
 <string name="importing">Import in progress</string>
 <string name="restore_t">Restore</string>
-<string name="rate_t">Rate Lightning</string>
+<string name="rate_t">Rate 白い熊 雷起動盤</string>
 <string name="rate_s">Tell us what you think</string>
-<string name="facebook_t">Lightning Launcher forum</string>
+<string name="facebook_t">白い熊 雷起動盤 forum</string>
 <string name="facebook_s">App update news, suggest a feature, or report a bug</string>
-<string name="ld_t">Lightning Drawer</string>
+<string name="ld_t">白い熊 雷起動盤 Drawer</string>
 <string name="ld_s">A highly advanced All Apps page.</string>
-<string name="customize_ll">Customize Lightning</string>
+<string name="customize_ll">Customize 白い熊 雷起動盤</string>
 
 
 
@@ -138,7 +138,7 @@
 <string name="language_t">Language options</string>
 <string name="language_s">Install a language pack</string>
 <string name="lg_pick_t">Select your language pack</string>
-<string name="lg_pick_s">This will restart Lightning.</string>
+<string name="lg_pick_s">This will restart 白い熊 雷起動盤.</string>
 <string name="lg_install_t">Get another language</string>
 <string name="lg_install_s">Install from Google Play</string>
 
@@ -173,16 +173,16 @@
 <string name="an_nd">Next desktop</string>
 <string name="an_el">Edit layout</string>
 <string name="an_ao">Add item</string>
-<string name="an_cl">Customize Lightning</string>
+<string name="an_cl">Customize 白い熊 雷起動盤</string>
 <string name="an_cd">Current desktop settings</string>
 <string name="an_la">Launch an app</string>
 <string name="an_ls">Launch a shortcut</string>
 <string name="an_ls_jiyu">白い熊 自由作業盤 shortcut</string>
 <string name="an_backup_restore">Backup / restore</string>
 <string name="an_sw">Select a wallpaper</string>
-<string name="an_lm">Lightning Menu</string>
+<string name="an_lm">白い熊 雷起動盤 Menu</string>
 <string name="an_ssb">Toggle status bar</string>
-<string name="an_smsb">Toggle status bar &amp; Lightning Menu</string>
+<string name="an_smsb">Toggle status bar &amp; 白い熊 雷起動盤 Menu</string>
 <string name="an_sn">Expand notifications tray</string>
 <string name="an_s">Search</string>
 <string name="an_i_m">Move item</string>
@@ -201,7 +201,7 @@
 <item>Vertical slide</item>
 </string-array>
 
-<string name="keep_in_memory_t">Keep Lightning running</string>
+<string name="keep_in_memory_t">Keep 白い熊 雷起動盤 running</string>
 <string name="keep_in_memory_s">This will shorten the time it takes to load, but uses more memory</string>
 <string name="tools_pick_shortcut">Select a shortcut</string>
 <string name="tools_pick_widget">Select a widget</string>
@@ -211,7 +211,7 @@
 <string name="relayout_items">This style has fewer columns than the current one. Continue and reorganize items ?</string>
 <string name="style_saved">Style saved</string>
 <string name="style_loaded">Style loaded</string>
-<string name="install_widgets">Add LL widget</string>
+<string name="install_widgets">Add 白い熊 雷起動盤 widget</string>
 <string name="item_settings_icon_copy_failed">Icon copy failed :(</string>
 <string name="tool_not_available">Sorry, this tool isn\'t available.</string>
 <string name="default_folder_name">Folder</string>
@@ -453,7 +453,7 @@
 <string name="ovr_custom">custom</string>
 
 <string name="pick_t">Select an icon from:</string>
-<string name="pick_file">Lightning File Manager</string>
+<string name="pick_file">白い熊 雷起動盤 File Manager</string>
 <string name="pick_gallery">Other file manager</string>
 <string name="pick_icon_pack">Compatible icon pack</string>
 
@@ -468,8 +468,8 @@
 <string name="tut_scroll">Desktop and navigation</string>
 <string name="dialog_color_picker">Color Picker</string>
 
-<string name="shortcut_settings">Lightning Setting</string>
-<string name="shortcut_actions">Lightning Action</string>
+<string name="shortcut_settings">白い熊 雷起動盤 Setting</string>
+<string name="shortcut_actions">白い熊 雷起動盤 Action</string>
 
 <string name="no_backup_archive">No backup available</string>
 <string name="backup_in_progress">Backup in progress…</string>
@@ -522,10 +522,10 @@
 <item>Vertical</item>
 </string-array>
 <string name="m_events">Events</string>
-<string name="shortcut_screen">Lightning Desktop bookmark</string>
+<string name="shortcut_screen">白い熊 雷起動盤 Desktop bookmark</string>
 
 <!-- added: 93 -->
-<string name="llx_t">Lightning Launcher eXtreme</string>
+<string name="llx_t">白い熊 雷起動盤</string>
 <string name="llx_s">The ultimate launcher. No compromise.</string>
 <string name="more_apps_t">More free apps</string>
 <string name="more_apps_s">From PierroX (tools, games, fun)</string>
@@ -552,8 +552,8 @@
 \nTry zooming out and selecting "Edit layout": apps can be put on left, right, top and bottom pages too, letting you manage apps in your very own way.</string>
 <string name="empty_folder_x">empty folder
 \nDrag and drop items into the folder</string>
-<string name="ll_import_title">Importing LL setup</string>
-<string name="ll_import_message">An installation of Lightning Launcher has been detected.\n\nAll data will now be imported. When this is done you can safely uninstall the classic version and use this one instead.</string>
+<string name="ll_import_title">Importing 白い熊 雷起動盤 setup</string>
+<string name="ll_import_message">An installation of 白い熊 雷起動盤 has been detected.\n\nAll data will now be imported. When this is done you can safely uninstall the classic version and use this one instead.</string>
 <string name="init_ok">Ready!</string>
 <string name="init_ko">Something went wrong during file copy!</string>
 <string name="auto_exit_t">Auto exit</string>
@@ -635,7 +635,7 @@
 <string name="an_gh">Go to home desktop</string>
 <string name="an_ghz100">Go to home desktop, then zoom 100p.</string>
 <string name="an_sd">Ask desktop to go to</string>
-<string name="an_re">Restart Lightning</string>
+<string name="an_re">Restart 白い熊 雷起動盤</string>
 
 <!-- added 105 -->
 <string name="grid_pl_t">Settings below apply to:</string>
@@ -664,12 +664,12 @@
 <string name="tmpl_check">Opening template…</string>
 <string name="tmpl_check_e">Unable to read this template!</string>
 <string name="tmpl_check_ut">Need to update</string>
-<string name="tmpl_check_um">This template has been designed for a newer version of Lightning Launcher, would you like to update now ?</string>
-<string name="tmpl_get_llx">Get LLX</string>
+<string name="tmpl_check_um">This template has been designed for a newer version of 白い熊 雷起動盤, would you like to update now ?</string>
+<string name="tmpl_get_llx">Get 白い熊 雷起動盤</string>
 <string name="tmpl_warn_t">Warning</string>
 <string name="tmpl_warn_c">Continue anyway</string>
 <string name="tmpl_warn_m">The template is ready to be applied but some warnings have been found:</string>
-<string name="tmpl_warn_llx">• this template has been designed with the full version of Lightning Launcher, it may use some features not available in this version.</string>
+<string name="tmpl_warn_llx">• this template has been designed with the full version of 白い熊 雷起動盤, it may use some features not available in this version.</string>
 <string name="tmpl_warn_screen">• this template does not exactly match your screen characteristics. Some elements may be scaled and displayed incorrectly, or look blurry.</string>
 <string name="tmpl_warn_widget">• your device is not able to restore widgets automatically, you will need to manually recreate them.</string>
 <string name="widget_e">Couldn\'t find the widget :(
@@ -859,7 +859,7 @@
     <string name="br_ob">Overwrite with backup</string>
     <string name="br_ot">Overwrite with template</string>
     <string name="sc_ma">Categories</string>
-    <string name="sc_ml">Lightning menu</string>
+    <string name="sc_ml">白い熊 雷起動盤 menu</string>
     <string name="sc_mi">Item menu</string>
     <string name="sc_mc">Custom menu</string>
     <string name="mi_s">Scripts…</string>
@@ -891,7 +891,7 @@
 	
 	<!-- added 178 -->
 	<string name="em_t">Expert mode</string>
-	<string name="em_s">Unleash the power of LL by displaying advanced options</string>
+	<string name="em_s">Unleash the power of 白い熊 雷起動盤 by displaying advanced options</string>
 	<string name="bm_c">Color</string>
 	<string name="bm_bg">Background image</string>
 	<string name="bm_prev">Preview</string>
@@ -902,7 +902,7 @@
 	<string name="h_f">You just added a folder. Folders can contain apps, widgets or even other folders.\n\nDrag some item over it, wait a bit for the move to be confirmed (at the end of the animation), then drop the object: it will be moved inside the folder.\n\nTap to learn more on folders.</string>
 	<string name="h_p">Your first panel is here.\nA panel behaves a bit like a folder: drag item over it, wait a bit for the move to be confirmed (end of the animation), then drop the object.\n\nTap to learn more on panels.</string>
 	<string name="h_t">Hint</string>
-	<string name="h_k">This is your desktop. Long tap to add objects (apps, widgets, folders, more) and access settings.\n\nPages are created as soon as you drag objects over them: to the left and right sides, but also to the top and bottom sides.\n\nTap to learn more on LL concepts.</string>
+	<string name="h_k">This is your desktop. Long tap to add objects (apps, widgets, folders, more) and access settings.\n\nPages are created as soon as you drag objects over them: to the left and right sides, but also to the top and bottom sides.\n\nTap to learn more on 白い熊 雷起動盤 concepts.</string>
 	<string name="tut_concepts">Read me first!</string>
 	<string name="tut_wiki">Wiki</string>
 
@@ -1053,13 +1053,13 @@
     <string name="adm_z">At least one category need to be selected…</string>
 
     <!-- added 224 -->
-    <string name="tr_fl_t">Please unlock Lightning to use this feature</string>
-    <string name="tr_fl_m">Upgrade to the Full Lightning version to benefit from more features:\n\n- Advanced app drawer (folders, action bar, categories).\n- Add, remove, rearrange desktops at will.\n- Per desktop wallpaper.\n- Unread count, badges and dynamic text.\n- Customizable lock screen.\n- Integrated app killer.\n\nIf you already unlocked Lightning in the past, please select "OK" to re-activate this version.</string>
+    <string name="tr_fl_t">Please unlock 白い熊 雷起動盤 to use this feature</string>
+    <string name="tr_fl_m">Upgrade to the Full 白い熊 雷起動盤 version to benefit from more features:\n\n- Advanced app drawer (folders, action bar, categories).\n- Add, remove, rearrange desktops at will.\n- Per desktop wallpaper.\n- Unread count, badges and dynamic text.\n- Customizable lock screen.\n- Integrated app killer.\n\nIf you already unlocked 白い熊 雷起動盤 in the past, please select "OK" to re-activate this version.</string>
     <string name="tr_pw">Please wait…</string>
-    <string name="tr_ty">Thank you for supporting Lightning!</string>
+    <string name="tr_ty">Thank you for supporting 白い熊 雷起動盤!</string>
     <string name="tr_eu">Sorry, an error occurred…</string>
     <string name="tr_c">Canceled</string>
-    <string name="tr_rm">Lightning need your feedback!\n\nWould you like to take a few seconds to rate this app on the Play Store?\n</string>
+    <string name="tr_rm">白い熊 雷起動盤 need your feedback!\n\nWould you like to take a few seconds to rate this app on the Play Store?\n</string>
     <string name="ds_hls">This is a sample lock screen that you can customize at will.\nAdd apps or widgets then activate it through the lock screen settings (tap here).</string>
     <string name="ic">Image cropper</string>
     <string name="bg_st">Position</string>
@@ -1211,14 +1211,14 @@
     <string name="font_weight_black">Black</string>
 
     <string name="nois">No option</string>
-    <string name="lightning">Lightning</string>
+    <string name="lightning">白い熊 雷起動盤</string>
     <string name="folder">Folder</string>
     <string name="tg">Run in:</string>
     <string name="tg_d">Desktop</string>
     <string name="tg_ad">App Drawer</string>
     <string name="tg_ls">Lock screen</string>
     <string name="tg_bg">Background</string>
-    <string name="tss">Lightning Script</string>
+    <string name="tss">白い熊 雷起動盤 Script</string>
     <string name="mi_nos">No script</string>
     <string name="mi_nos1">I think I already told you there were no script ;-)</string>
     <string name="mi_nos2">Please do not insist, there is no script here.</string>
@@ -1292,7 +1292,7 @@
     <string name="v_o">Other</string>
     <string name="an_sv">Set a variable</string>
     <string name="sv_n">Variable name (without $)</string>
-    <string name="tsv">Lightning Variable</string>
+    <string name="tsv">白い熊 雷起動盤 Variable</string>
     <string name="bv_ts">Timestamp</string>
     <string name="eb_sh">Show hidden items</string>
     <string name="pz">Z-Index</string>
@@ -1366,7 +1366,7 @@
     <string name="ldo_t">No floating desktop</string>
     <string name="ldo_s">When locked, the floating desktop is disabled. It is re-enabled upon unlock.</string>
     <string name="pr_t">Regarding permissions</string>
-    <string name="pr_s">To accomplish this task, Lightning Launcher needs your permission:</string>
+    <string name="pr_s">To accomplish this task, 白い熊 雷起動盤 needs your permission:</string>
     <string name="pr_r1">look for backup and templates archives on the external storage</string>
     <string name="pr_r2">write backups and templates on the external storage</string>
     <string name="pr_r3">read font files on the external storage</string>
@@ -1386,7 +1386,7 @@
     <string name="pr_f3">Cannot pick image</string>
     <string name="pr_f4">Cannot process template</string>
     <string name="pr_f5">Cannot kill app</string>
-    <string name="pr_rcl_rms">Starting at January 9th, 2019, due to Google policy changes, launchers are not allowed anymore to display unread sms and missed phone calls count.\n\nFortunately Lightning offers a workaround to re-enable this feature. Please hit the "OK" button to re-enable the feature.</string>
+    <string name="pr_rcl_rms">Starting at January 9th, 2019, due to Google policy changes, launchers are not allowed anymore to display unread sms and missed phone calls count.\n\nFortunately 白い熊 雷起動盤 offers a workaround to re-enable this feature. Please hit the "OK" button to re-enable the feature.</string>
     <string name="pr_inst">Would you like to install a permission package?</string>
     <string name="mi_sel">Select…</string>
     <string name="mi_sa">All</string>
@@ -1402,7 +1402,7 @@
     <string name="sc_all">Include sub directories</string>
     <string name="nfh">Nothing to display here</string>
     <string name="sc_path">Current path</string>
-    <string name="lwp">Lightning Live Wallpaper</string>
+    <string name="lwp">白い熊 雷起動盤 Live Wallpaper</string>
     <string name="sd">Please select a desktop\nfor your live wallpaper</string>
     <string name="ad_b">Built-ins</string>
     <string name="ad_p">Plugins</string>
@@ -1413,11 +1413,11 @@
     <string name="iab_y_key">Yes (key)</string>
     <string name="iab_y_app">Yes (in-app)</string>
     <string name="iab_ul_lwp_t">Not enabled yet</string>
-    <string name="iab_ul_lwp_m">The Lightning Live Wallpaper is not yet enabled\n\nSupport the developer and help making Lightning the best launcher ever!</string>
+    <string name="iab_ul_lwp_m">The 白い熊 雷起動盤 Live Wallpaper is not yet enabled\n\nSupport the developer and help making 白い熊 雷起動盤 the best launcher ever!</string>
     <string name="an_i_as">Show app shortcuts</string>
     <string name="as_no_s">No app shortcut for this item</string>
     <string name="as_no_hp_t">No app shortcut permission</string>
-    <string name="as_no_hp_m">In order to access app shortcuts, Lightning Launcher needs to be the default launcher, otherwise it has no app shortcut permission.\n\nNote: you may see this message twice before you can select \'Always\' in the launcher selection box.</string>
+    <string name="as_no_hp_m">In order to access app shortcuts, 白い熊 雷起動盤 needs to be the default launcher, otherwise it has no app shortcut permission.\n\nNote: you may see this message twice before you can select \'Always\' in the launcher selection box.</string>
     <string name="as_nf">Shortcut disabled</string>
     <string name="widget_count">(%d widgets)</string>
     <string name="eas_done">Done</string>
@@ -1442,7 +1442,7 @@
     <string name="svgp_path">#%s path</string>
 
     <string name="permission_label">Use Script Service</string>
-    <string name="permission_description">view, create, edit, delete and run scripts in Lightning Launcher</string>
+    <string name="permission_description">view, create, edit, delete and run scripts in 白い熊 雷起動盤</string>
 
     <string name="sc_disable_toast">Script disabled. Open it in the editor to enable again</string>
     <string name="srch_ttl">Search text</string>

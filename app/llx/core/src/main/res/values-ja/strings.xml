@@ -129,7 +129,7 @@
     <string name="app_added">%s をホーム画面に追加しました。</string>
     <string name="app_drawer_s">ドロワー（アプリ一覧）の設定です。</string>
     <string name="app_drawer_t">ドロワーの設定</string>
-    <string name="app_killer_s">LLに統合された軽量タスクキラーです。</string>
+    <string name="app_killer_s">白い熊 雷起動盤に統合された軽量タスクキラーです。</string>
     <string name="app_killer_t">タスクキラー</string>
     <string name="appearance">デザイン（左スワイプして変更をプレビューできます）</string>
     <string name="auto_close_s">フォルダの中のアプリを立ち上げるとそのフォルダを閉じます。</string>
@@ -156,7 +156,7 @@
     <string name="colums">縦列</string>
     <string name="confirm_reset_page">現在のデザインをリセットしてよろしいですか？</string>
     <string name="content">中身</string>
-    <string name="customize_ll">Lightningをカスタマイズ</string>
+    <string name="customize_ll">白い熊 雷起動盤をカスタマイズ</string>
     <string name="dashboard_s">現在のホーム画面のデザインと動作を変更します。</string>
     <string name="dashboard_t">デスクトップの設定</string>
     <string name="default_folder_name">フォルダ</string>
@@ -192,12 +192,12 @@
     <string name="facebook_s">次期バージョンの開発情報や新機能の要望・バグの報告はこちら</string>
     <string name="facebook_t">このアプリのGoogle+ページにアクセス</string>
     <string name="file_picker_activity_up">上に行く</string>
-    <string name="first_use_message">"Lightning Launcher（ライトニングランチャー、LL）は、高速かつ軽量で、そのうえ細かくカスタマイズできるAndroid用ホームアプリです。 
+    <string name="first_use_message">"白い熊 雷起動盤は、高速かつ軽量で、そのうえ細かくカスタマイズできるAndroid用ホームアプリです。 
  
-現在、LLはインストール済みアプリの一覧を準備しています。 
+現在、白い熊 雷起動盤はインストール済みアプリの一覧を準備しています。 
  
 まずはデスクトップに配置されているチュートリアルをご覧ください。 
-操作方法を把握したら、自由にカスタマイズしてみましょう。慣れるまでは少し大変かもしれませんが、しばらく触っていれば次第にLLを操れるようになるでしょう。 
+操作方法を把握したら、自由にカスタマイズしてみましょう。慣れるまでは少し大変かもしれませんが、しばらく触っていれば次第に白い熊 雷起動盤を操れるようになるでしょう。 
  
 あなただけのホーム画面カスタマイズをお楽しみください。"</string>
     <string name="first_use_title">ようこそ！</string>
@@ -236,7 +236,7 @@
     <string name="i_smooth">アイコンを滑らかにする</string>
     <string name="il_preview">"プレビュー 
 （実際のデスクトップとは異なる場合があります）"</string>
-    <string name="install_widgets">LLウィジェットを追加</string>
+    <string name="install_widgets">白い熊 雷起動盤ウィジェットを追加</string>
     <string name="item_settings_icon_copy_failed">アイコンをコピーできません(´・ω・｀)</string>
     <string name="keep_in_memory_s">ホーム画面への復帰が速くなりますが、メモリ消費量が増えます。</string>
     <string name="keep_in_memory_t">メモリに常駐</string>
@@ -268,7 +268,7 @@
     <string name="lg_contrib_t">多言語化に協力</string>
     <string name="lg_install_s">言語パックをPlay Storeから入手します / Get new packs</string>
     <string name="lg_install_t">言語パックを入手</string>
-    <string name="lg_pick_s">言語パックの選択後、LLが再起動します。 / Select a language pack</string>
+    <string name="lg_pick_s">言語パックの選択後、白い熊 雷起動盤が再起動します。 / Select a language pack</string>
     <string name="lg_pick_t">言語パックを選択</string>
     <string name="load_style_s">スタイルを読み込み、現在の設定を読み込んだスタイルで置き換えます。</string>
     <string name="load_style_t">スタイルを適用する</string>
@@ -279,7 +279,7 @@
     <string name="manage">管理</string>
     <string name="margin">マージン</string>
     <string name="menu_add">追加</string>
-    <string name="menu_customize">Lightningをカスタマイズ</string>
+    <string name="menu_customize">白い熊 雷起動盤をカスタマイズ</string>
     <string name="menu_customize_folder">フォルダの設定</string>
     <string name="menu_objects_layout">レイアウトを編集</string>
     <string name="menu_refresh">再読み込み</string>
@@ -380,7 +380,7 @@
     <string name="wp_w_t">幅</string>
     <string name="wp_h_t">高さ</string>
     <string name="wp_auto">自動的に調整する場合は値を0にしてください。</string>
-    <string name="ld_t">Lightning Drawer</string>
+    <string name="ld_t">白い熊 雷起動盤 Drawer</string>
     <string name="ld_s">拡張された高機能ドロワー</string>
     <string name="mi_pick_widget">別のウィジェットを選択</string>
     <string name="backup_t">バックアップ</string>
@@ -390,7 +390,7 @@
     <string name="mi_position">位置</string>
     <string name="mi_move_to_screen">別のデスクトップに移動</string>
     <string name="confirm_delete">本当に削除しますか？</string>
-    <string name="pack_name">Lightning Launcher - 日本語</string>
+    <string name="pack_name">白い熊 雷起動盤 - 日本語</string>
     <string name="pick_file">画像を選択</string>
     <string name="pick_gallery">画像を選択（外部ファイルマネージャ）</string>
     <string name="pick_icon_pack">インストール済みADWアイコンパック</string>
@@ -421,9 +421,9 @@
     <string name="dialog_help_hint_dsa">再度表示しない</string>
     <string name="m_events">ジェスチャー</string>
     <string name="m_pin_mode">ピン留めモード</string>
-    <string name="shortcut_screen">LL - デスクトップブックマーク</string>
-    <string name="llx_t">Lightning Launcher eXtreme</string>
-    <string name="llx_s">LLをさらに拡張した究極のランチャー</string>
+    <string name="shortcut_screen">白い熊 雷起動盤 - デスクトップブックマーク</string>
+    <string name="llx_t">白い熊 雷起動盤</string>
+    <string name="llx_s">白い熊 雷起動盤をさらに拡張した究極のランチャー</string>
     <string name="more_apps_t">PierroXの無料アプリ</string>
     <string name="more_apps_s">LL作者による他のツールやゲームなどをGoogle Playでチェック</string>
     <string name="icons_t">アイコンパック</string>
@@ -438,8 +438,8 @@
     <string name="fdroid">F-Droid</string>
     <string name="aurora_store">Aurora Store</string>
     <string name="ll_action_shortcut">白い熊 雷起動盤 アクション</string>
-    <string name="shortcut_settings">LL - 設定</string>
-    <string name="shortcut_actions">LL - アクション</string>
+    <string name="shortcut_settings">白い熊 雷起動盤 - 設定</string>
+    <string name="shortcut_actions">白い熊 雷起動盤 - アクション</string>
     <string name="no_backup_archive">復元に利用できるバックアップデータが存在しません</string>
     <string name="backup_in_progress">バックアップ中…</string>
     <string name="restore_in_progress">復元中…</string>
@@ -475,16 +475,16 @@
     <string name="an_nd">次のデスクトップ</string>
     <string name="an_el">レイアウトを編集</string>
     <string name="an_ao">アイテムを追加</string>
-    <string name="an_cl">Lightningをカスタマイズ</string>
+    <string name="an_cl">白い熊 雷起動盤をカスタマイズ</string>
     <string name="an_cd">現在のデスクトップまたはフォルダをカスタマイズ</string>
     <string name="an_la">アプリ起動</string>
     <string name="an_ls">ショートカットを起動</string>
     <string name="an_ls_jiyu">白い熊 自由作業盤 ショートカット</string>
     <string name="an_backup_restore">バックアップ／復元</string>
     <string name="an_sw">壁紙を選択</string>
-    <string name="an_lm">LLメニューを開く</string>
+    <string name="an_lm">白い熊 雷起動盤メニューを開く</string>
     <string name="an_ssb">ステータスバーを表示</string>
-    <string name="an_smsb">LLメニューとステータスバーを表示／非表示</string>
+    <string name="an_smsb">白い熊 雷起動盤メニューとステータスバーを表示／非表示</string>
     <string name="an_sn">通知を見る</string>
     <string name="an_s">検索</string>
     <string name="an_i_m">アイテムの移動</string>
@@ -510,7 +510,7 @@
     <string name="mi_mode_recently_updated">最近更新したアプリ</string>
     <string name="mi_mode_frequently_used">よく使うアプリ</string>
     <string name="mi_es_refresh">更新</string>
-    <string name="mi_es_settings">Lightningをカスタマイズ</string>
+    <string name="mi_es_settings">白い熊 雷起動盤をカスタマイズ</string>
     <string name="mi_uninstall">アンインストール</string>
     <string name="my_drawer_title">My Drawer</string>
     <string name="my_drawer_message">"My Drawer（マイドロワー）モードでは、アプリの配置を自由にカスタマイズできます。 
@@ -522,10 +522,10 @@
     <string name="empty_folder_x">"空のフォルダです。 
 アイテムをフォルダのアイコンまでドラッグ&amp;ドロップしてください"</string>
     <string name="ll_import_title">設定の移行</string>
-    <string name="ll_import_message">"お使いの端末にLightning Launcher（通常版）がインストールされています。 
-現在、通常版の設定をLightning Launcher eXtremeに移行中です。 
+    <string name="ll_import_message">"お使いの端末に白い熊 雷起動盤（通常版）がインストールされています。 
+現在、通常版の設定を白い熊 雷起動盤に移行中です。 
  
-移行完了後、Lightning Launcher eXtremeやお使いのウィジェットなどが問題なく動作するようであれば、通常版をアンインストールしても構いません。 
+移行完了後、白い熊 雷起動盤やお使いのウィジェットなどが問題なく動作するようであれば、通常版をアンインストールしても構いません。 
 通常版と併存させることも不可能ではありませんが、混乱や予期せぬ不具合を防ぐために一本化することを推奨します。"</string>
     <string name="init_ok">設定の移行が完了しました！</string>
     <string name="init_ko">ファイルのコピー中に何らかの問題が発生しました。</string>
@@ -547,10 +547,10 @@
     <string name="tmpl_e_e">エクスポートに失敗しました</string>
     <string name="tmpl_check">テンプレートを開いています…</string>
     <string name="tmpl_check_e">このテンプレートを読み込めませんでした</string>
-    <string name="tmpl_get_llx">LLXを購入する</string>
+    <string name="tmpl_get_llx">白い熊 雷起動盤を購入する</string>
     <string name="tmpl_warn_t">警告</string>
     <string name="tmpl_warn_c">無視して続行する</string>
-    <string name="tmpl_warn_llx">- このテンプレートはLightning Launcher eXtreme(LLX)用に作成されているため、通常版のLLでは動作しない機能が使用されている可能性があります。</string>
+    <string name="tmpl_warn_llx">- このテンプレートは白い熊 雷起動盤用に作成されているため、通常版の白い熊 雷起動盤では動作しない機能が使用されている可能性があります。</string>
     <string name="tmpl_warn_screen">- このテンプレートはお使いの端末の画面仕様に適合していません。 一部の要素が正常に表示されない可能性があります。</string>
     <string name="tmpl_warn_widget">- お使いの端末においてウィジェットが自動的に復元されないため、手動でウィジェットを再配置および再設定する必要が生じる可能性があります。</string>
     <string name="widget_e">"ウィジェットを読み込めませんでした。 
@@ -686,7 +686,7 @@
     <string name="br_ob">バックアップを使用して上書き</string>
     <string name="br_ot">テンプレートを使用して上書き</string>
     <string name="sc_ma">表示先:</string>
-    <string name="sc_ml">LLメニュー</string>
+    <string name="sc_ml">白い熊 雷起動盤メニュー</string>
     <string name="sc_mi">アイテムメニュー</string>
     <string name="sc_mc">カスタムメニュー</string>
     <string name="an_cm">カスタムスクリプトメニュー</string>
@@ -704,7 +704,7 @@
     <string name="mi_b">戻る</string>
     <string name="mi_im">アイテムメニュー</string>
     <string name="em_t">Expert mode</string>
-    <string name="em_s">Unleash the power of LL by displaying advanced options (take effect upon reload)</string>
+    <string name="em_s">Unleash the power of 白い熊 雷起動盤 by displaying advanced options (take effect upon reload)</string>
     <string name="bm_c">色</string>
     <string name="bm_bg">背景画像</string>
     <string name="bm_prev">プレビュー</string>
@@ -731,7 +731,7 @@
  
 Pages are created as soon as you drag objects over them: to the left and right sides, but also to the top and bottom sides. 
  
-Tap to learn more on LL concepts."</string>
+Tap to learn more on 白い熊 雷起動盤 concepts."</string>
     <string name="tut_concepts">コンセプト</string>
     <string name="tut_wiki">Wiki</string>
     <string name="mi_s">スクリプト</string>
@@ -839,7 +839,7 @@ Seamless mode is enabled again when exiting edit mode."</string>
     <string name="sc_import">Import…</string>
     <string name="sc_si_t">スクリプト読み込みツール（Script Importer）がインストールされていません</string>
     <string name="sc_si_m">PlayStoreからインストールしますか？</string>
-    <string name="ds_um">"ヒント:ホーム画面において、1本指または2本指で上にスワイプするとユーザーメニューが表示されます。このユーザーメニューはカスタマイズ可能です。また、ホーム画面でロングタップするとコンテクストメニューが表示されます。コンテクストメニューからはAndroidの設定やLLの設定などにアクセスできます。 
+    <string name="ds_um">"ヒント:ホーム画面において、1本指または2本指で上にスワイプするとユーザーメニューが表示されます。このユーザーメニューはカスタマイズ可能です。また、ホーム画面でロングタップするとコンテクストメニューが表示されます。コンテクストメニューからはAndroidの設定や白い熊 雷起動盤の設定などにアクセスできます。 
  
 （このヒントは削除しても問題ありません） 
 "</string>
@@ -847,22 +847,22 @@ Seamless mode is enabled again when exiting edit mode."</string>
     <string name="adm_s">Select visible app drawer categories</string>
     <string name="adm_z">At least one category need to be selected…</string>
     <string name="tmpl_warn_m">テンプレート適用の準備が出来ましたが、いくつかの問題があります</string>
-    <string name="tr_fl_t">Please unlock Lightning to use this feature</string>
-    <string name="tr_fl_m">"Lightning Launcher(LL)の完全版にアップグレードすることで以下の機能が利用可能になります。 
+    <string name="tr_fl_t">Please unlock 白い熊 雷起動盤 to use this feature</string>
+    <string name="tr_fl_m">"白い熊 雷起動盤の完全版にアップグレードすることで以下の機能が利用可能になります。 
  
 -拡張されたドロワー（フォルダ、アクションバー、カテゴリなどが利用できます） 
 -デスクトップの追加・削除 
 -デスクトップごとに異なる壁紙 
 -未読カウントやバッジを表示できるDynamic text 
 -カスタマイズ可能なロック画面 
--LLに統合されたタスクキラー 
+-白い熊 雷起動盤に統合されたタスクキラー 
  
-以前、この端末や別の端末でLLの完全版を導入されたことがある場合は「OK」を選択すると再認証を行います。"</string>
+以前、この端末や別の端末で白い熊 雷起動盤の完全版を導入されたことがある場合は「OK」を選択すると再認証を行います。"</string>
     <string name="tr_pw">お待ちください</string>
-    <string name="tr_ty">Lightningの開発にご協力いただきまして誠にありがとうございます！</string>
+    <string name="tr_ty">白い熊 雷起動盤の開発にご協力いただきまして誠にありがとうございます！</string>
     <string name="tr_eu">申し訳ありません。エラーが発生しました。</string>
     <string name="tr_c">Canceled</string>
-    <string name="tr_rm">"Lightningはユーザからのレビューをお待ちしております。 
+    <string name="tr_rm">"白い熊 雷起動盤はユーザからのレビューをお待ちしております。 
  
 PlayStoreで評価をいただけますでしょうか？"</string>
     <string name="ds_hls">"これはロック画面のサンプルです。自由にカスタマイズできます。 
@@ -930,8 +930,8 @@ Nov. 16, 2014 : add translations
  
 Mar. 23, 2015 : add translations"</string>
     <string name="icon_pack_no_appfilter">このアイコンパックには有効なアプリ別アイコンが含まれていません。</string>
-    <string name="tmpl_check_ut">LLをアップデートする必要があります</string>
-    <string name="tmpl_check_um">このテンプレートは新しいバージョンのLightning Launcherで作成されているため、このバージョンのLLでは動作しません。アップデートを実行しますか？</string>
+    <string name="tmpl_check_ut">白い熊 雷起動盤をアップデートする必要があります</string>
+    <string name="tmpl_check_um">このテンプレートは新しいバージョンの白い熊 雷起動盤で作成されているため、このバージョンの白い熊 雷起動盤では動作しません。アップデートを実行しますか？</string>
     <string-array name="b_alignh_e">
         <item>左</item>
         <item>中央</item>
@@ -948,7 +948,7 @@ Mar. 23, 2015 : add translations"</string>
         <item>アプリ</item>
         <item>ショートカット</item>
         <item>ウィジェット</item>
-        <item>LLのウィジェット</item>
+        <item>白い熊 雷起動盤のウィジェット</item>
         <item>フォルダ</item>
         <item>スクロールストッパー</item>
     </string-array>

@@ -11,7 +11,7 @@
     <string name="app_added">%s добавлен</string>
     <string name="app_drawer_s">Настройки списка приложений</string>
     <string name="app_drawer_t">Меню приложений</string>
-    <string name="app_killer_s">Закрытие приложений с помощью Lightning</string>
+    <string name="app_killer_s">Закрытие приложений с помощью 白い熊 雷起動盤</string>
     <string name="app_killer_t">Выгрузка приложений</string>
     <string name="appearance">"Внешний вид 
 Сдвиг влево для предпросмотра"</string>
@@ -38,7 +38,7 @@
     <string name="colums">Столбцов в сетке</string>
     <string name="confirm_reset_page">Сбросить этот экран?</string>
     <string name="content">содержимое</string>
-    <string name="customize_ll">Настройка Lightning</string>
+    <string name="customize_ll">Настройка 白い熊 雷起動盤</string>
     <string name="dashboard_s">Вид элементов, макет рабочего стола и прокрутка</string>
     <string name="dashboard_t">Рабочий стол</string>
     <string name="default_folder_name">Папка</string>
@@ -73,11 +73,11 @@
     <string name="facebook_s">Следите за обновлениями, предлагайте новые функции, сообщайте об ошибках</string>
     <string name="facebook_t">Страничка на Google+</string>
     <string name="file_picker_activity_up">Вверх</string>
-    <string name="first_use_message">"Lightning Launcher - это легкая, быстрая и невероятно гибкая замена домашнего экрана Android. 
+    <string name="first_use_message">"白い熊 雷起動盤 - это легкая, быстрая и невероятно гибкая замена домашнего экрана Android. 
  
 Сейчас активирован Нормальный режим. В этом режиме скрыты некоторые расширенные настройки. Для получения доступа ко всем настройкам переключитесь в режим Эксперта (в Общих настройках). 
  
-Lightning сейчас подготовит список приложений. 
+白い熊 雷起動盤 сейчас подготовит список приложений. 
  
 Благодарю за прочтение и использование!"</string>
     <string name="first_use_title">Добро пожаловать!</string>
@@ -116,7 +116,7 @@ Lightning сейчас подготовит список приложений.
     <string name="i_smooth">Сглаживание иконки</string>
     <string name="il_preview">"Предварительный просмотр 
 (может отличаться от реальности)"</string>
-    <string name="install_widgets">Виджеты Lightning</string>
+    <string name="install_widgets">Виджеты 白い熊 雷起動盤</string>
     <string name="item_settings_icon_copy_failed">Не удалось скопировать иконку :-(</string>
     <string name="keep_in_memory_s">Работает быстрее, но использует больше памяти</string>
     <string name="keep_in_memory_t">Оставаться в памяти</string>
@@ -148,7 +148,7 @@ Lightning сейчас подготовит список приложений.
     <string name="lg_contrib_t">Помочь с переводом</string>
     <string name="lg_install_s">Установка из Google Play</string>
     <string name="lg_install_t">Получить другие языковые пакеты</string>
-    <string name="lg_pick_s">Произойдет перезапуск Lightning</string>
+    <string name="lg_pick_s">Произойдет перезапуск 白い熊 雷起動盤</string>
     <string name="lg_pick_t">Выбрать языковой пакет</string>
     <string name="load_style_s">Заменить текущую конфигурацию значениями из стиля</string>
     <string name="load_style_t">Загрузить стиль</string>
@@ -159,7 +159,7 @@ Lightning сейчас подготовит список приложений.
     <string name="manage">Управление</string>
     <string name="margin">отступ</string>
     <string name="menu_add">Добавить…</string>
-    <string name="menu_customize">Lightning</string>
+    <string name="menu_customize">白い熊 雷起動盤</string>
     <string name="menu_customize_folder">Настройки папки</string>
     <string name="menu_objects_layout">Изменить макет</string>
     <string name="menu_refresh">Обновить</string>
@@ -196,7 +196,7 @@ Lightning сейчас подготовит список приложений.
     <string name="preview_toast">"Предварительный просмотр 
 Все действия отключены!"</string>
     <string name="rate_s">Выскажите свое мнение на Google Play</string>
-    <string name="rate_t">Оценить Lightning</string>
+    <string name="rate_t">Оценить 白い熊 雷起動盤</string>
     <string name="relayout_items">Этот стиль имеет меньше столбцов, чем текущий. Продолжить и упорядочить элементы?</string>
     <string name="reset_page_s">Удаление элементов на активном рабочем столе и восстановление стиля по умолчанию</string>
     <string name="reset_page_t">Сброс рабочего стола</string>
@@ -258,7 +258,7 @@ Lightning сейчас подготовит список приложений.
     <string name="wp_w_t">Ширина</string>
     <string name="wp_h_t">Высота</string>
     <string name="wp_auto">Используйте 0 для авторазмера</string>
-    <string name="ld_t">Меню приложений Lightning</string>
+    <string name="ld_t">Меню приложений 白い熊 雷起動盤</string>
     <string name="ld_s">Улучшенное меню приложений</string>
     <string name="mi_pick_widget">Выберите другой виджет</string>
     <string name="backup_t">Резервное копирование настроек</string>
@@ -269,8 +269,8 @@ Lightning сейчас подготовит список приложений.
     <string name="mi_move_to_screen">Переместить…</string>
     <string name="confirm_delete">"Вы действительно хотите удалить этот рабочий стол? 
 Восстановить его будет не возможно."</string>
-    <string name="pack_name">Lightning Launcher - Русский</string>
-    <string name="pick_file">менеджера файлов Lightning</string>
+    <string name="pack_name">白い熊 雷起動盤 - Русский</string>
+    <string name="pick_file">менеджера файлов 白い熊 雷起動盤</string>
     <string name="pick_gallery">другого менеджера файлов</string>
     <string name="pick_icon_pack">пакета иконок</string>
     <string name="pick_t">Выбирите иконку из:</string>
@@ -301,7 +301,7 @@ Lightning сейчас подготовит список приложений.
     <string name="m_events">События</string>
     <string name="m_pin_mode">Режим фиксации</string>
     <string name="shortcut_screen">Закладка</string>
-    <string name="llx_t">Lightning Launcher eXtreme</string>
+    <string name="llx_t">白い熊 雷起動盤</string>
     <string name="llx_s">Ultimate launcher. Без компромисов.</string>
     <string name="more_apps_t">Больше бесплатных приложений</string>
     <string name="more_apps_s">От PierroX (инструменты, игры)</string>
@@ -317,8 +317,8 @@ Lightning сейчас подготовит список приложений.
     <string name="fdroid">F-Droid</string>
     <string name="aurora_store">Aurora Store</string>
     <string name="ll_action_shortcut">白い熊 雷起動盤 действие</string>
-    <string name="shortcut_settings">Настройки Lightning</string>
-    <string name="shortcut_actions">Действия Lightning</string>
+    <string name="shortcut_settings">Настройки 白い熊 雷起動盤</string>
+    <string name="shortcut_actions">Действия 白い熊 雷起動盤</string>
     <string name="no_backup_archive">Нет резервной копии для восстановления</string>
     <string name="backup_in_progress">Идет создание резервной копии...</string>
     <string name="restore_in_progress">Идет восстановление...</string>
@@ -354,16 +354,16 @@ Lightning сейчас подготовит список приложений.
     <string name="an_nd">Следующий стол</string>
     <string name="an_el">Изменить макет</string>
     <string name="an_ao">Добавить элемент</string>
-    <string name="an_cl">Настройки Lightning</string>
+    <string name="an_cl">Настройки 白い熊 雷起動盤</string>
     <string name="an_cd">Настроить текущий рабочий стол</string>
     <string name="an_la">Запуск приложения</string>
     <string name="an_ls">Запуск ярлыка</string>
     <string name="an_ls_jiyu">Ярлык 白い熊 自由作業盤</string>
     <string name="an_backup_restore">Резервная копия / восстановление</string>
     <string name="an_sw">Выбрать обои</string>
-    <string name="an_lm">Меню Lightning</string>
+    <string name="an_lm">Меню 白い熊 雷起動盤</string>
     <string name="an_ssb">Видимость строки состояния</string>
-    <string name="an_smsb">Показать/скрыть строку состояния и меню Lightning</string>
+    <string name="an_smsb">Показать/скрыть строку состояния и меню 白い熊 雷起動盤</string>
     <string name="an_sn">Показать уведомления</string>
     <string name="an_s">Поиск</string>
     <string name="an_i_m">Переместить элемент</string>
@@ -400,8 +400,8 @@ Lightning сейчас подготовит список приложений.
     <string name="mi_es_edit_layout">Изменить макет</string>
     <string name="empty_folder_x">"пустая папка 
 Перетащите элементы в эту папку"</string>
-    <string name="ll_import_title">Импортировать настройки Lightning</string>
-    <string name="ll_import_message">"Обнаружен установленный Lightning Launcher. 
+    <string name="ll_import_title">Импортировать настройки 白い熊 雷起動盤</string>
+    <string name="ll_import_message">"Обнаружен установленный 白い熊 雷起動盤. 
  
 Все данные будут импортированы. После окончания, можете удалить классическую версию и пользоваться этой."</string>
     <string name="init_ok">Готово!</string>
@@ -424,10 +424,10 @@ Lightning сейчас подготовит список приложений.
     <string name="tmpl_e_e">Ошибка при экспорте!</string>
     <string name="tmpl_check">Открытие шаблона…</string>
     <string name="tmpl_check_e">Невозможно открыть шаблон!</string>
-    <string name="tmpl_get_llx">Получить Lightning Launcher eXtreme</string>
+    <string name="tmpl_get_llx">Получить 白い熊 雷起動盤</string>
     <string name="tmpl_warn_t">Внимание</string>
     <string name="tmpl_warn_c">Всё-равно продолжить</string>
-    <string name="tmpl_warn_llx">• этот шаблон был разработан для Lightning Launcher eXtreme, он может использовать дополнительные возможности, недоступные в этой версии.</string>
+    <string name="tmpl_warn_llx">• этот шаблон был разработан для 白い熊 雷起動盤, он может использовать дополнительные возможности, недоступные в этой версии.</string>
     <string name="tmpl_warn_screen">• этот шаблон не соответствует характеристикам Вашего экрана. Некоторые элементы могут неправильно отображаться.</string>
     <string name="tmpl_warn_widget">• ваше устройство не может автоматически восстановить виджеты, вам нужно будет восстановить их вручную.</string>
     <string name="widget_e">"Не удалось загрузить этот виджет :( 
@@ -563,7 +563,7 @@ Lightning сейчас подготовит список приложений.
     <string name="br_ob">Заменить резервной копией</string>
     <string name="br_ot">Заменить шаблоном</string>
     <string name="sc_ma">Категории</string>
-    <string name="sc_ml">Меню Lightning</string>
+    <string name="sc_ml">Меню 白い熊 雷起動盤</string>
     <string name="sc_mi">Меню элемента</string>
     <string name="sc_mc">Свое меню</string>
     <string name="an_cm">Меню своих скриптов</string>
@@ -581,7 +581,7 @@ Lightning сейчас подготовит список приложений.
     <string name="mi_b">Вернуться</string>
     <string name="mi_im">Меню элемента</string>
     <string name="em_t">Режим Эксперта</string>
-    <string name="em_s">Раскройте потенциал Lightning c дополнительнми настройками</string>
+    <string name="em_s">Раскройте потенциал 白い熊 雷起動盤 c дополнительнми настройками</string>
     <string name="bm_c">Цвет</string>
     <string name="bm_bg">Картинка фона</string>
     <string name="bm_prev">Просмотр</string>
@@ -606,7 +606,7 @@ Lightning сейчас подготовит список приложений.
  
 Страницы создаются как только Вы размещаете на них элементы: не только слева и справа, но и сверху и снизу 
  
-Коснитесь, чтобы узнать больше о концепции Lightning Launcher."</string>
+Коснитесь, чтобы узнать больше о концепции 白い熊 雷起動盤."</string>
     <string name="tut_concepts">Концепция</string>
     <string name="tut_wiki">Вики</string>
     <string name="mi_s">Скрипты...</string>
@@ -717,8 +717,8 @@ Lightning сейчас подготовит список приложений.
     <string name="adm_s">Категории отображаемые в меню приложений</string>
     <string name="adm_z">Нужно выбрать хотя бы одну категорию…</string>
     <string name="tmpl_warn_m">Шаблон может быть применен, но были обнаружены некоторые проблемы:</string>
-    <string name="tr_fl_t">Разблокируйте Lightning, чтобы воспользоваться функцией</string>
-    <string name="tr_fl_m">"Обновите до Lightning Launcher eXtreme, чтобы воспользоваться функциями: 
+    <string name="tr_fl_t">Разблокируйте 白い熊 雷起動盤, чтобы воспользоваться функцией</string>
+    <string name="tr_fl_m">"Обновите до 白い熊 雷起動盤, чтобы воспользоваться функциями: 
  
 - Расширенное меню приложений (папки, строка действий, категории). 
 - Добавление, удаление, изменение порядка рабочих столов. 
@@ -727,12 +727,12 @@ Lightning сейчас подготовит список приложений.
 - Настраиваемый экран блокировки. 
 - Функция завершения приложений. 
  
-Если Вы раньше разблокировали Lightning, то нажмите OK, чтобы активировать эту версию."</string>
+Если Вы раньше разблокировали 白い熊 雷起動盤, то нажмите OK, чтобы активировать эту версию."</string>
     <string name="tr_pw">Подождите…</string>
-    <string name="tr_ty">Спасибо за поддержку Lightning!</string>
+    <string name="tr_ty">Спасибо за поддержку 白い熊 雷起動盤!</string>
     <string name="tr_eu">Извините, произошла ошибка…</string>
     <string name="tr_c">Отменено</string>
-    <string name="tr_rm">"Lightning нуждается в Вашем отзыве! 
+    <string name="tr_rm">"白い熊 雷起動盤 нуждается в Вашем отзыве! 
  
 Не хотите ли потратить несколько секунд на оценку приложения в Google Play? 
 "</string>
@@ -772,14 +772,14 @@ Lightning сейчас подготовит список приложений.
     <string name="st_d">Стиль скопирован. Выберите Вставить стиль для дублирования.</string>
     <string name="mi_actions">Действия…</string>
     <string name="nois">Ничего не выбрано</string>
-    <string name="lightning">Lightning</string>
+    <string name="lightning">白い熊 雷起動盤</string>
     <string name="folder">Папка</string>
     <string name="tg">Запускать:</string>
     <string name="tg_d">На рабочем столе</string>
     <string name="tg_ad">В меню приложений</string>
     <string name="tg_ls">На экране блокировки</string>
     <string name="tg_bg">В фоне</string>
-    <string name="tss">Скрипт Lightning</string>
+    <string name="tss">Скрипт 白い熊 雷起動盤</string>
     <string name="mi_nos">Нет скрипта</string>
     <string name="mi_nos1">Я же говорил, что скрипта нет ;-)</string>
     <string name="mi_nos2">Не тупи, здесь нет скрипта.</string>
@@ -853,7 +853,7 @@ Lightning сейчас подготовит список приложений.
     <string name="v_o">Прочее</string>
     <string name="an_sv">Установите переменную</string>
     <string name="sv_n">Имя переменной (без $)</string>
-    <string name="tsv">Переменная Lightning</string>
+    <string name="tsv">Переменная 白い熊 雷起動盤</string>
     <string name="bv_ts">Отметка времени</string>
     <string name="eb_sh">Показать скрытые элементы</string>
     <string name="pz">Z-индекс</string>
@@ -894,7 +894,7 @@ Lightning сейчас подготовит список приложений.
     <string name="ldo_s">На заблокированном экране плавающий стол отключается. Снова включается при разблокировании.</string>
     <string name="ldo_t">Блокировать плавающий стол</string>
     <string name="pr_t">Запрашивать разрешение</string>
-    <string name="pr_s">Для выполнения задачи, Lightning Launcher требует ваше разрешение:</string>
+    <string name="pr_s">Для выполнения задачи, 白い熊 雷起動盤 требует ваше разрешение:</string>
     <string name="pr_r1">поиск резервной копии и шаблонов на внешнем хранилище</string>
     <string name="pr_r2">запись резервных копий и шаблонов на внешнее хранилище</string>
     <string name="pr_r3">чтение файлов шрифтов на внешнем хранилище</string>
@@ -927,7 +927,7 @@ Lightning сейчас подготовит список приложений.
     <string name="nfh">Nothing to display here</string>
     <string name="sc_all">Include sub directories</string>
     <string name="sc_path">Current path</string>
-    <string name="lwp">Lightning Live Wallpaper</string>
+    <string name="lwp">白い熊 雷起動盤 Live Wallpaper</string>
     <string name="sd">"Please select a desktop
 for your live wallpaper"</string>
     <string name="ad_b">Built-ins</string>
@@ -936,13 +936,13 @@ for your live wallpaper"</string>
     <string name="an_i_as">Show app shortcuts</string>
     <string name="as_no_s">No app shortcut for this item</string>
     <string name="as_no_hp_t">No app shortcut permission</string>
-    <string name="as_no_hp_m">"In order to access app shortcuts, Lightning Launcher needs to be the default launcher, otherwise it has no app shortcut permission.
+    <string name="as_no_hp_m">"In order to access app shortcuts, 白い熊 雷起動盤 needs to be the default launcher, otherwise it has no app shortcut permission.
 
 Note: you may see this message twice before you can select 'Always' in the launcher selection box."</string>
     <string name="as_nf">Shortcut disabled</string>
     <string name="widget_count">(%d widgets)</string>
     <string name="tranlator_name">Mikhail Goncharov, maksnogin, Bop4yN</string>
-    <string name="description">"Lightning - это невероятно быстрая и легкая оболочка (лаунчер) с почти безграничными возможностями настройки. 
+    <string name="description">"白い熊 雷起動盤 - это невероятно быстрая и легкая оболочка (лаунчер) с почти безграничными возможностями настройки. 
  
 Вы больше не ограничены страницами. Теперь Ваш рабочий стол - это произведение искусства на бесконечном холсте. 
 Возможности безграничны. 
@@ -969,11 +969,11 @@ Note: you may see this message twice before you can select 'Always' in the launc
  
 ------ 
  
-Lightning поддерживает прозрачность строки статуса (status bar) и строки навигации (navigation bar) из KitKat. 
+白い熊 雷起動盤 поддерживает прозрачность строки статуса (status bar) и строки навигации (navigation bar) из KitKat. 
  
 ------ 
  
-Lightning одна из наиболее настраиваемых оболочек. И потому может быть не самая лёгкая в освоении. Как и большинство серьёзных инструментов Lightning требует некоторого времени на изучение. Но разве эта не малая плата за возможность получения самого невероятного и уникального рабочего экрана? 
+白い熊 雷起動盤 одна из наиболее настраиваемых оболочек. И потому может быть не самая лёгкая в освоении. Как и большинство серьёзных инструментов 白い熊 雷起動盤 требует некоторого времени на изучение. Но разве эта не малая плата за возможность получения самого невероятного и уникального рабочего экрана? 
  
 Сайт проекта http://www.lightninglauncher.com/ 
 Все замечания, предложения и сообщения об ошибках приветствуются. 
@@ -983,16 +983,16 @@ Lightning одна из наиболее настраиваемых оболоч
 Долгим нажатием на любой пункт настроек открывается окно помощи по этой настройке."</string>
     <string name="icon_pack_no_appfilter">В наборе нет иконок приложений</string>
     <string name="tmpl_check_ut">Необходимо обновить</string>
-    <string name="tmpl_check_um">Этот шаблон был создан для новой версии Lightning Launcher, вы хотите его обновить?</string>
+    <string name="tmpl_check_um">Этот шаблон был создан для новой версии 白い熊 雷起動盤, вы хотите его обновить?</string>
     <string name="lwp_ev_t">Use standard touch events</string>
     <string name="lwp_ev_s">React to touches as a normal app, allowing wallpaper swipe and scroll</string>
     <string name="iab_no">No, thanks</string>
     <string name="iab_y_key">Yes (key)</string>
     <string name="iab_y_app">Yes (in-app)</string>
     <string name="iab_ul_lwp_t">Not enabled yet</string>
-    <string name="iab_ul_lwp_m">"The Lightning Live Wallpaper is not yet enabled
+    <string name="iab_ul_lwp_m">"The 白い熊 雷起動盤 Live Wallpaper is not yet enabled
 
-Support the developer and help making Lightning the best launcher ever!"</string>
+Support the developer and help making 白い熊 雷起動盤 the best launcher ever!"</string>
     <string-array name="b_alignh_e">
         <item>Слева</item>
         <item>По центру</item>
@@ -1009,7 +1009,7 @@ Support the developer and help making Lightning the best launcher ever!"</string
         <item>Приложение</item>
         <item>Ярлык</item>
         <item>Виджет</item>
-        <item>Виджет LL</item>
+        <item>Виджет 白い熊 雷起動盤</item>
         <item>Папку</item>
         <item>Точку остановки прокрутки</item>
     </string-array>
