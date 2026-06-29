@@ -141,19 +141,22 @@ public class BubbleLayout extends AbsoluteLayout {
             a_bottom = a_top + ah;
         }
 
-        if (b_top < 0) {
-            b_top = above ? 0 : ah;
-            int height_diff = bh - (b_bottom - b_top);
-            if (height_diff > 0) {
-                // The content is taller than the room on the chosen side (e.g. a large menu font):
-                // let it grow across the item into the free space below, capped to the screen and then
-                // scrolled — rather than clamping it to the space above the item.
-                b_bottom += height_diff;
-                a_top += height_diff;
-                a_bottom += height_diff;
-            }
-        }
+        // Keep the panel fully within the visible area [0, h]. When the menu is taller than the room on
+        // its side, clamp it to the screen and let the inner ScrollView scroll — it must never be drawn
+        // off-screen.
+        if (b_top < 0) b_top = 0;
         if (b_bottom > h) b_bottom = h;
+
+        // Force the bubble (a ScrollView) to EXACTLY the on-screen slot height. Otherwise it is measured
+        // at its full content height (which still fits within h), computes a zero scroll range, and the
+        // part below the clamp is silently clipped and unreachable. Sizing its viewport below its content
+        // is what makes it actually scroll (and reveals its scrollbar).
+        final int slot = b_bottom - b_top;
+        if (slot > 0 && slot < bh) {
+            bubble.measure(
+                    View.MeasureSpec.makeMeasureSpec(bw, View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(slot, View.MeasureSpec.EXACTLY));
+        }
 
         bubble.layout(b_left, b_top, b_right, b_bottom);
         arrow.layout(a_left, a_top, a_right, a_bottom);

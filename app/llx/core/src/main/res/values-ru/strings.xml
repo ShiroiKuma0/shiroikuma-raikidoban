@@ -1288,4 +1288,6 @@ Support the developer and help making 白い熊 雷起動盤 the best launcher e
     <string name="mi_reinit_jiyu_widgets">Переинициализировать виджеты 自由作業盤</string>
     <string name="jiyu_widget_name_title">Имя виджета 自由作業盤</string>
     <string name="jiyu_name_unset">(Имя 自由作業盤 не задано)</string>
+    <string name="mi_capture_jiyu_binding">Получить настройки виджета 自由作業盤</string>
+    <string name="jiyu_template_label">Источник: %1$s</string>
 </resources>

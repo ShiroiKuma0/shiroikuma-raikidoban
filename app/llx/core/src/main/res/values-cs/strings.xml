@@ -1308,4 +1308,6 @@ Oprávnění:
     <string name="mi_reinit_jiyu_widgets">Znovu inicializovat widgety 自由作業盤</string>
     <string name="jiyu_widget_name_title">Název widgetu 自由作業盤</string>
     <string name="jiyu_name_unset">(Název 自由作業盤 není nastaven)</string>
+    <string name="mi_capture_jiyu_binding">Načíst nastavení widgetu 自由作業盤</string>
+    <string name="jiyu_template_label">Zdroj: %1$s</string>
 </resources>

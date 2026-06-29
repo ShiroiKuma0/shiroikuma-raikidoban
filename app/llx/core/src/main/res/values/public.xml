@@ -23,6 +23,7 @@
 	<item type="id" name="mi_app_store" />
 	<item type="id" name="mi_widget_options" />
 	<item type="id" name="mi_set_jiyu_widget_name" />
+	<item type="id" name="mi_capture_jiyu_binding" />
 	<item type="id" name="mi_reinit_jiyu_widgets" />
 	<item type="id" name="mi_folder_options" />
 	<item type="id" name="mi_ef_edit_layout" />

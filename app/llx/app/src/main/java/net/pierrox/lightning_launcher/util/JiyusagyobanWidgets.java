@@ -44,9 +44,14 @@ import net.pierrox.lightning_launcher.data.Widget;
  * travels in Lightning backups.
  *
  * Unlike Tasker (third-party, only configurable through its Compose UI, hence the accessibility hack),
- * jiyusagyoban accepts the name HEADLESSLY: after Lightning re-binds a fresh appWidgetId it sends the
- * explicit ordered broadcast built by {@link #buildSetNameIntent(Widget)}, and jiyusagyoban persists
- * the name -> appWidgetId mapping and re-renders. No UI, no accessibility service.
+ * jiyusagyoban accepts the binding HEADLESSLY: after Lightning re-binds a fresh appWidgetId it sends the
+ * explicit ordered broadcast built by {@link #buildRestoreBindingIntent(Widget)}, and jiyusagyoban
+ * persists the binding -> appWidgetId mapping and re-renders. No UI, no accessibility service.
+ *
+ * For <em>pull widgets</em> the name is irrelevant; the durable identity is the pull-source template
+ * (see {@link #TEMPLATE_TAG}). Because the template is authored in jiyusagyoban (not here), the launcher
+ * learns it via {@link #buildGetBindingIntent(Widget)} (capture) and restores it via the same
+ * {@code buildRestoreBindingIntent} broadcast (now carrying {@link #EXTRA_WIDGET_TEMPLATE}).
  */
 public final class JiyusagyobanWidgets {
 
@@ -57,12 +62,26 @@ public final class JiyusagyobanWidgets {
     /** Item tag id under which the jiyusagyoban widget name is stored. Persisted in the page JSON. */
     public static final String NAME_TAG = "rkb.jiyuWidgetName";
 
+    /** Item tag id under which a jiyusagyoban <em>pull widget</em>'s source template name is stored.
+     * For pull widgets the name is irrelevant — this template is the identity that must survive a
+     * crash/restore. Authored in jiyusagyoban's config UI (not here), so the launcher learns it via
+     * {@link #buildGetBindingIntent(Widget)} and mirrors it onto this tag. Persisted in the page JSON. */
+    public static final String TEMPLATE_TAG = "rkb.jiyuWidgetTemplate";
+
     // ---- Cross-app contract (the hand-off spec jiyusagyoban implements on its side) ----
 
-    /** Action of the explicit ordered broadcast that asks jiyusagyoban to bind a name to an appWidgetId. */
+    /** Action of the explicit ordered broadcast that asks jiyusagyoban to bind a name AND/OR template to
+     * an appWidgetId (the restore path). Carries {@link #EXTRA_WIDGET_NAME} and/or
+     * {@link #EXTRA_WIDGET_TEMPLATE}, whichever the item has stored. */
     public static final String ACTION_SET_WIDGET_NAME = "shiroikuma.jiyusagyoban.action.SET_WIDGET_NAME";
+    /** Action of the explicit ordered broadcast that asks jiyusagyoban to report a widget's current
+     * binding (the capture path). jiyusagyoban replies via the ordered-broadcast result extras with
+     * {@link #EXTRA_WIDGET_TEMPLATE} (and optionally {@link #EXTRA_WIDGET_NAME}). */
+    public static final String ACTION_GET_WIDGET_BINDING = "shiroikuma.jiyusagyoban.action.GET_WIDGET_BINDING";
     /** String extra: the name to bind (from {@link #NAME_TAG}). */
     public static final String EXTRA_WIDGET_NAME = "shiroikuma.jiyusagyoban.extra.WIDGET_NAME";
+    /** String extra: the pull-source template name (from {@link #TEMPLATE_TAG}). */
+    public static final String EXTRA_WIDGET_TEMPLATE = "shiroikuma.jiyusagyoban.extra.WIDGET_TEMPLATE";
     /** String extra: the flattened provider ComponentName (Styled vs Task), for disambiguation. */
     public static final String EXTRA_PROVIDER = "shiroikuma.jiyusagyoban.extra.PROVIDER";
     /** Int extra: the contract version, so jiyusagyoban can reject unknown protocols. */
@@ -71,8 +90,8 @@ public final class JiyusagyobanWidgets {
 
     /** The spelled-out widget-id key from the hand-off spec. NB the framework constant
      * {@link AppWidgetManager#EXTRA_APPWIDGET_ID} is actually the string {@code "appWidgetId"}, not
-     * this — so {@link #buildSetNameIntent(Widget)} writes the id under BOTH keys, and jiyusagyoban can
-     * read either without relying on a fallback. */
+     * this — so the intent builders write the id under BOTH keys, and jiyusagyoban can read either
+     * without relying on a fallback. */
     public static final String EXTRA_APPWIDGET_ID_SPEC = "android.appwidget.extra.APPWIDGET_ID";
 
     /** Ordered-broadcast result code jiyusagyoban returns when it can't apply the name yet (data not
@@ -109,22 +128,61 @@ public final class JiyusagyobanWidgets {
         return isJiyuWidget(item) && getStoredName(item) != null;
     }
 
-    /** Build the explicit ordered broadcast that tells jiyusagyoban to bind this widget's stored name to
-     * its (live) appWidgetId. The Intent is kept explicit via {@code setPackage} — implicit broadcasts
-     * to another app are banned on API 31+. */
-    public static Intent buildSetNameIntent(Widget w) {
+    /** @return the jiyusagyoban pull-source template recorded on this item, or null if none. */
+    public static String getStoredTemplate(Item item) {
+        String tpl = item.getTag(TEMPLATE_TAG);
+        return TextUtils.isEmpty(tpl) ? null : tpl;
+    }
+
+    /** Record (or clear, when template is null/empty) the jiyusagyoban pull-source template on this
+     * item. Mirrored authoritatively from jiyusagyoban during capture. */
+    public static void setStoredTemplate(Item item, String template) {
+        item.setTag(TEMPLATE_TAG, TextUtils.isEmpty(template) ? null : template.trim());
+    }
+
+    /** @return true if this item is a jiyusagyoban widget carrying any restorable binding — a name or a
+     * pull-source template. This (not {@link #hasStoredName}) is the predicate for restore, so that
+     * unnamed pull widgets are restored too. */
+    public static boolean hasBinding(Item item) {
+        return isJiyuWidget(item) && (getStoredName(item) != null || getStoredTemplate(item) != null);
+    }
+
+    /** Build the explicit ordered broadcast that tells jiyusagyoban to restore this widget's stored
+     * binding (name and/or pull-source template) onto its (live) appWidgetId. The Intent is kept
+     * explicit via {@code setPackage} — implicit broadcasts to another app are banned on API 31+. */
+    public static Intent buildRestoreBindingIntent(Widget w) {
         Intent intent = new Intent(ACTION_SET_WIDGET_NAME);
         intent.setPackage(JIYU_PACKAGE);
+        writeIdAndProvider(intent, w);
+        String name = getStoredName(w);
+        if (name != null) {
+            intent.putExtra(EXTRA_WIDGET_NAME, name);
+        }
+        String template = getStoredTemplate(w);
+        if (template != null) {
+            intent.putExtra(EXTRA_WIDGET_TEMPLATE, template);
+        }
+        return intent;
+    }
+
+    /** Build the explicit ordered broadcast that asks jiyusagyoban to report this widget's current
+     * binding (the capture path). The answer comes back in the ordered-broadcast result extras. */
+    public static Intent buildGetBindingIntent(Widget w) {
+        Intent intent = new Intent(ACTION_GET_WIDGET_BINDING);
+        intent.setPackage(JIYU_PACKAGE);
+        writeIdAndProvider(intent, w);
+        return intent;
+    }
+
+    private static void writeIdAndProvider(Intent intent, Widget w) {
         int appWidgetId = w.getAppWidgetId();
         // Write the id under both the framework constant ("appWidgetId") and the spelled-out spec key.
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         intent.putExtra(EXTRA_APPWIDGET_ID_SPEC, appWidgetId);
-        intent.putExtra(EXTRA_WIDGET_NAME, getStoredName(w));
         ComponentName cn = w.getComponentName();
         if (cn != null) {
             intent.putExtra(EXTRA_PROVIDER, cn.flattenToString());
         }
         intent.putExtra(EXTRA_PROTOCOL, PROTOCOL_VERSION);
-        return intent;
     }
 }

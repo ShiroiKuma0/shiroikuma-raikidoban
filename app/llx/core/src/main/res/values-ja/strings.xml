@@ -119,6 +119,10 @@
     <string name="jiyu_reinit_offer_title">自由作業盤 ウィジェットを再初期化しますか？</string>
     <string name="jiyu_reinit_offer_msg">再起動または復元後、一部の 自由作業盤 ウィジェットの再初期化が必要です。今すぐ実行しますか？</string>
     <string name="jiyu_not_installed">白い熊 自由作業盤 がインストールされていません</string>
+    <string name="mi_capture_jiyu_binding">白い熊 自由作業盤 ウィジェット設定を取得</string>
+    <string name="jiyu_template_label">プル元: %1$s</string>
+    <string name="jiyu_capture_none">取得できる稼働中の 自由作業盤 ウィジェットがありません</string>
+    <string name="jiyu_capture_result">自由作業盤 取得: 成功 %1$d / 失敗 %2$d</string>
 
     <!-- Bundled Japanese (from the legacy lp.jp pack) so JA is self-contained. -->
     <string name="all_apps">全てのアプリ</string>

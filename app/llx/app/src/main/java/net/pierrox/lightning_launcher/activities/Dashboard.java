@@ -824,6 +824,11 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         if (mModifyingWidget != null) {
             // reload widget that may have been changed in another activity/process (out of the launcher control)
             mModifyingWidget.notifyChanged();
+            // If it was a jiyusagyoban widget, its pull-source template may have just been set/changed in
+            // jiyusagyoban's config screen -> capture it onto the durable tag so it rides the next backup.
+            if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.isJiyuWidget(mModifyingWidget)) {
+                captureJiyuBinding((Widget) mModifyingWidget);
+            }
         }
 
         // a pause followed by a resume soon after, with a call to onNewIntent is considered as a home key press
@@ -1206,6 +1211,9 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                     case REQUEST_BIND_APPWIDGET:
                         ((Widget) mTmpItem).setAppWidgetId(mAllocatedAppWidgetId);
                         mTmpItem.notifyChanged();
+                        // Freshly-bound id -> re-push any stored jiyusagyoban binding so the pull template
+                        // is restored automatically (the 作成 recovery path from a broken widget).
+                        pushJiyuRestoreIfBound(mTmpItem);
                         break;
 
                     case REQUEST_SELECT_SCRIPT_TO_LOAD:
@@ -1907,6 +1915,10 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
 
             case R.id.mi_reinit_jiyu_widgets:
                 reinitJiyuWidgets();
+                break;
+
+            case R.id.mi_capture_jiyu_binding:
+                captureAllJiyuBindings();
                 break;
 
             case R.id.mi_ef_edit_layout:
@@ -4504,6 +4516,11 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                     // Show the recorded jiyusagyoban name on a second line so it can be checked at a glance.
                     String jiyuName = net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.getStoredName(titleItem);
                     text = text + "\n" + (jiyuName != null ? jiyuName : getString(R.string.jiyu_name_unset));
+                    // And, for a pull widget, the captured source template on a third line.
+                    String jiyuTpl = net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.getStoredTemplate(titleItem);
+                    if (jiyuTpl != null) {
+                        text = text + "\n" + getString(R.string.jiyu_template_label, jiyuTpl);
+                    }
                 }
                 configureBubbleForItem(mode, itemView, shortcuts);
             }
@@ -4657,6 +4674,10 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     private int mJiyuReinitReplied;
     private int mJiyuReinitOk;
     private int mJiyuReinitFail;
+    private int mJiyuCaptureExpected;
+    private int mJiyuCaptureReplied;
+    private int mJiyuCaptureOk;
+    private int mJiyuCaptureFail;
     private static boolean sJiyuAutoOfferChecked = false;
 
     /** Prompt for / edit the jiyusagyoban name stored on a widget item.
@@ -4687,10 +4708,11 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 .show();
     }
 
-    /** Re-establish each named jiyusagyoban widget's name -> appWidgetId binding: rebind any dead
-     * appWidgetId, then push the stored name to jiyusagyoban with an explicit ordered broadcast. Fully
-     * headless — no config UI, no accessibility. A per-widget ACK tallies into a summary Flash; the
-     * initial RESULT_CANCELED means a missing / old jiyusagyoban automatically counts as a failure. */
+    /** Re-establish each jiyusagyoban widget's binding -> appWidgetId mapping: rebind any dead
+     * appWidgetId, then push the stored binding (name and/or pull-source template) to jiyusagyoban with
+     * an explicit ordered broadcast. Covers unnamed pull widgets (template-only). Fully headless — no
+     * config UI, no accessibility. A per-widget ACK tallies into a summary Flash; the initial
+     * RESULT_CANCELED means a missing / old jiyusagyoban automatically counts as a failure. */
     public void reinitJiyuWidgets() {
         try {
             getPackageManager().getPackageInfo(
@@ -4715,7 +4737,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                     continue;
                 }
                 for (Item it : page.items) {
-                    if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.hasStoredName(it)) {
+                    if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.hasBinding(it)) {
                         list.add((Widget) it);
                     }
                 }
@@ -4752,15 +4774,15 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 rebindWidget(w);
             }
             sendOrderedBroadcast(
-                    net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.buildSetNameIntent(w),
+                    net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.buildRestoreBindingIntent(w),
                     null, ack, null, RESULT_CANCELED, null, null);
         }
         // rebinds changed appWidgetIds on the items -> persist.
         LLApp.get().getAppEngine().saveData();
     }
 
-    /** Once per launch, if any named jiyusagyoban widget has a dead appWidgetId (the post-restore /
-     * post-crash state), offer a one-tap reinitialization. */
+    /** Once per launch, if any jiyusagyoban widget with a stored binding (name or pull-source template)
+     * has a dead appWidgetId (the post-restore / post-crash state), offer a one-tap reinitialization. */
     private void maybeOfferJiyuReinit() {
         if (getClass() != Dashboard.class || sJiyuAutoOfferChecked) {
             return;
@@ -4773,7 +4795,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 continue;
             }
             for (Item it : page.items) {
-                if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.hasStoredName(it)
+                if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.hasBinding(it)
                         && awm.getAppWidgetInfo(((Widget) it).getAppWidgetId()) == null) {
                     anyDead = true;
                     break;
@@ -4797,6 +4819,134 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
+    }
+
+    /** Capture (learn) a single jiyusagyoban widget's pull-source template FROM jiyusagyoban and mirror
+     * it onto the durable item tag, so it rides in backups. Used right after the widget's config screen
+     * closes. The template is authored in jiyusagyoban, so this is the only way the launcher learns it.
+     * Only runs while the appWidgetId is alive; RESULT_OK is authoritative (clears the tag if the widget
+     * is now static), anything else leaves the tag untouched. */
+    private void captureJiyuBinding(final Widget w) {
+        AppWidgetManager awm = AppWidgetManager.getInstance(this);
+        if (awm.getAppWidgetInfo(w.getAppWidgetId()) == null) {
+            return; // id not alive (e.g. just after a restore) -> nothing to read; restore path handles it
+        }
+        BroadcastReceiver ack = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (getResultCode() != RESULT_OK) {
+                    return; // not-ready / unknown / no receiver -> keep whatever the tag already had
+                }
+                android.os.Bundle ex = getResultExtras(true);
+                String tpl = ex == null ? null
+                        : ex.getString(net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.EXTRA_WIDGET_TEMPLATE);
+                // Non-destructive: only mirror a template we actually learn. NEVER clear the tag on an
+                // empty answer — a freshly-rebound / lost appWidgetId legitimately has no template in
+                // jiyusagyoban yet, and that tag is the ONLY thing that makes recovery possible. A query
+                // must not be able to wipe it.
+                if (!android.text.TextUtils.isEmpty(tpl)) {
+                    net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.setStoredTemplate(w, tpl);
+                    w.notifyChanged();
+                    LLApp.get().getAppEngine().saveData();
+                }
+            }
+        };
+        sendOrderedBroadcast(
+                net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.buildGetBindingIntent(w),
+                null, ack, null, RESULT_CANCELED, null, null);
+    }
+
+    /** Bulk-capture every jiyusagyoban widget's pull-source template across ALL pages (the one-time
+     * migration of already-placed, unnamed pull widgets, and a pre-backup refresh). Only alive
+     * appWidgetIds are queried; a per-widget ACK mirrors the reported template onto the tag and tallies a
+     * summary Flash. */
+    public void captureAllJiyuBindings() {
+        try {
+            getPackageManager().getPackageInfo(
+                    net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.JIYU_PACKAGE, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            Flash.show(this, R.string.jiyu_not_installed);
+            return;
+        }
+        AppWidgetManager awm = AppWidgetManager.getInstance(this);
+        java.util.ArrayList<Widget> list = new java.util.ArrayList<>();
+        String[] pageNames = FileUtils.getPagesDir(LLApp.get().getAppEngine().getBaseDir()).list();
+        if (pageNames != null) {
+            for (String pageName : pageNames) {
+                int pageId;
+                try {
+                    pageId = Integer.parseInt(pageName);
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+                Page page = LLApp.get().getAppEngine().getOrLoadPage(pageId);
+                if (page == null || page.items == null) {
+                    continue;
+                }
+                for (Item it : page.items) {
+                    // Capture from live widgets only; dead ids can't be read (use reinit to restore them).
+                    if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.isJiyuWidget(it)
+                            && awm.getAppWidgetInfo(((Widget) it).getAppWidgetId()) != null) {
+                        list.add((Widget) it);
+                    }
+                }
+            }
+        }
+        if (list.isEmpty()) {
+            Flash.show(this, R.string.jiyu_capture_none);
+            return;
+        }
+        mJiyuCaptureExpected = list.size();
+        mJiyuCaptureReplied = 0;
+        mJiyuCaptureOk = 0;
+        mJiyuCaptureFail = 0;
+        for (final Widget w : list) {
+            // scheduler=null -> the ACK runs on the main thread, so setTag/Flash are safe here.
+            BroadcastReceiver ack = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (getResultCode() == RESULT_OK) {
+                        android.os.Bundle ex = getResultExtras(true);
+                        String tpl = ex == null ? null
+                                : ex.getString(net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.EXTRA_WIDGET_TEMPLATE);
+                        // Non-destructive (see captureJiyuBinding): only store a template we actually
+                        // learn; never clear the tag on an empty answer. A static widget still counts as
+                        // a successful query, it just leaves the tag as-is.
+                        if (!android.text.TextUtils.isEmpty(tpl)) {
+                            net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.setStoredTemplate(w, tpl);
+                            w.notifyChanged();
+                        }
+                        mJiyuCaptureOk++;
+                    } else {
+                        mJiyuCaptureFail++;
+                    }
+                    mJiyuCaptureReplied++;
+                    if (mJiyuCaptureReplied >= mJiyuCaptureExpected) {
+                        LLApp.get().getAppEngine().saveData();
+                        Flash.show(Dashboard.this,
+                                getString(R.string.jiyu_capture_result, mJiyuCaptureOk, mJiyuCaptureFail));
+                    }
+                }
+            };
+            sendOrderedBroadcast(
+                    net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.buildGetBindingIntent(w),
+                    null, ack, null, RESULT_CANCELED, null, null);
+        }
+    }
+
+    /** After a jiyusagyoban widget is (re)bound to a fresh appWidgetId by ANY path — the system bind
+     * dialog (REQUEST_BIND_APPWIDGET) or our silent rebind on a broken-widget tap — immediately push its
+     * stored binding (name + pull-source template) so jiyusagyoban re-applies it to the new id. This is
+     * what makes tap→作成 recovery restore the pull automatically, the same way an item's gesture already
+     * survives a rebind (the gesture lives on the LL item; the template lives in jiyusagyoban keyed by
+     * appWidgetId, so it must be re-pushed). No-op for non-jiyusagyoban widgets or those with no stored
+     * binding (e.g. a brand-new widget being added). Fire-and-forget: the widget re-rendering is the
+     * feedback, and a missing/old jiyusagyoban simply ignores it. */
+    private void pushJiyuRestoreIfBound(Item item) {
+        if (!net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.hasBinding(item)) {
+            return;
+        }
+        sendBroadcast(net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.buildRestoreBindingIntent((Widget) item));
     }
 
     protected View addBubbleItem(int id, int title) {
@@ -5069,11 +5219,18 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             addBubbleItem(R.id.mi_position, R.string.mi_position);
             addBubbleItem(R.id.mi_actions, R.string.mi_actions);
             addBubbleItem(R.id.mi_gesture_actions, R.string.acd_actions);
+            // Widget config at the top level here too (not only nested under mi_edit -> カスタマイズ): a
+            // widget that has a long-press action can ONLY be reached via edit mode, so this gives it
+            // one-tap access to its config — needed e.g. to set/capture a 自由作業盤 pull widget's template.
+            if (item_class == Widget.class && ((Widget) item).hasConfigurationScreen()) {
+                addBubbleItem(R.id.mi_widget_options, R.string.mi_widget_options);
+            }
             // A live jiyusagyoban widget swallows the normal-mode long-press, so its labeling / re-init
             // entries are unreachable from the no-edit menu. Surface them here too: in edit mode you tap
             // the widget to select it and get this bubble.
             if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.isJiyuWidget(item)) {
                 addBubbleItem(R.id.mi_set_jiyu_widget_name, R.string.mi_set_jiyu_widget_name);
+                addBubbleItem(R.id.mi_capture_jiyu_binding, R.string.mi_capture_jiyu_binding);
                 addBubbleItem(R.id.mi_reinit_jiyu_widgets, R.string.mi_reinit_jiyu_widgets);
             }
         } else if (mode == BUBBLE_MODE_ITEM_NO_EM) {
@@ -5095,6 +5252,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
 
                 if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.isJiyuWidget(item)) {
                     addBubbleItem(R.id.mi_set_jiyu_widget_name, R.string.mi_set_jiyu_widget_name);
+                    addBubbleItem(R.id.mi_capture_jiyu_binding, R.string.mi_capture_jiyu_binding);
                     addBubbleItem(R.id.mi_reinit_jiyu_widgets, R.string.mi_reinit_jiyu_widgets);
                 }
 
@@ -8318,6 +8476,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                                     if (ok) {
                                         w.setAppWidgetId(new_id);
                                         item.notifyChanged();
+                                        // Freshly-bound id -> re-push any stored jiyusagyoban binding.
+                                        pushJiyuRestoreIfBound(item);
                                     } else {
                                         mTmpItem = item;
                                         mAllocatedAppWidgetId = new_id;
