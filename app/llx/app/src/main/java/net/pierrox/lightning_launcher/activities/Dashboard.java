@@ -268,6 +268,11 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     private static final int REQUEST_ACTIONS_PICK_SHORTCUT = 9102;
     private static final int REQUEST_ACTIONS_EDIT_FULL = 9103;
     private static final int REQUEST_ACTIONS_PICK_POSITION = 9104;
+
+    // "App not installed" dialog in gesture-repair mode: the pick result rewrites the failing
+    // event-action binding (mNotValidEventAction), not the item's own intent.
+    private static final int REQUEST_REPAIR_EA_PICK_APP = 9105;
+    private static final int REQUEST_REPAIR_EA_PICK_SHORTCUT = 9106;
     private static final String BROADCAST_ACTION_DISPLAY_PAGE = LLApp.LL_PKG_NAME + ".ACTION_DISPLAY_PAGE";
     private static final String BROADCAST_ACTION_RELOAD = LLApp.LLX_PKG_NAME + ".ACTION_RELOAD";
     private static final int BUBBLE_MODE_NONE = 0;
@@ -482,6 +487,11 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         }
     };
     private Shortcut mNotValidShortcut;
+    // Gesture-repair mode of the "app not installed" dialog: the failing event-action binding and
+    // the item whose ItemConfig owns it. Set instead of mNotValidShortcut when the dead intent came
+    // from a gesture (ea.data), so the pick result repairs the binding, not the item's own intent.
+    private EventAction mNotValidEventAction;
+    private Item mNotValidEventActionItem;
     private WallpaperManager mWallpaperManager;
     private ItemLayout mEditItemLayoutBeforeLock;
     private SelectionState mSelectionStateBeforeLock;
@@ -1046,6 +1056,27 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         if (requestCode == REQUEST_ACTIONS_EDIT_FULL) {
             if (resultCode == RESULT_OK) {
                 applyActionsSlotEdit(EventActionSetup.getEventActionFromIntent(data));
+            }
+            return;
+        }
+        if (requestCode == REQUEST_REPAIR_EA_PICK_APP || requestCode == REQUEST_REPAIR_EA_PICK_SHORTCUT) {
+            if (resultCode == RESULT_OK && data != null) {
+                if (requestCode == REQUEST_REPAIR_EA_PICK_APP) {
+                    repairNotValidEventAction(data, GlobalConfig.LAUNCH_APP);
+                } else {
+                    Intent launch = data.getParcelableExtra(Intent.EXTRA_SHORTCUT_INTENT);
+                    if (launch != null) {
+                        String label = ActionsOverviewDialog.shortcutLaunchLabel(this, launch, data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME));
+                        if (label != null) {
+                            launch.putExtra(LightningIntent.INTENT_EXTRA_SHORTCUT_LABEL, label);
+                        }
+                        repairNotValidEventAction(launch, GlobalConfig.LAUNCH_SHORTCUT);
+                    }
+                }
+            } else {
+                // pick cancelled: keep the existing (broken) binding
+                mNotValidEventAction = null;
+                mNotValidEventActionItem = null;
             }
             return;
         }
@@ -2678,8 +2709,20 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
 
         switch (id) {
             case DIALOG_APP_NOT_INSTALLED:
-                if (mNotValidShortcut != null) {
-                    final ComponentName cn = mNotValidShortcut.getIntent().getComponent();
+                if (mNotValidShortcut != null || mNotValidEventAction != null) {
+                    // In gesture-repair mode the dead intent is the binding's (ea.data), not the
+                    // item's own — the store links must point at ITS package.
+                    Intent failingIntent = null;
+                    if (mNotValidEventAction != null) {
+                        try {
+                            failingIntent = Intent.parseUri(mNotValidEventAction.data, 0);
+                        } catch (Exception e) {
+                            // pass
+                        }
+                    } else {
+                        failingIntent = mNotValidShortcut.getIntent();
+                    }
+                    final ComponentName cn = failingIntent == null ? null : failingIntent.getComponent();
                     // A 4th choice ("白い熊 自由作業盤 shortcut") won't fit AlertDialog's three buttons, so offer
                     // the choices as a themed list: pick another app, repoint at a jiyusagyoban shortcut, or
                     // (when the missing component is known) open the store. Cancel stays a button.
@@ -2715,20 +2758,46 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                         public void onClick(DialogInterface dialog, int which) {
                             Item target = mNotValidShortcut;
                             mNotValidShortcut = null;
-                            if (target == null) {
+                            // In gesture-repair mode keep mNotValidEventAction/Item set: the pick
+                            // result (REQUEST_REPAIR_EA_*) consumes them. The store entries below
+                            // clear them (no result will come back).
+                            boolean repairEa = mNotValidEventAction != null;
+                            if (!repairEa && target == null) {
                                 return;
                             }
                             switch (kinds.get(which)) {
                                 case 0:
-                                    replaceShortcutApp(target);
+                                    if (repairEa) {
+                                        Intent picker = new Intent(Dashboard.this, AppDrawerX.class);
+                                        picker.setAction(Intent.ACTION_PICK_ACTIVITY);
+                                        startActivityForResult(picker, REQUEST_REPAIR_EA_PICK_APP);
+                                    } else {
+                                        replaceShortcutApp(target);
+                                    }
                                     break;
                                 case 1:
-                                    pickJiyuShortcutForItem(target);
+                                    if (repairEa) {
+                                        pickJiyuShortcutForRepair();
+                                    } else {
+                                        pickJiyuShortcutForItem(target);
+                                    }
                                     break;
                                 case 3:
-                                    pickLightningActionForItem(target);
+                                    if (repairEa) {
+                                        Intent editor = new Intent(Intent.ACTION_CREATE_SHORTCUT);
+                                        editor.setClass(Dashboard.this, EventActionSetup.class);
+                                        try {
+                                            startActivityForResult(editor, REQUEST_REPAIR_EA_PICK_SHORTCUT);
+                                        } catch (Exception e) {
+                                            // pass
+                                        }
+                                    } else {
+                                        pickLightningActionForItem(target);
+                                    }
                                     break;
                                 case 2:
+                                    mNotValidEventAction = null;
+                                    mNotValidEventActionItem = null;
                                     // F-Droid (the missing component's package), opened in the F-Droid app
                                     // if installed, else the browser.
                                     Intent intent = new Intent(Intent.ACTION_VIEW,
@@ -2736,6 +2805,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                                     Utils.startActivitySafely(Dashboard.this, intent, R.string.start_activity_error);
                                     break;
                                 case 4:
+                                    mNotValidEventAction = null;
+                                    mNotValidEventActionItem = null;
                                     // Aurora Store: the original Google Play (market://) link, which Aurora
                                     // registers for (falls back to Play Store / browser).
                                     Intent aurora = new Intent(Intent.ACTION_VIEW,
@@ -2749,6 +2820,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             mNotValidShortcut = null;
+                            mNotValidEventAction = null;
+                            mNotValidEventActionItem = null;
                         }
                     });
                     AlertDialog notInstalledDialog = builder.create();
@@ -3579,6 +3652,117 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         } catch (Exception e) {
             // pass
         }
+    }
+
+    // ---- Gesture-binding repair (the "app not installed" dialog on a failed gesture action) ----
+    // A gesture whose LAUNCH_APP/LAUNCH_SHORTCUT intent fails used to land in the generic dialog,
+    // which rewrote the swiped ITEM's own intent and left the gesture's dead intent untouched (so
+    // the swipe kept failing forever). These helpers locate the failing EventAction inside the
+    // item's config and rewrite that binding instead.
+
+    private static final int ITEM_EVENT_ACTION_SLOTS = 10;
+
+    private static EventAction getItemEventActionSlot(ItemConfig ic, int slot) {
+        switch (slot) {
+            case 0: return ic.tap;
+            case 1: return ic.longTap;
+            case 2: return ic.swipeLeft;
+            case 3: return ic.swipeRight;
+            case 4: return ic.swipeUp;
+            case 5: return ic.swipeDown;
+            case 6: return ic.touch;
+            case 7: return ic.paused;
+            case 8: return ic.resumed;
+            default: return ic.menu;
+        }
+    }
+
+    private static void setItemEventActionSlot(ItemConfig ic, int slot, EventAction ea) {
+        switch (slot) {
+            case 0: ic.tap = ea; break;
+            case 1: ic.longTap = ea; break;
+            case 2: ic.swipeLeft = ea; break;
+            case 3: ic.swipeRight = ea; break;
+            case 4: ic.swipeUp = ea; break;
+            case 5: ic.swipeDown = ea; break;
+            case 6: ic.touch = ea; break;
+            case 7: ic.paused = ea; break;
+            case 8: ic.resumed = ea; break;
+            default: ic.menu = ea; break;
+        }
+    }
+
+    // Locate the exact failing EventAction node inside an item's config, by identity (the object
+    // handed to runAction IS the stored one). Returns {slot, position-in-chain}, or null when the
+    // binding is not item-owned (page/global gesture, synthetic action, ...).
+    private static int[] findItemEventAction(ItemConfig ic, EventAction target) {
+        for (int slot = 0; slot < ITEM_EVENT_ACTION_SLOTS; slot++) {
+            int pos = 0;
+            for (EventAction n = getItemEventActionSlot(ic, slot); n != null; n = n.next) {
+                if (n == target) {
+                    return new int[]{slot, pos};
+                }
+                pos++;
+            }
+        }
+        return null;
+    }
+
+    // Write the picked replacement into the located gesture binding and persist it. The slot is
+    // rewritten with a deep-cloned chain (never mutated in place): modifyItemConfig()'s
+    // copy-on-write is shallow, so the original EventAction objects may still be shared with a
+    // page-default config used by sibling items.
+    private void repairNotValidEventAction(Intent launch, int action) {
+        EventAction ea = mNotValidEventAction;
+        Item item = mNotValidEventActionItem;
+        mNotValidEventAction = null;
+        mNotValidEventActionItem = null;
+        if (ea == null || item == null || launch == null) {
+            return;
+        }
+        int[] where = findItemEventAction(item.getItemConfig(), ea);
+        if (where == null) {
+            // the binding changed while the picker was open
+            return;
+        }
+        ItemConfig ic = item.modifyItemConfig();
+        EventAction head = getItemEventActionSlot(ic, where[0]).clone();
+        EventAction node = head;
+        for (int i = 0; i < where[1]; i++) {
+            node = node.next;
+        }
+        node.action = action;
+        node.data = launch.toUri(0);
+        setItemEventActionSlot(ic, where[0], head);
+        item.getPage().setModified();
+    }
+
+    // Gesture-repair variant of pickJiyuShortcutForItem: same jiyusagyoban-first creator flow, but
+    // the result rewrites the failing binding (REQUEST_REPAIR_EA_PICK_SHORTCUT) instead of an item.
+    private void pickJiyuShortcutForRepair() {
+        PackageManager pm = getPackageManager();
+        for (ResolveInfo ri : pm.queryIntentActivities(new Intent(Intent.ACTION_CREATE_SHORTCUT), 0)) {
+            if (net.pierrox.lightning_launcher.util.JiyusagyobanWidgets.JIYU_PACKAGE.equals(ri.activityInfo.packageName)) {
+                Intent chosen = new Intent(Intent.ACTION_CREATE_SHORTCUT);
+                chosen.setComponent(new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name));
+                try {
+                    startActivityForResult(chosen, REQUEST_REPAIR_EA_PICK_SHORTCUT);
+                    return;
+                } catch (Exception e) {
+                    // fall through to the generic picker
+                }
+            }
+        }
+        showThemedShortcutPicker(new OnShortcutActivityChosen() {
+            @Override
+            public void onChosen(Intent chosen) {
+                try {
+                    startActivityForResult(chosen, REQUEST_REPAIR_EA_PICK_SHORTCUT);
+                } catch (Exception e) {
+                    // pass
+                }
+            }
+        });
     }
 
     private void selectAppForAdd() {
@@ -7725,6 +7909,28 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         @Override
         public void onShortcutLaunchError(Shortcut shortcut) {
             mNotValidShortcut = shortcut;
+            mNotValidEventAction = null;
+            mNotValidEventActionItem = null;
+            try {
+                removeDialog(DIALOG_APP_NOT_INSTALLED);
+            } catch (Exception e2) {
+            }
+            showDialog(DIALOG_APP_NOT_INSTALLED);
+        }
+
+        @Override
+        public void onEventActionLaunchError(EventAction ea, ItemView itemView) {
+            // A gesture/event binding failed to launch its ea.data intent. Offer the repair dialog
+            // only when the binding can be located inside the item's own config (so the pick result
+            // has a slot to write back to); otherwise just report the failure.
+            Item item = itemView == null ? null : itemView.getItem();
+            if (item == null || ea.data == null || findItemEventAction(item.getItemConfig(), ea) == null) {
+                super.onEventActionLaunchError(ea, itemView);
+                return;
+            }
+            mNotValidShortcut = null;
+            mNotValidEventAction = ea;
+            mNotValidEventActionItem = item;
             try {
                 removeDialog(DIALOG_APP_NOT_INSTALLED);
             } catch (Exception e2) {

@@ -373,6 +373,15 @@ public abstract class Screen implements ItemLayout.ItemLayoutListener, ItemView.
     }
 
     /**
+     * What to do when an event action (gesture or other binding, launched from its ea.data intent)
+     * fails to start. Unlike onShortcutLaunchError the failing intent is the binding's, not the
+     * item's own, so any repair must target the binding.
+     */
+    public void onEventActionLaunchError(EventAction ea, ItemView itemView) {
+        Flash.show(mContext, R.string.start_activity_error);
+    }
+
+    /**
      * No LauncherApps host permission (Android 7.1)
      */
     public void onLauncherAppsNoHostPermission(ItemView itemView) {
@@ -1699,7 +1708,18 @@ public abstract class Screen implements ItemLayout.ItemLayoutListener, ItemView.
         launchIntent(shortcut.getIntent(), shortcutView);
     }
 
+    // The event action whose ea.data intent launchIntent is currently starting, when the intent
+    // comes from a gesture/event binding rather than from the launched item itself. Lets the
+    // launch-error path report the actual failing binding instead of blaming the item's own
+    // intent (kept as a field so the launchIntent overrides in subclasses stay signature-stable).
+    private EventAction mLaunchingEventAction;
+
     protected void launchIntent(Intent originalIntent, ItemView itemView) {
+        // Consume the event-action origin immediately: whatever happens below (including an
+        // unexpected throw) it must not leak into an unrelated later launch.
+        EventAction launchingEventAction = mLaunchingEventAction;
+        mLaunchingEventAction = null;
+
         Intent intent = new Intent(originalIntent);
 
         if (intent.getAction() == null) intent.setAction(Intent.ACTION_MAIN);
@@ -1746,7 +1766,9 @@ public abstract class Screen implements ItemLayout.ItemLayoutListener, ItemView.
             // continue
         }
 
-        if (itemView != null && itemView.getItem().getClass() == Shortcut.class) {
+        if (launchingEventAction != null) {
+            onEventActionLaunchError(launchingEventAction, itemView);
+        } else if (itemView != null && itemView.getItem().getClass() == Shortcut.class) {
             onShortcutLaunchError((Shortcut) itemView.getItem());
         }
     }
@@ -1826,6 +1848,7 @@ public abstract class Screen implements ItemLayout.ItemLayoutListener, ItemView.
                             }
                         }
                     } else {
+                        mLaunchingEventAction = ea;
                         launchIntent(intent, itemView);
                     }
                 } catch (Exception e) {
