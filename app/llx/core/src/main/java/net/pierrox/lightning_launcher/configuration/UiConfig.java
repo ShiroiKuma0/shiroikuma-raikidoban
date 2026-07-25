@@ -33,7 +33,8 @@ public final class UiConfig {
     /** Upper bound of the geometry-box panel width seekbar, in dp. 0 means "auto (wrap to content)". */
     public static final int MAX_GEOM_PANEL_WIDTH_DP = 800;
 
-    private static final String PREFS = "llui";
+    /** The SharedPreferences file holding every 「白い熊 雷起動盤 UI」 value (exported as the "ui" category). */
+    public static final String PREFS = "llui";
     /** In-app UI locale: "" = follow the system, else a BCP-47 tag ("en", "ja"). */
     public static final String PREF_LOCALE = "ui_locale";
     private static final String FONT_FAMILY_PREFIX = "font_family_";

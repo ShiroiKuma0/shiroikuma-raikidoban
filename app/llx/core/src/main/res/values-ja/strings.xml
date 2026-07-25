@@ -1092,4 +1092,54 @@ Mar. 23, 2015 : add translations"</string>
         <item>中央（拡大縮小しない）</item>
         <item>高さと幅に合わせる</item>
     </string-array>
+
+    <!-- 白い熊: 書き出し・読み込み + 保存復元 の自動化 -->
+    <string name="rkb_ui_section_eim">書き出し・読み込み</string>
+    <string name="rkb_eim_entry">書き出し・読み込み…</string>
+    <string name="rkb_eim_entry_desc">この起動盤で設定できるすべてを 1 つの .zip に保存し、復元します。</string>
+    <string name="rkb_eim_title">書き出し・読み込み</string>
+    <string name="rkb_eim_desc">持ち出す対象にチェックを入れて 1 つの .zip に書き出す、または .zip を読み込んでその部分だけ復元します。</string>
+    <string name="rkb_eim_dir">保存先フォルダー</string>
+    <string name="rkb_eim_dir_unset">未設定 — タップしてフォルダーを選択</string>
+    <string name="rkb_eim_warn_nodir">保存先フォルダーが未設定です。</string>
+    <string name="rkb_eim_warn_none">このフォルダーにはまだバックアップがありません。</string>
+    <string name="rkb_eim_last">最終バックアップ: %1$s</string>
+    <string name="rkb_eim_select_all">全選択</string>
+    <string name="rkb_eim_export">書き出し</string>
+    <string name="rkb_eim_import">読み込み</string>
+    <string name="rkb_eim_exporting">書き出し中…</string>
+    <string name="rkb_eim_importing">読み込み中…</string>
+    <string name="rkb_eim_none_selected">区分が選択されていません。</string>
+    <string name="rkb_eim_pick_backup">バックアップを選択</string>
+    <string name="rkb_eim_browse">参照…</string>
+    <string name="rkb_eim_export_done_title">書き出し完了</string>
+    <string name="rkb_eim_export_done_body">書き出し先:\n%1$s\n\n%2$s · %3$d 区分</string>
+    <string name="rkb_eim_export_fail_title">書き出し失敗</string>
+    <string name="rkb_eim_export_fail">書き出しに失敗しました: %1$s</string>
+    <string name="rkb_eim_import_done_title">読み込み完了</string>
+    <string name="rkb_eim_import_fail_title">読み込み失敗</string>
+    <string name="rkb_eim_import_fail">読み込みに失敗しました: %1$s</string>
+    <string name="rkb_eim_import_none">白い熊 雷起動盤 のバックアップではありません。</string>
+    <string name="rkb_eim_import_nothing">復元するものがありません。</string>
+    <string name="rkb_eim_restart_hint">復元したデータを反映するには起動盤を再起動してください。</string>
+    <string name="rkb_eim_restart_later">あとで</string>
+    <string name="rkb_eim_restart_now">今すぐ再起動</string>
+    <string name="rkb_eim_cat_ui">白い熊 雷起動盤 UI（外観）</string>
+    <string name="rkb_eim_cat_ui_fonts">取り込んだフォント</string>
+    <string name="rkb_eim_cat_settings">起動盤の設定</string>
+    <string name="rkb_eim_cat_fold">折りたたみ表</string>
+    <string name="rkb_eim_cat_desktops">デスクトップと項目</string>
+    <string name="rkb_eim_cat_desktops_icons">項目のアイコンと画像</string>
+    <string name="rkb_eim_cat_desktops_wp">デスクトップの壁紙</string>
+    <string name="rkb_eim_cat_scripts">スクリプト</string>
+    <string name="rkb_eim_cat_themes">項目のスタイル</string>
+    <string name="rkb_eim_cat_variables">スクリプト変数</string>
+    <string name="rkb_auto_switch">自動書き出し</string>
+    <string name="rkb_auto_switch_desc">白い熊 自由作業盤 のタスクが下のトークンでこの書き出しを画面なしで実行できるようにします。</string>
+    <string name="rkb_auto_token">自動化トークン</string>
+    <string name="rkb_auto_regenerate">再生成</string>
+    <string name="rkb_auto_token_copied">トークンをクリップボードにコピーしました。</string>
+    <string name="rkb_auto_token_regen_title">トークンを再生成しますか？</string>
+    <string name="rkb_auto_token_regen_msg">古いトークンは直ちに無効になります。白い熊 自由作業盤 に貼り付け済みの複製はすべて更新が必要です。</string>
+    <string name="rkb_auto_token_regenerated">新しいトークンを生成しました — 貼り付け済みの複製を更新してください。</string>
 </resources>

@@ -25,6 +25,9 @@ SOFTWARE.
 package net.pierrox.lightning_launcher.activities;
 
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -42,6 +45,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -55,6 +59,9 @@ import net.pierrox.lightning_launcher.configuration.UiFonts;
 import net.pierrox.lightning_launcher.configuration.UiGroup;
 import net.pierrox.lightning_launcher.configuration.UiSlot;
 import net.pierrox.lightning_launcher.configuration.UiTheme;
+import net.pierrox.lightning_launcher.data.RkbExport;
+import net.pierrox.lightning_launcher.util.AutomationAuth;
+import net.pierrox.lightning_launcher.util.ExportImportPanel;
 import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.GeometryBoxStyler;
 import net.pierrox.lightning_launcher.util.UiFontPickerDialog;
@@ -97,6 +104,16 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
     private UiSlot mPendingFontSlot;
     private final ActivityResultLauncher<String[]> mFontImport =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), this::onFontImported);
+
+    /** The Export / Import window (see {@link ExportImportPanel}) and its two SAF pickers. */
+    private ExportImportPanel mExportImport;
+    private final ActivityResultLauncher<Uri> mPickExportDir =
+            registerForActivityResult(new ActivityResultContracts.OpenDocumentTree(), this::onExportDirPicked);
+    private final ActivityResultLauncher<String[]> mPickImportFile =
+            registerForActivityResult(new ActivityResultContracts.OpenDocument(), this::onImportFilePicked);
+
+    /** Shown wherever a backup destination is missing — the one thing on this page that is not yellow. */
+    private static final int WARN_COLOR = 0xFFFF5252;
 
     private static final class TextSlotViews {
         TextView fontValue, weightValue, sizeValue, sample;
@@ -179,6 +196,7 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         mTextSlots.clear();
         mGeometryPreviews.clear();
 
+        addExportImportSection();
         addLanguageSection();
 
         for (UiGroup group : UiGroup.values()) {
@@ -212,27 +230,52 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         addSection(getString(group.labelRes));
     }
 
+    /**
+     * A section heading in the 白い熊 house style (the kxkb settings page): 20 sp bold accent title with
+     * an underline exactly as wide as the TEXT — never a full-width rule — and sections separated from
+     * one another by a thin, subdued full-width spacer.
+     */
     private void addSection(String labelText) {
+        if (mHolder.getChildCount() > 0) {
+            addSectionSpacer();
+        }
         int accent = UiTheme.color(UiSlot.ACCENT);
 
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
-        box.setPadding(dp(8), dp(18), dp(8), dp(4));
+        box.setPadding(dp(8), dp(16), dp(8), dp(4));
 
         TextView label = makeLabel(labelText, accent);
         label.setTextSize(20);
         label.setTypeface(label.getTypeface(), Typeface.BOLD);
+        label.setMaxLines(1);
         box.addView(label);
-
-        View rule = new View(this);
-        LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(2));
-        rlp.topMargin = dp(4);
-        rule.setLayoutParams(rlp);
-        rule.setBackgroundColor(accent);
-        box.addView(rule);
+        box.addView(underline(label, dp(2), accent));
 
         mHolder.addView(box);
+    }
+
+    /** Thin neutral full-width hairline between one section and the next (the kxkb page rhythm). */
+    private void addSectionSpacer() {
+        View line = new View(this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, Math.max(1, dp(1)));
+        lp.topMargin = dp(18);
+        line.setLayoutParams(lp);
+        line.setBackgroundColor(UiTheme.color(UiSlot.TEXT));
+        line.setAlpha(0.35f);
+        mHolder.addView(line);
+    }
+
+    /** An underline measured to the label's text width, so it never stretches to the whole row. */
+    private View underline(TextView label, int height, int color) {
+        label.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        View rule = new View(this);
+        LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(label.getMeasuredWidth(), height);
+        rlp.topMargin = dp(3);
+        rule.setLayoutParams(rlp);
+        rule.setBackgroundColor(color);
+        return rule;
     }
 
     // --- geometry box (split per region: panel / top tiles / cross / layer buttons) + live preview ---
@@ -284,14 +327,21 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
                 GeometryBoxStyler.DEFAULT_ZORDER_DP, UiConfig.MAX_GEOM_ELEMENT_DP, mStepPx, false);
     }
 
-    // A rule-less, indented heading for a geometry sub-section (it lives inside the Geometry box group,
-    // which already drew the only separator line).
+    // An indented sub-heading inside a group (no full-width spacer — that marks top-level sections
+    // only), text-width underlined like every other heading on the page.
     private void addSubHeader(String text, int indent) {
-        TextView label = makeLabel(text, UiTheme.color(UiSlot.ACCENT));
+        int accent = UiTheme.color(UiSlot.ACCENT);
+        TextView label = makeLabel(text, accent);
         label.setTextSize(16);
         label.setTypeface(label.getTypeface(), Typeface.BOLD);
-        label.setPadding(indent + dp(8), dp(12), dp(8), dp(2));
-        mHolder.addView(label);
+        label.setMaxLines(1);
+
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(indent + dp(8), dp(12), dp(8), dp(2));
+        box.addView(label);
+        box.addView(underline(label, Math.max(1, dp(1.5f)), accent));
+        mHolder.addView(box);
     }
 
     // Fixed preview width for regions whose buttons use layout weights (tiles, z-order row) so they have
@@ -416,6 +466,203 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
             return getString(R.string.llui_geom_auto);
         }
         return getString(R.string.theme_border_width_value, dp);
+    }
+
+    // --- Export / Import: the first section of the page, exactly as in the sister apps. It holds the
+    // Export / Import window, the backup directory, and — directly below those, never as a section of
+    // its own — the 保存復元 automation switch + token, because that is a backup feature too. ---
+
+    private void addExportImportSection() {
+        addSection(getString(R.string.rkb_ui_section_eim));
+        addTwoLineRow(getString(R.string.rkb_eim_entry), getString(R.string.rkb_eim_entry_desc),
+                UiTheme.color(UiSlot.TEXT), mStepPx, v -> openExportImport());
+        addDirRow();
+        addLastExportRow();
+        addAutomationRows();
+    }
+
+    /** The directory is queried when this page opens, so the newest backup's date is shown right here. */
+    private void addLastExportRow() {
+        String msg;
+        boolean warn;
+        if (RkbExport.exportDir(this) == null) {
+            msg = getString(R.string.rkb_eim_warn_nodir);
+            warn = true;
+        } else {
+            androidx.documentfile.provider.DocumentFile newest = RkbExport.newestExport(this);
+            if (newest == null) {
+                msg = getString(R.string.rkb_eim_warn_none);
+                warn = true;
+            } else {
+                msg = getString(R.string.rkb_eim_last,
+                        android.text.format.DateFormat.getDateFormat(this).format(newest.lastModified())
+                                + " " + android.text.format.DateFormat.getTimeFormat(this).format(newest.lastModified()));
+                warn = false;
+            }
+        }
+        TextView line = makeLabel(msg, warn ? WARN_COLOR : UiTheme.color(UiSlot.TEXT));
+        line.setTextSize(13);
+        line.setAlpha(warn ? 1f : 0.8f);
+        line.setPadding(mStepPx + dp(8), 0, dp(14), dp(10));
+        mHolder.addView(line);
+    }
+
+    /** The backup directory — red while unset, so a launcher with nowhere to back up to says so loudly. */
+    private void addDirRow() {
+        String label = ExportImportPanel.dirLabel(this);
+        boolean unset = label == null;
+        addTwoLineRow(getString(R.string.rkb_eim_dir),
+                unset ? getString(R.string.rkb_eim_dir_unset) : label,
+                unset ? WARN_COLOR : UiTheme.color(UiSlot.TEXT),
+                mStepPx, v -> mPickExportDir.launch(RkbExport.exportDirUri(this)));
+    }
+
+    private void openExportImport() {
+        mExportImport = new ExportImportPanel(this, new ExportImportPanel.Host() {
+            @Override
+            public void pickExportDir(Uri initial) {
+                mPickExportDir.launch(initial);
+            }
+
+            @Override
+            public void pickImportFile() {
+                mPickImportFile.launch(new String[]{"application/zip", "application/octet-stream", "*/*"});
+            }
+
+            @Override
+            public void onChainFinished() {
+                // A finished export/import closes the whole chain: info dialog → panel → this page.
+                finish();
+            }
+        });
+        mExportImport.show();
+    }
+
+    private void onExportDirPicked(Uri uri) {
+        if (uri == null) {
+            return;
+        }
+        if (mExportImport != null && mExportImport.isShowing()) {
+            mExportImport.onDirPicked(uri);
+        } else {
+            ExportImportPanel.storeDir(this, uri);
+        }
+        buildRows();
+    }
+
+    private void onImportFilePicked(Uri uri) {
+        if (uri != null && mExportImport != null && mExportImport.isShowing()) {
+            mExportImport.onImportFilePicked(uri);
+        }
+    }
+
+    // --- 保存復元 automation (the sister-app state-export contract) ---
+
+    private void addAutomationRows() {
+        addSwitchRow(getString(R.string.rkb_auto_switch), getString(R.string.rkb_auto_switch_desc),
+                AutomationAuth.isEnabled(this), mStepPx, checked -> AutomationAuth.setEnabled(this, checked));
+        addTokenRow();
+    }
+
+    /** Tap = copy the full token; "Regenerate" on the right = a fresh secret (revokes pasted copies). */
+    private void addTokenRow() {
+        int textColor = UiTheme.color(UiSlot.TEXT);
+        LinearLayout row = makeRowContainer(mStepPx);
+
+        LinearLayout labels = new LinearLayout(this);
+        labels.setOrientation(LinearLayout.VERTICAL);
+        labels.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        labels.addView(makeLabel(getString(R.string.rkb_auto_token), textColor));
+        TextView value = makeLabel(AutomationAuth.abbreviate(AutomationAuth.token(this)), textColor);
+        value.setTypeface(Typeface.MONOSPACE);
+        value.setTextSize(13);
+        value.setAlpha(0.7f);
+        value.setPadding(0, dp(3), dp(8), 0);
+        labels.addView(value);
+        row.addView(labels);
+
+        TextView regenerate = makeLabel(getString(R.string.rkb_auto_regenerate), UiTheme.color(UiSlot.ACCENT));
+        regenerate.setPadding(dp(12), dp(8), dp(4), dp(8));
+        regenerate.setOnClickListener(v -> confirmRegenerateToken());
+        row.addView(regenerate);
+
+        row.setOnClickListener(v -> {
+            ClipboardManager cb = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            if (cb != null) {
+                cb.setPrimaryClip(ClipData.newPlainText("automation_token", AutomationAuth.token(this)));
+            }
+            Flash.show(this, R.string.rkb_auto_token_copied);
+        });
+        mHolder.addView(row);
+    }
+
+    private void confirmRegenerateToken() {
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.rkb_auto_token_regen_title)
+                .setMessage(R.string.rkb_auto_token_regen_msg)
+                .setPositiveButton(R.string.rkb_auto_regenerate, (d, which) -> {
+                    AutomationAuth.regenerateToken(this);
+                    buildRows();
+                    Flash.show(this, R.string.rkb_auto_token_regenerated);
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        dialog.show();
+        net.pierrox.lightning_launcher.util.UiDialogStyler.style(dialog);
+    }
+
+    // --- generic rows shared by the section above ---
+
+    /** A title over a smaller value/description line; the whole row is the tap target. */
+    private LinearLayout addTwoLineRow(String title, CharSequence value, int valueColor, int indent,
+                                       View.OnClickListener onClick) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.VERTICAL);
+        int pad = dp(10);
+        row.setPadding(indent + dp(8), pad, dp(14), pad);
+        row.addView(makeLabel(title, UiTheme.color(UiSlot.TEXT)));
+        TextView valueView = makeLabel(value, valueColor);
+        valueView.setTextSize(13);
+        valueView.setPadding(0, dp(3), 0, 0);
+        row.addView(valueView);
+        if (onClick != null) {
+            row.setOnClickListener(onClick);
+        }
+        mHolder.addView(row);
+        return row;
+    }
+
+    private interface OnToggle {
+        void onToggle(boolean checked);
+    }
+
+    /** A title + description on the left, a themed switch on the right. */
+    private void addSwitchRow(String title, String description, boolean checked, int indent,
+                              final OnToggle onToggle) {
+        int textColor = UiTheme.color(UiSlot.TEXT);
+        int accent = UiTheme.color(UiSlot.ACCENT);
+        LinearLayout row = makeRowContainer(indent);
+
+        LinearLayout labels = new LinearLayout(this);
+        labels.setOrientation(LinearLayout.VERTICAL);
+        labels.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        labels.addView(makeLabel(title, textColor));
+        TextView desc = makeLabel(description, textColor);
+        desc.setTextSize(13);
+        desc.setAlpha(0.7f);
+        desc.setPadding(0, dp(3), dp(8), 0);
+        labels.addView(desc);
+        row.addView(labels);
+
+        final Switch toggle = new Switch(this);
+        toggle.setChecked(checked);
+        toggle.setThumbTintList(android.content.res.ColorStateList.valueOf(accent));
+        toggle.setTrackTintList(android.content.res.ColorStateList.valueOf(textColor));
+        toggle.setOnCheckedChangeListener((button, isChecked) -> onToggle.onToggle(isChecked));
+        row.addView(toggle);
+
+        row.setOnClickListener(v -> toggle.toggle());
+        mHolder.addView(row);
     }
 
     // --- language (in-app, independent of the system locale) ---

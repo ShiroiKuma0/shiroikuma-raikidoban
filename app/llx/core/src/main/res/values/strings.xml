@@ -1454,4 +1454,55 @@
     <string name="srch_regexp">Regexp</string>
     <string name="srch_case">Match case</string>
     <string name="sc_ind">Autoindentation</string>
+
+    <!-- 白い熊: Export / Import — the one category backup of everything settable in this launcher,
+         plus the 保存復元 automation contract (headless export driven by 白い熊 自由作業盤). -->
+    <string name="rkb_ui_section_eim">Export / Import</string>
+    <string name="rkb_eim_entry">Export / Import…</string>
+    <string name="rkb_eim_entry_desc">Back up everything settable in this launcher to one .zip, and restore it.</string>
+    <string name="rkb_eim_title">Export / Import</string>
+    <string name="rkb_eim_desc">Tick what to carry, then export it as a single .zip — or import one and restore just those parts.</string>
+    <string name="rkb_eim_dir">Backup directory</string>
+    <string name="rkb_eim_dir_unset">Not set — tap to choose a folder</string>
+    <string name="rkb_eim_warn_nodir">No backup directory set.</string>
+    <string name="rkb_eim_warn_none">No backup in this directory yet.</string>
+    <string name="rkb_eim_last">Last backup: %1$s</string>
+    <string name="rkb_eim_select_all">Select all</string>
+    <string name="rkb_eim_export">Export</string>
+    <string name="rkb_eim_import">Import</string>
+    <string name="rkb_eim_exporting">Exporting…</string>
+    <string name="rkb_eim_importing">Importing…</string>
+    <string name="rkb_eim_none_selected">No categories selected.</string>
+    <string name="rkb_eim_pick_backup">Choose a backup</string>
+    <string name="rkb_eim_browse">Browse…</string>
+    <string name="rkb_eim_export_done_title">Export finished</string>
+    <string name="rkb_eim_export_done_body">Written to:\n%1$s\n\n%2$s · %3$d categories</string>
+    <string name="rkb_eim_export_fail_title">Export failed</string>
+    <string name="rkb_eim_export_fail">Export failed: %1$s</string>
+    <string name="rkb_eim_import_done_title">Import finished</string>
+    <string name="rkb_eim_import_fail_title">Import failed</string>
+    <string name="rkb_eim_import_fail">Import failed: %1$s</string>
+    <string name="rkb_eim_import_none">Not a 白い熊 雷起動盤 backup.</string>
+    <string name="rkb_eim_import_nothing">Nothing to restore.</string>
+    <string name="rkb_eim_restart_hint">Restart the launcher to apply the restored data.</string>
+    <string name="rkb_eim_restart_later">Later</string>
+    <string name="rkb_eim_restart_now">Restart now</string>
+    <string name="rkb_eim_cat_ui">白い熊 雷起動盤 UI (appearance)</string>
+    <string name="rkb_eim_cat_ui_fonts">Imported fonts</string>
+    <string name="rkb_eim_cat_settings">Launcher settings</string>
+    <string name="rkb_eim_cat_fold">Fold matrix</string>
+    <string name="rkb_eim_cat_desktops">Desktops and items</string>
+    <string name="rkb_eim_cat_desktops_icons">Item icons and images</string>
+    <string name="rkb_eim_cat_desktops_wp">Desktop wallpapers</string>
+    <string name="rkb_eim_cat_scripts">Scripts</string>
+    <string name="rkb_eim_cat_themes">Item styles</string>
+    <string name="rkb_eim_cat_variables">Script variables</string>
+    <string name="rkb_auto_switch">Automation export</string>
+    <string name="rkb_auto_switch_desc">Let sister-app tasks (白い熊 自由作業盤) run this export headlessly with the token below.</string>
+    <string name="rkb_auto_token">Automation token</string>
+    <string name="rkb_auto_regenerate">Regenerate</string>
+    <string name="rkb_auto_token_copied">Token copied to the clipboard.</string>
+    <string name="rkb_auto_token_regen_title">Regenerate the token?</string>
+    <string name="rkb_auto_token_regen_msg">The old token stops working at once. Every copy already pasted into 白い熊 自由作業盤 must be updated.</string>
+    <string name="rkb_auto_token_regenerated">New token generated — update the pasted copies.</string>
 </resources>

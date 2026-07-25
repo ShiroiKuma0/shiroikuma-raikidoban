@@ -361,6 +361,17 @@
             </intent-filter>
         </receiver>
 
+        <!-- 保存復元: the sister-app state-export automation contract. No android:permission — the
+             caller cannot hold one; the master switch + token (AutomationAuth) are the gate. -->
+        <receiver
+            android:name="net.pierrox.lightning_launcher.util.StateExportReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="${applicationId}.action.EXPORT_STATE" />
+                <action android:name="${applicationId}.action.LIST_CATEGORIES" />
+            </intent-filter>
+        </receiver>
+
 		<!-- Home reset -->
 		<activity
             android:exported="true"
