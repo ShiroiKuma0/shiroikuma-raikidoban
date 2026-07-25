@@ -1726,13 +1726,28 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             targetItemPackageName = Utils.getPackageNameForItem(targetItem);
         }
 
+        // A 自由作業盤 run-task shortcut's component is always jiyusagyoban's TaskRunActivity — for the
+        // package-based actions below, resolve the app the task actually opens instead.
+        final Intent jiyuTaskIntent =
+                net.pierrox.lightning_launcher.util.JiyuTaskTarget.getTaskIntent(targetItem);
+
         switch (view_id) {
             case R.id.mi_app_details:
-                startPackageDetails(targetItemPackageName);
+                if (jiyuTaskIntent != null) {
+                    net.pierrox.lightning_launcher.util.JiyuTaskTarget.resolveTargetPackage(
+                            this, jiyuTaskIntent, this::startPackageDetails);
+                } else {
+                    startPackageDetails(targetItemPackageName);
+                }
                 break;
 
             case R.id.mi_app_store:
-                Utils.startAppStore(this, targetItemPackageName);
+                if (jiyuTaskIntent != null) {
+                    net.pierrox.lightning_launcher.util.JiyuTaskTarget.resolveTargetPackage(
+                            this, jiyuTaskIntent, pkg -> Utils.startAppStore(Dashboard.this, pkg));
+                } else {
+                    Utils.startAppStore(this, targetItemPackageName);
+                }
                 break;
 
             case R.id.mi_kill: {
@@ -1778,7 +1793,13 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 break;
 
             case R.id.mi_uninstall:
-                startActivity(new Intent(Intent.ACTION_DELETE, Uri.parse("package:" + targetItemPackageName)));
+                if (jiyuTaskIntent != null) {
+                    net.pierrox.lightning_launcher.util.JiyuTaskTarget.resolveTargetPackage(
+                            this, jiyuTaskIntent, pkg -> startActivity(
+                                    new Intent(Intent.ACTION_DELETE, Uri.parse("package:" + pkg))));
+                } else {
+                    startActivity(new Intent(Intent.ACTION_DELETE, Uri.parse("package:" + targetItemPackageName)));
+                }
                 break;
 
             case R.id.mi_cfp:
