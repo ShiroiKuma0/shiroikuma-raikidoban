@@ -10,7 +10,7 @@ A fork of [Lightning Launcher](https://github.com/pierrehebert/LightningLauncher
 
 Installs **side-by-side** with the original Lightning Launcher (package `shiroikuma.raikidoban`).
 
-**📥 Latest release: [`14.3.3`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases)
+**📥 Latest release: [`14.3.4`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases)
 
 *(雷起動盤 — “raikidōban”, the “lightning launch board”.)*
 
@@ -45,6 +45,10 @@ English, **Japanese, Czech and Russian** are bundled right into the app — no e
 ## 💾 Backups that work on modern Android
 
 Restores the ability to **create** backups on Android 13 (targetSdk 33), which scoped storage had blocked, by writing to a folder you choose through the system file picker. Also stops a restore from wiping your system wallpaper.
+
+## 📤 Export / Import — one zip, ticked by category
+
+A dedicated Export / Import window at the top of the UI page backs up **everything settable in the launcher** into a single timestamped `.zip`: the appearance theme and imported fonts, launcher settings, the fold matrix, desktops and items (with item icons and desktop wallpapers as separate sub-options), scripts, item styles and script variables. Tick what to carry, pick a backup folder once, and import restores just the parts you tick — merged, never wiped. The same export runs **headlessly** on a token-gated intent, so [自由作業盤](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban) can back this app up alongside every other sister app in one run.
 
 ## 🧰 Themed pickers & dialogs
 
