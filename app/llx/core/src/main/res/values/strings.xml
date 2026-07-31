@@ -91,6 +91,7 @@
 <string name="jiyu_template_label">Pull: %1$s</string>
 <string name="jiyu_capture_none">No live 自由作業盤 widgets here to capture</string>
 <string name="jiyu_capture_result">自由作業盤 capture: %1$d ok / %2$d failed</string>
+<string name="jiyu_stopped">白い熊 自由作業盤 は停止中</string>
 <string name="mi_move_out_of_folder">Move out of folder</string>
     <string name="first_use_title">Welcome!</string>
     <string name="first_use_message">白い熊 雷起動盤 is a lightweight and extremely customizable home screen replacement for Android.\n\nYou are now running in normal mode, meaning that some advanced options are hidden. Switch to expert mode to access all features and options (General settings).\n\n白い熊 雷起動盤 is now preparing the list of apps once and for all.\n\nThank you for reading and using 白い熊 雷起動盤!</string>

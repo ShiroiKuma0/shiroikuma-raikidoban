@@ -42,6 +42,8 @@ public abstract class ItemView extends TransformLayout implements TouchEventInte
     private static final int[][] RIPPLE_STATES_LIST = {{android.R.attr.state_pressed}};
     private static final int[] STATE_PRESSED = new int[]{android.R.attr.state_pressed, android.R.attr.state_enabled};
     private static final int MINIMUM_ALPHA = 50;
+    /** How far a dimmed item is faded — enough to read as "this will not do anything right now". */
+    private static final float DIM_FACTOR = 0.35f;
     private static final Box sStopPointBox = new Box();
     private static final Interpolator sAccelerateDecelerateInterpolator = new AccelerateDecelerateInterpolator();
     private static final int[] STATE_UNPRESSED = new int[]{android.R.attr.state_enabled};
@@ -247,9 +249,36 @@ public abstract class ItemView extends TransformLayout implements TouchEventInte
                     mAlpha = MINIMUM_ALPHA;
                 }
             }
-            mSensibleView.setAlpha(mAlpha / 255f);
+            float alpha = mAlpha / 255f;
+            // The item's own alpha is left untouched (scripts read it): the dim is a display-only
+            // multiplier, so clearing the reason restores exactly what the user configured.
+            DimPredicate dim = sDimPredicate;
+            if (dim != null && dim.isDimmed(mItem)) {
+                alpha *= DIM_FACTOR;
+            }
+            mSensibleView.setAlpha(alpha);
             mSensibleView.invalidate();
         }
+    }
+
+    /**
+     * A launcher-level reason to draw an item faded, on top of whatever alpha the user gave it —
+     * today: a 白い熊 自由作業盤 task shortcut while 自由作業盤 is stopped, which would otherwise look
+     * exactly like a working one until the tap did nothing.
+     *
+     * <p>Installed by the app (the core knows nothing about jiyusagyoban) and consulted on every alpha
+     * update, which {@link #setView} runs at init — so an item view built after the reason appeared is
+     * born dimmed, and only a change of the reason itself needs a walk over the loaded views
+     * ({@code Screen.updateAllItemViewsAlpha()}).
+     */
+    public interface DimPredicate {
+        boolean isDimmed(Item item);
+    }
+
+    private static volatile DimPredicate sDimPredicate;
+
+    public static void setDimPredicate(DimPredicate predicate) {
+        sDimPredicate = predicate;
     }
 
     public boolean isHighlighted() {

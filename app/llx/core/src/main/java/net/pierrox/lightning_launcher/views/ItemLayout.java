@@ -759,6 +759,13 @@ public class ItemLayout extends ViewGroup {
         return mItemViews.get(itemId);
     }
 
+    /** Re-apply every loaded item view's alpha — for when a display-wide dim reason changes. */
+    public void updateItemViewsAlpha() {
+        for (int i = mItemViews.size() - 1; i >= 0; i--) {
+            mItemViews.valueAt(i).updateViewAlpha();
+        }
+    }
+
     public void ensureItemViewReady(ItemView itemView) {
         if (!itemView.isInitDone()) {
             itemView.init();

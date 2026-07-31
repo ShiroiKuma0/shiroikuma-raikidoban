@@ -860,6 +860,22 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         updateLightningLiveWallpaperVisibility();
 
         maybeOfferJiyuReinit();
+        refreshJiyuStoppedState();
+    }
+
+    /**
+     * Re-ask 白い熊 自由作業盤 whether the user has shut it down ("Exit app fully"), and repaint the
+     * desktop if the answer moved. Probed on resume, not per frame: the flag changes at most a few
+     * times a day, and coming back to the launcher is exactly when it may have — 白い熊 has just been
+     * in 自由作業盤, either stopping it or opening it again.
+     */
+    private void refreshJiyuStoppedState() {
+        final boolean before = net.pierrox.lightning_launcher.util.JiyuTaskTarget.isStopped();
+        net.pierrox.lightning_launcher.util.JiyuTaskTarget.isJiyuStopped(this, stopped -> {
+            if (stopped != before && mScreen != null) {
+                mScreen.updateAllItemViewsAlpha();
+            }
+        });
     }
 
     @Override

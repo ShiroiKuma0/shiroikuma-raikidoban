@@ -123,6 +123,7 @@
     <string name="jiyu_template_label">プル元: %1$s</string>
     <string name="jiyu_capture_none">取得できる稼働中の 自由作業盤 ウィジェットがありません</string>
     <string name="jiyu_capture_result">自由作業盤 取得: 成功 %1$d / 失敗 %2$d</string>
+    <string name="jiyu_stopped">白い熊 自由作業盤 は停止中</string>
 
     <!-- Bundled Japanese (from the legacy lp.jp pack) so JA is self-contained. -->
     <string name="all_apps">全てのアプリ</string>

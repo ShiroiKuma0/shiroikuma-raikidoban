@@ -1720,6 +1720,13 @@ public abstract class Screen implements ItemLayout.ItemLayoutListener, ItemView.
         EventAction launchingEventAction = mLaunchingEventAction;
         mLaunchingEventAction = null;
 
+        // Asked after the event-action origin is consumed above, so swallowing a launch can never
+        // leak it into an unrelated later one.
+        LaunchInterceptor interceptor = sLaunchInterceptor;
+        if (interceptor != null && interceptor.onLaunch(mContext, originalIntent)) {
+            return;
+        }
+
         Intent intent = new Intent(originalIntent);
 
         if (intent.getAction() == null) intent.setAction(Intent.ACTION_MAIN);
@@ -1771,6 +1778,26 @@ public abstract class Screen implements ItemLayout.ItemLayoutListener, ItemView.
         } else if (itemView != null && itemView.getItem().getClass() == Shortcut.class) {
             onShortcutLaunchError((Shortcut) itemView.getItem());
         }
+    }
+
+    /**
+     * A last-moment veto on starting an item's (or a gesture binding's) intent, so the launcher can
+     * explain itself instead of firing something that would silently do nothing — today: a
+     * 白い熊 自由作業盤 task while 自由作業盤 is stopped, whose tap is indistinguishable from a working
+     * one. Returning true means "handled, do not start it".
+     *
+     * <p>Installed by the app, like {@link ItemView.DimPredicate}; the core knows nothing about
+     * jiyusagyoban. It sits in {@link #launchIntent}, so it covers desktops, folders, panels, the app
+     * drawer and gesture bindings from one place.
+     */
+    public interface LaunchInterceptor {
+        boolean onLaunch(Context context, Intent intent);
+    }
+
+    private static volatile LaunchInterceptor sLaunchInterceptor;
+
+    public static void setLaunchInterceptor(LaunchInterceptor interceptor) {
+        sLaunchInterceptor = interceptor;
     }
 
     public void restart() {
@@ -2160,6 +2187,17 @@ public abstract class Screen implements ItemLayout.ItemLayoutListener, ItemView.
     protected void onOrientationChanged(int orientation) {
         for (ItemLayout il : mItemLayouts) {
             il.updateItemsOrientation(orientation);
+        }
+    }
+
+    /**
+     * Re-apply every loaded item view's alpha, across desktops, folders and panels. Needed when the
+     * {@link ItemView.DimPredicate}'s answer changes for items already on screen; views created
+     * afterwards pick the new answer up on their own.
+     */
+    public void updateAllItemViewsAlpha() {
+        for (ItemLayout il : mItemLayouts) {
+            il.updateItemViewsAlpha();
         }
     }
 

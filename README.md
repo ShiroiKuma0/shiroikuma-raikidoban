@@ -10,7 +10,7 @@ A fork of [Lightning Launcher](https://github.com/pierrehebert/LightningLauncher
 
 Installs **side-by-side** with the original Lightning Launcher (package `shiroikuma.raikidoban`).
 
-**📥 Latest release: [`14.3.4`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases)
+**📥 Latest release: [`14.3.5`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases)
 
 *(雷起動盤 — “raikidōban”, the “lightning launch board”.)*
 
@@ -36,7 +36,9 @@ Long-tap any desktop or item and open **「ジェスチャー」** to see every 
 
 ## 🤖 白い熊 自由作業盤 integration
 
-Tight, headless integration with 白い熊's own automation app, **[自由作業盤 (jiyusagyoban)](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban)** — the in-house successor to Tasker. Drop a **自由作業盤 task shortcut** straight from the item / action pickers, and have widget names survive crashes and restores through a cross-app re-init handshake (no accessibility hacks needed). Such shortcuts are labelled 「白い熊 自由作業盤: …」 throughout.
+Tight, headless integration with 白い熊's own automation app, **[自由作業盤 (jiyusagyoban)](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban)** — the in-house successor to Tasker. Drop a **自由作業盤 task shortcut** straight from the item / action pickers, and have widget names survive crashes and restores through a cross-app re-init handshake (no accessibility hacks needed). Such shortcuts are labelled 「白い熊 自由作業盤: …」 throughout, and their “App info” / “App store” / “Uninstall” entries resolve the app the *task* opens rather than 自由作業盤 itself.
+
+When you shut 自由作業盤 down from its own menu, the launcher **notices and says so**: every task shortcut is drawn faded, and tapping one explains 「白い熊 自由作業盤 は停止中」 and opens 自由作業盤 instead of firing into the void — a dead tap that used to be indistinguishable from a working one.
 
 ## 🌐 Self-contained, in-app languages
 
@@ -48,7 +50,7 @@ Restores the ability to **create** backups on Android 13 (targetSdk 33), which s
 
 ## 📤 Export / Import — one zip, ticked by category
 
-A dedicated Export / Import window at the top of the UI page backs up **everything settable in the launcher** into a single timestamped `.zip`: the appearance theme and imported fonts, launcher settings, the fold matrix, desktops and items (with item icons and desktop wallpapers as separate sub-options), scripts, item styles and script variables. Tick what to carry, pick a backup folder once, and import restores just the parts you tick — merged, never wiped. The same export runs **headlessly** on a token-gated intent, so [自由作業盤](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban) can back this app up alongside every other sister app in one run.
+A dedicated Export / Import window at the top of the UI page backs up **everything settable in the launcher** into a single timestamped `.zip`: the appearance theme and imported fonts, launcher settings, the fold matrix, desktops and items (with item icons and desktop wallpapers as separate sub-options), scripts, item styles and script variables. Tick what to carry, pick a backup folder once, and import restores just the parts you tick — merged, never wiped. The same export runs **headlessly** on a token-gated intent, so [自由作業盤](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban) can back this app up alongside every other sister app in one run — announcing which parts start ticked rather than letting the caller guess, and **stopping cleanly** when told to: a cancelled export unwinds at the next entry, deletes its half-written archive, and leaves the backup folder exactly as it found it.
 
 ## 🧰 Themed pickers & dialogs
 

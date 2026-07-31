@@ -30,6 +30,11 @@
     <!-- Tasker -->
     <uses-permission android:name="net.dinglisch.android.tasker.PERMISSION_RUN_TASKS"/>
 
+    <!-- 白い熊 自由作業盤: its AutomationTargetReceiver is permission-guarded, and QUERY_STATUS (has the
+         user shut 自由作業盤 down?) goes there. Without this the probe simply never answers, which is
+         read as "not stopped" — nothing breaks, task shortcuts just stop being dimmed. -->
+    <uses-permission android:name="com.opentasker.permission.AUTOMATION"/>
+
     <permission
             android:name="shiroikuma.raikidoban.USE_SCRIPT_SERVICE"
             android:protectionLevel="dangerous"
@@ -369,6 +374,7 @@
             <intent-filter>
                 <action android:name="${applicationId}.action.EXPORT_STATE" />
                 <action android:name="${applicationId}.action.LIST_CATEGORIES" />
+                <action android:name="${applicationId}.action.CANCEL_EXPORT" />
             </intent-filter>
         </receiver>
 

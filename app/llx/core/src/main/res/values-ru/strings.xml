@@ -359,6 +359,7 @@
     <string name="an_la">Запуск приложения</string>
     <string name="an_ls">Запуск ярлыка</string>
     <string name="an_ls_jiyu">Ярлык 白い熊 自由作業盤</string>
+    <string name="jiyu_stopped">白い熊 自由作業盤 остановлен</string>
     <string name="an_backup_restore">Резервная копия / восстановление</string>
     <string name="an_sw">Выбрать обои</string>
     <string name="an_lm">Меню 白い熊 雷起動盤</string>

@@ -51,6 +51,15 @@ public class LLAppPhone extends LLApp {
     public void onCreate() {
         super.onCreate();
 
+        // A 白い熊 自由作業盤 task shortcut runs nothing while 自由作業盤 is stopped, and looks identical
+        // to a working one — so every item view asks this before drawing itself. Installed once, for
+        // the whole process: the core has no idea jiyusagyoban exists.
+        net.pierrox.lightning_launcher.views.item.ItemView.setDimPredicate(
+                net.pierrox.lightning_launcher.util.JiyuTaskTarget::isDimmedTaskShortcut);
+        // ...and the tap on one is answered rather than fired into the void.
+        net.pierrox.lightning_launcher.engine.Screen.setLaunchInterceptor(
+                net.pierrox.lightning_launcher.util.JiyuTaskTarget::interceptStoppedTaskLaunch);
+
         // Implicit broadcasts cannot be registered anymore in the manifest starting at Android O,
         // however it is still possible to register them at runtime.
         // the consequence is that these events will not be received if the app is not running,

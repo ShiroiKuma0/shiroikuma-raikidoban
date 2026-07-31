@@ -71,7 +71,9 @@ public class ExportImportPanel {
     private final Host mHost;
     private final float mDensity;
 
-    private final Set<RkbExport.Cat> mSelected = new LinkedHashSet<>(RkbExport.Cat.all());
+    // Seeded from the categories' own defaultSelected flag — the same answer LIST_CATEGORIES gives
+    // the automation picker, so the in-app sheet and 保存復元 open on an identical selection.
+    private final Set<RkbExport.Cat> mSelected = new LinkedHashSet<>(RkbExport.Cat.defaults());
 
     private AlertDialog mDialog;
     private LinearLayout mBox;

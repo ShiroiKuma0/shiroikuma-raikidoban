@@ -102,7 +102,17 @@ public final class RkbExport {
     private RkbExport() {
     }
 
-    /** A selectable part of the backup. {@code id} is also the entry (or entry-tree) name in the ZIP. */
+    /**
+     * A selectable part of the backup. {@code id} is also the entry (or entry-tree) name in the ZIP.
+     *
+     * <p>{@code defaultSelected} is this app <i>stating</i> whether the part starts ticked, rather
+     * than every picker guessing — the in-app panel and the {@code LIST_CATEGORIES} fourth field
+     * ({@code on|off}) both read it. Everything here is {@code on}: the rule for {@code off} is
+     * "large, derived AND re-creatable", and nothing this app exports qualifies. In particular
+     * {@code desktops.icons} and {@code desktops.wallpapers} are the two big ones and stay on — a
+     * launcher restored without its icons and wallpapers is a broken desktop, and neither can be
+     * rebuilt from the rest of the archive.
+     */
     public enum Cat {
         UI("ui", R.string.rkb_eim_cat_ui, null),
         UI_FONTS("ui.fonts", R.string.rkb_eim_cat_ui_fonts, "ui"),
@@ -119,11 +129,18 @@ public final class RkbExport {
         public final int labelRes;
         /** The parent category's id for a sub-option, or null for a top-level category. */
         public final String parentId;
+        /** Whether a freshly-opened picker starts with this part ticked. */
+        public final boolean defaultSelected;
 
         Cat(String id, int labelRes, String parentId) {
+            this(id, labelRes, parentId, true);
+        }
+
+        Cat(String id, int labelRes, String parentId, boolean defaultSelected) {
             this.id = id;
             this.labelRes = labelRes;
             this.parentId = parentId;
+            this.defaultSelected = defaultSelected;
         }
 
         public static Cat byId(String id) {
@@ -142,11 +159,38 @@ public final class RkbExport {
             }
             return set;
         }
+
+        /** The set a picker starts on — also what an EXPORT_STATE with no {@code items} extra means. */
+        public static Set<Cat> defaults() {
+            Set<Cat> set = new LinkedHashSet<>();
+            for (Cat c : values()) {
+                if (c.defaultSelected) {
+                    set.add(c);
+                }
+            }
+            return set;
+        }
     }
 
     /** Called after each category is written, with real counts (never a percentage). */
     public interface Progress {
         void onProgress(int done, int total, String categoryLabel);
+    }
+
+    /**
+     * Polled between ZIP entries so a running export can be stopped from outside (the
+     * {@code CANCEL_EXPORT} action). Never interrupts a thread mid-write: the export unwinds at the
+     * next entry boundary by throwing {@link CancelledException}, and the caller deletes the partial.
+     */
+    public interface Cancel {
+        boolean isCancelled();
+    }
+
+    /** Thrown out of {@link #export} when the caller's {@link Cancel} goes up. */
+    public static class CancelledException extends IOException {
+        public CancelledException() {
+            super("cancelled");
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -299,6 +343,15 @@ public final class RkbExport {
      */
     public static String export(Context context, Set<Cat> cats, OutputStream out, Progress progress)
             throws IOException {
+        return export(context, cats, out, progress, null);
+    }
+
+    /**
+     * As above, but pollable: {@code cancel} is checked at every entry boundary, and a raised flag
+     * unwinds the whole export with a {@link CancelledException} instead of finishing the archive.
+     */
+    public static String export(Context context, Set<Cat> cats, OutputStream out, Progress progress,
+                                Cancel cancel) throws IOException {
         LightningEngine engine = LLApp.get().getAppEngine();
         // Flush anything still only in memory, so the archive matches what the launcher shows.
         engine.saveData();
@@ -333,12 +386,14 @@ public final class RkbExport {
 
             int done = 0;
             for (Cat cat : ordered) {
-                exportCategory(context, engine, base, cat, zip);
+                throwIfCancelled(cancel);
+                exportCategory(context, engine, base, cat, zip, cancel);
                 done++;
                 if (progress != null) {
                     progress.onProgress(done, total, context.getString(cat.labelRes));
                 }
             }
+            throwIfCancelled(cancel);
             zip.finish();
             zip.flush();
         } finally {
@@ -348,21 +403,21 @@ public final class RkbExport {
     }
 
     private static void exportCategory(Context context, LightningEngine engine, File base, Cat cat,
-                                       ZipOutputStream zip) throws IOException {
+                                       ZipOutputStream zip, Cancel cancel) throws IOException {
         switch (cat) {
             case UI:
                 writeEntry(zip, UI_ENTRY, dumpPrefs(uiPrefs(context)).getBytes(StandardCharsets.UTF_8));
                 break;
 
             case UI_FONTS:
-                zipTree(zip, cat.id, base, FileUtils.getFontsDir(base));
+                zipTree(zip, cat.id, base, FileUtils.getFontsDir(base), cancel);
                 break;
 
             case SETTINGS:
-                zipFile(zip, cat.id, base, FileUtils.getGlobalConfigFile(base));
-                zipFile(zip, cat.id, base, FileUtils.getSystemConfigFile(context));
-                zipFile(zip, cat.id, base, FileUtils.getStateFile(base));
-                zipFile(zip, cat.id, base, FileUtils.getStatisticsFile(base));
+                zipFile(zip, cat.id, base, FileUtils.getGlobalConfigFile(base), cancel);
+                zipFile(zip, cat.id, base, FileUtils.getSystemConfigFile(context), cancel);
+                zipFile(zip, cat.id, base, FileUtils.getStateFile(base), cancel);
+                zipFile(zip, cat.id, base, FileUtils.getStatisticsFile(base), cancel);
                 break;
 
             case FOLD: {
@@ -378,38 +433,44 @@ public final class RkbExport {
             }
 
             case DESKTOPS:
-                zipFile(zip, cat.id, base, FileUtils.getManifestFile(base));
-                zipFile(zip, cat.id, base, FileUtils.getPinnedAppShortcutsFile(base));
+                zipFile(zip, cat.id, base, FileUtils.getManifestFile(base), cancel);
+                zipFile(zip, cat.id, base, FileUtils.getPinnedAppShortcutsFile(base), cancel);
                 for (File page : pageDirs(base)) {
-                    zipFile(zip, cat.id, base, new File(page, "items"));
-                    zipFile(zip, cat.id, base, new File(page, "conf"));
-                    zipFile(zip, cat.id, base, new File(page, "i"));
+                    zipFile(zip, cat.id, base, new File(page, "items"), cancel);
+                    zipFile(zip, cat.id, base, new File(page, "conf"), cancel);
+                    zipFile(zip, cat.id, base, new File(page, "i"), cancel);
                 }
                 break;
 
             case DESKTOPS_ICONS:
                 for (File page : pageDirs(base)) {
-                    zipTree(zip, cat.id, base, new File(page, "icon"));
+                    zipTree(zip, cat.id, base, new File(page, "icon"), cancel);
                 }
                 break;
 
             case DESKTOPS_WALLPAPERS:
                 for (File page : pageDirs(base)) {
-                    zipFile(zip, cat.id, base, new File(page, "wp"));
+                    zipFile(zip, cat.id, base, new File(page, "wp"), cancel);
                 }
                 break;
 
             case SCRIPTS:
-                zipTree(zip, cat.id, base, engine.getScriptManager().getScriptsDir());
+                zipTree(zip, cat.id, base, engine.getScriptManager().getScriptsDir(), cancel);
                 break;
 
             case THEMES:
-                zipTree(zip, cat.id, base, FileUtils.getStylesDir(base));
+                zipTree(zip, cat.id, base, FileUtils.getStylesDir(base), cancel);
                 break;
 
             case VARIABLES:
-                zipFile(zip, cat.id, base, FileUtils.getVariablesFile(base));
+                zipFile(zip, cat.id, base, FileUtils.getVariablesFile(base), cancel);
                 break;
+        }
+    }
+
+    private static void throwIfCancelled(Cancel cancel) throws CancelledException {
+        if (cancel != null && cancel.isCancelled()) {
+            throw new CancelledException();
         }
     }
 
@@ -425,7 +486,9 @@ public final class RkbExport {
     }
 
     /** Store {@code file} as {@code <catId>/<path relative to base>}. Missing files are skipped. */
-    private static void zipFile(ZipOutputStream zip, String catId, File base, File file) throws IOException {
+    private static void zipFile(ZipOutputStream zip, String catId, File base, File file, Cancel cancel)
+            throws IOException {
+        throwIfCancelled(cancel); // every entry is a cancel boundary — never mid-write
         if (file == null || !file.isFile()) {
             return;
         }
@@ -447,16 +510,17 @@ public final class RkbExport {
         zip.closeEntry();
     }
 
-    private static void zipTree(ZipOutputStream zip, String catId, File base, File dir) throws IOException {
+    private static void zipTree(ZipOutputStream zip, String catId, File base, File dir, Cancel cancel)
+            throws IOException {
         File[] files = dir == null ? null : dir.listFiles();
         if (files == null) {
             return; // the directory may simply not exist yet (fonts, themes, scripts)
         }
         for (File f : files) {
             if (f.isDirectory()) {
-                zipTree(zip, catId, base, f);
+                zipTree(zip, catId, base, f, cancel);
             } else {
-                zipFile(zip, catId, base, f);
+                zipFile(zip, catId, base, f, cancel);
             }
         }
     }

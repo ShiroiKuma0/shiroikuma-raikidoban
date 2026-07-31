@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -33,8 +34,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * {@code progress_action} (optional), plus the reply trio {@code reply_action} / {@code reply_package}
  * / {@code reply_id}.</li>
  * <li>{@code <pkg>.action.LIST_CATEGORIES}: token-gated, instant enumeration for the caller's picker.
- * One {@code id<TAB>label} line per category, with a third TAB field naming the parent for a
- * sub-option (item icons / wallpapers sit under Desktops, imported fonts under UI).</li>
+ * One {@code id<TAB>label<TAB>parent<TAB>on|off} line per category: the third field names the parent
+ * for a sub-option (item icons / wallpapers sit under Desktops, imported fonts under UI) and is empty
+ * for a top-level one, the fourth states whether the item starts ticked ({@link RkbExport.Cat#defaultSelected}
+ * — this app says {@code on} to all of them). Both trailing fields are positional; a caller that
+ * predates them reads the first two and is unaffected.</li>
+ * <li>{@code <pkg>.action.CANCEL_EXPORT}: stop a running export. Extras {@code token} (the same gate)
+ * and an optional {@code reply_id} (absent = every export in flight). Fire-and-forget — it never
+ * replies, not even to a bad token, and is a silent no-op when nothing is running or the export has
+ * already finished. The export itself unwinds at the next entry boundary, deletes the half-written
+ * archive, and answers its ORIGINAL request with {@code ERROR:cancelled}.</li>
  * </ul>
  *
  * <p><b>ONE ZIP per request, always</b> — every category is an entry inside the single archive, named
@@ -62,6 +71,7 @@ public class StateExportReceiver extends BroadcastReceiver {
 
     public static final String ACTION_EXPORT_STATE = BuildConfig.APPLICATION_ID + ".action.EXPORT_STATE";
     public static final String ACTION_LIST_CATEGORIES = BuildConfig.APPLICATION_ID + ".action.LIST_CATEGORIES";
+    public static final String ACTION_CANCEL_EXPORT = BuildConfig.APPLICATION_ID + ".action.CANCEL_EXPORT";
 
     // Contract extras — deliberately bare names, shared verbatim by every sister app.
     private static final String EXTRA_TOKEN = "token";
@@ -81,6 +91,23 @@ public class StateExportReceiver extends BroadcastReceiver {
     private static final long PROGRESS_MIN_INTERVAL_MS = 500;
     private static final String PROGRESS_UNIT = "区分"; // categories — what this app counts
 
+    /**
+     * The exports currently writing, so a CANCEL_EXPORT arriving on a fresh receiver instance can
+     * reach them. A broadcast receiver is rebuilt per delivery, hence static; the list empties itself
+     * in the export thread's finally, so "nothing is running" is the normal state.
+     */
+    private static final List<Run> sRunning = new CopyOnWriteArrayList<>();
+
+    /** One in-flight export: the request it answers, and the flag that stops it. */
+    private static final class Run {
+        final String replyId;
+        final AtomicBoolean cancelled = new AtomicBoolean(false);
+
+        Run(String replyId) {
+            this.replyId = replyId;
+        }
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         final Context app = context.getApplicationContext();
@@ -95,6 +122,20 @@ public class StateExportReceiver extends BroadcastReceiver {
         final String progressAction = trimmed(intent.getStringExtra(EXTRA_PROGRESS_ACTION));
         final String pathOverride = trimmed(intent.getStringExtra(EXTRA_PATH));
         final String items = trimmed(intent.getStringExtra(EXTRA_ITEMS));
+
+        // Cancel is handled ahead of the replying gate below: it must never answer anything, and a
+        // rejected token is silence too. Safe to send at any time — when nothing matches, nothing
+        // happens.
+        if (ACTION_CANCEL_EXPORT.equals(action)) {
+            if (AutomationAuth.isEnabled(app) && AutomationAuth.isTokenValid(app, token)) {
+                for (Run run : sRunning) {
+                    if (replyId.isEmpty() || replyId.equals(run.replyId)) {
+                        run.cancelled.set(true);
+                    }
+                }
+            }
+            return;
+        }
 
         final AtomicBoolean replied = new AtomicBoolean(false);
         final Replier reply = result -> {
@@ -130,10 +171,11 @@ public class StateExportReceiver extends BroadcastReceiver {
                     sb.append('\n');
                 }
                 first = false;
-                sb.append(cat.id).append('\t').append(app.getString(cat.labelRes));
-                if (cat.parentId != null) {
-                    sb.append('\t').append(cat.parentId);
-                }
+                // id TAB label TAB parent TAB on|off — the parent field stays present but empty for a
+                // top-level category, because the "starts ticked" flag after it is positional.
+                sb.append(cat.id).append('\t').append(app.getString(cat.labelRes))
+                        .append('\t').append(cat.parentId == null ? "" : cat.parentId)
+                        .append('\t').append(cat.defaultSelected ? "on" : "off");
             }
             reply.send(sb.toString());
             return;
@@ -146,7 +188,7 @@ public class StateExportReceiver extends BroadcastReceiver {
 
         final Set<RkbExport.Cat> cats;
         if (items.isEmpty()) {
-            cats = RkbExport.Cat.all();
+            cats = RkbExport.Cat.defaults(); // "your default set" = the ones LIST_CATEGORIES calls `on`
         } else {
             Set<RkbExport.Cat> resolved = new LinkedHashSet<>();
             List<String> unknown = new ArrayList<>();
@@ -195,8 +237,15 @@ public class StateExportReceiver extends BroadcastReceiver {
         };
 
         // The export walks the whole data dir — hold the broadcast open and work off the main thread.
+        final Run run = new Run(replyId);
+        sRunning.add(run);
         final PendingResult pending = goAsync();
         new Thread(() -> {
+            // What we are half-way through writing, so an abort can take it back out again. A
+            // cancelled or failed export must leave the backup directory exactly as it found it.
+            File partialFile = null;
+            DocumentFile partialDoc = null;
+            boolean written = false;
             try {
                 // Directory precedence: `path` extra -> configured export directory -> error. Writing
                 // an arbitrary absolute path needs All-Files-Access; without it we may only fall back
@@ -216,12 +265,14 @@ public class StateExportReceiver extends BroadcastReceiver {
                         throw new IOException("not a directory: " + pathOverride);
                     }
                     File file = new File(dir, fileName);
+                    partialFile = file;
                     OutputStream os = new FileOutputStream(file);
                     try {
-                        RkbExport.export(app, cats, os, progress);
+                        RkbExport.export(app, cats, os, progress, run.cancelled::get);
                     } finally {
                         os.close();
                     }
+                    written = true;
                     bytes = file.length();
                     shownPath = file.getAbsolutePath();
                 } else {
@@ -233,28 +284,56 @@ public class StateExportReceiver extends BroadcastReceiver {
                     if (doc == null) {
                         throw new IOException("cannot create " + fileName + " in the export directory");
                     }
+                    partialDoc = doc;
                     OutputStream os = app.getContentResolver().openOutputStream(doc.getUri());
                     if (os == null) {
                         throw new IOException("cannot open " + fileName + " for writing");
                     }
                     try {
-                        RkbExport.export(app, cats, os, progress);
+                        RkbExport.export(app, cats, os, progress, run.cancelled::get);
                     } finally {
                         os.close();
                     }
+                    written = true;
                     bytes = doc.length();
                     String abs = RkbExport.absolutePathOf(safDir, doc.getName() == null ? fileName : doc.getName());
                     shownPath = abs != null ? abs : safDir.getName() + "/" + fileName;
                 }
                 reply.send("OK:" + shownPath + "|" + bytes + "|" + RkbExport.humanSize(bytes)
                         + "|" + cats.size() + " categories");
+            } catch (RkbExport.CancelledException e) {
+                // The terminal reply for the ORIGINAL request — sent even if nobody is still
+                // listening, because it is what proves the run ended rather than carried on unseen.
+                reply.send("ERROR:cancelled");
             } catch (Throwable t) {
                 String message = t.getMessage();
                 reply.send("ERROR:" + (message != null ? message : t.getClass().getSimpleName()));
             } finally {
+                if (!written) {
+                    deleteQuietly(partialFile, partialDoc);
+                }
+                sRunning.remove(run);
                 pending.finish();
             }
         }, "rkb-state-export").start();
+    }
+
+    /** Take a half-written archive back out, by whichever handle created it. */
+    private static void deleteQuietly(File file, DocumentFile doc) {
+        try {
+            if (file != null) {
+                file.delete();
+            }
+        } catch (Exception e) {
+            // pass — nothing useful is left to do about it
+        }
+        try {
+            if (doc != null) {
+                doc.delete();
+            }
+        } catch (Exception e) {
+            // pass
+        }
     }
 
     /** All-Files-Access — required to write a caller-supplied absolute path on API 30+. */
