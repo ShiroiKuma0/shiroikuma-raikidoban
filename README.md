@@ -10,7 +10,7 @@ A fork of [Lightning Launcher](https://github.com/pierrehebert/LightningLauncher
 
 Installs **side-by-side** with the original Lightning Launcher (package `shiroikuma.raikidoban`).
 
-**📥 Latest release: [`14.3.5`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases)
+**📥 Latest release: [`14.3.6`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases)
 
 *(雷起動盤 — “raikidōban”, the “lightning launch board”.)*
 
@@ -24,7 +24,7 @@ A single appearance screen at the top of Lightning Settings recolours and re-fon
 
 ## ⚡ Black-and-yellow, everywhere
 
-Every visible element follows the theme — including toasts and progress dialogs, re-routed through a custom `Flash` helper so nothing ever pops up white-on-grey. A proper yellow-on-black dark mode covers the menus and configuration pages, and even the launcher icon was restyled to match.
+Every visible element follows the theme — including toasts and progress dialogs, re-routed through a custom `Flash` helper so nothing ever pops up white-on-grey. **Every dialog** wears the yellow frame, confirmations and pickers alike: a single styler is the only way this launcher shows one, so nothing can slip out unthemed. A proper yellow-on-black dark mode covers the menus and configuration pages, and even the launcher icon was restyled to match.
 
 ## 📐 Fold-aware desktop matrix (for the tri-fold)
 
