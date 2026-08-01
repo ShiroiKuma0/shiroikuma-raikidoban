@@ -285,13 +285,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
     // DIALOG_BORDER frame + rounded DIALOG_BG), matching the rest of the app's dialogs. Styled on show
     // so the title / buttons exist by the time UiDialogStyler runs.
     private AlertDialog withChrome(AlertDialog dialog) {
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface d) {
-                UiDialogStyler.style((AlertDialog) d);
-            }
-        });
-        return dialog;
+        return UiDialogStyler.styleOnShow(dialog);
     }
 
     @Override

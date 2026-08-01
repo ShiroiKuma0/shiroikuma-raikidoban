@@ -57,6 +57,13 @@ public class SetVariableDialog extends AlertDialog implements DialogInterface.On
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        // 「白い熊 雷起動盤 UI」: the themed bordered panel (yellow DIALOG_BORDER frame + rounded DIALOG_BG).
+        UiDialogStyler.style(this);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         View view = getLayoutInflater().inflate(R.layout.set_var_dialog, null);
 
@@ -138,6 +145,13 @@ public class SetVariableDialog extends AlertDialog implements DialogInterface.On
             super(context);
 
             mUserVariables = LLApp.get().getAppEngine().getVariableManager().getUserVariables();
+        }
+
+        @Override
+        protected void onStart() {
+            super.onStart();
+            // 「白い熊 雷起動盤 UI」: the themed bordered panel (yellow DIALOG_BORDER frame + rounded DIALOG_BG).
+            UiDialogStyler.style(this);
         }
 
         @Override

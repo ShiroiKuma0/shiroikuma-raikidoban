@@ -62,6 +62,7 @@ import net.pierrox.lightning_launcher.engine.LightningEngine;
 import net.pierrox.lightning_launcher.views.ItemLayout;
 import net.pierrox.lightning_launcher.views.item.ItemView;
 import net.pierrox.lightning_launcher_extreme.R;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -348,7 +349,7 @@ public class FoldMatrixActivity extends ResourceWrapperActivity
             return;
         }
         final Holder h = (Holder) tag;
-        new AlertDialog.Builder(this)
+        UiDialogStyler.show(new AlertDialog.Builder(this)
                 .setTitle(desktopName(h.pageId))
                 .setItems(new CharSequence[]{getString(R.string.fm_set_home), getString(R.string.fm_remove)},
                         new DialogInterface.OnClickListener() {
@@ -361,8 +362,7 @@ public class FoldMatrixActivity extends ResourceWrapperActivity
                                 }
                             }
                         })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .setNegativeButton(android.R.string.cancel, null));
     }
 
     @Override

@@ -180,6 +180,13 @@ public class BindingEditDialog extends AlertDialog implements DialogInterface.On
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        // 「白い熊 雷起動盤 UI」: the themed bordered panel (yellow DIALOG_BORDER frame + rounded DIALOG_BG).
+        UiDialogStyler.style(this);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         View view = getLayoutInflater().inflate(R.layout.ll_pref_binding_dialog, null);
 
@@ -262,6 +269,13 @@ public class BindingEditDialog extends AlertDialog implements DialogInterface.On
         }
 
         @Override
+        protected void onStart() {
+            super.onStart();
+            // 「白い熊 雷起動盤 UI」: the themed bordered panel (yellow DIALOG_BORDER frame + rounded DIALOG_BG).
+            UiDialogStyler.stylePanel(this);
+        }
+
+        @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
@@ -322,6 +336,13 @@ public class BindingEditDialog extends AlertDialog implements DialogInterface.On
 
         public VariableSelectionDialog(Context context) {
             super(context);
+        }
+
+        @Override
+        protected void onStart() {
+            super.onStart();
+            // 「白い熊 雷起動盤 UI」: the themed bordered panel (yellow DIALOG_BORDER frame + rounded DIALOG_BG).
+            UiDialogStyler.stylePanel(this);
         }
 
         @Override

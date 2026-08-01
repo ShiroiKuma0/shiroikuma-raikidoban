@@ -106,6 +106,7 @@ import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.PhoneUtils;
 import net.pierrox.lightning_launcher.util.ScriptPickerDialog;
 import net.pierrox.lightning_launcher_extreme.R;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 
 import org.koin.java.KoinJavaComponent;
 
@@ -478,7 +479,7 @@ public class CustomizeItemView extends MyViewPager implements LLPreferenceListVi
                 setCurrentView(mItems.get(which).v);
             }
         });
-        builder.create().show();
+        UiDialogStyler.show(builder);
     }
 
     public void gotoPageDynamicText() {
@@ -2196,7 +2197,7 @@ public class CustomizeItemView extends MyViewPager implements LLPreferenceListVi
         builder.setTitle(R.string.l_type_face);
         builder.setView(listView);
         builder.setNegativeButton(android.R.string.cancel, null);
-        final Dialog dialog = builder.create();
+        final Dialog dialog = UiDialogStyler.styleOnShow(builder.create());
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -2322,7 +2323,7 @@ public class CustomizeItemView extends MyViewPager implements LLPreferenceListVi
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);
-        builder.create().show();
+        UiDialogStyler.show(builder);
     }
 
     private void buildFontsList() {

@@ -168,5 +168,6 @@ public class Search {
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
+        UiDialogStyler.styleOnShow(mDialog);
     }
 }

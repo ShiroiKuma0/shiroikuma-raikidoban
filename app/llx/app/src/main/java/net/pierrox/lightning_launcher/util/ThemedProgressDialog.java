@@ -1,10 +1,12 @@
 package net.pierrox.lightning_launcher.util;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
+import android.view.View;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -23,11 +25,24 @@ import net.pierrox.lightning_launcher.configuration.UiTheme;
  */
 public final class ThemedProgressDialog {
 
+    /** Tag on the message TextView, so {@link #setMessage} can find it again inside the custom view. */
+    private static final String MESSAGE_TAG = "rkb.progress.message";
+
     private ThemedProgressDialog() {
     }
 
     /** Build and show a non-cancelable themed progress dialog. */
     public static AlertDialog show(Context ctx, CharSequence message) {
+        AlertDialog dialog = create(ctx, message);
+        dialog.show();
+        return dialog;
+    }
+
+    /**
+     * Build the dialog without showing it — for {@code onCreateDialog(int)}, which must return a dialog
+     * the framework then shows itself.
+     */
+    public static AlertDialog create(Context ctx, CharSequence message) {
         float d = ctx.getResources().getDisplayMetrics().density;
 
         LinearLayout row = new LinearLayout(ctx);
@@ -46,6 +61,7 @@ public final class ThemedProgressDialog {
 
         TextView text = new TextView(ctx);
         text.setText(message);
+        text.setTag(MESSAGE_TAG);
         UiTheme.applyTo(text, UiSlot.DIALOG_TEXT);
         row.addView(text, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -62,7 +78,20 @@ public final class ThemedProgressDialog {
             window.setBackgroundDrawable(panel);
         }
 
-        dialog.show();
         return dialog;
+    }
+
+    /**
+     * Replace the message of a dialog built here — the stand-in for {@code ProgressDialog.setMessage},
+     * which does nothing on a dialog whose content is a custom view. No-op for any other dialog.
+     */
+    public static void setMessage(Dialog dialog, CharSequence message) {
+        if (dialog == null || dialog.getWindow() == null) {
+            return;
+        }
+        View v = dialog.getWindow().getDecorView().findViewWithTag(MESSAGE_TAG);
+        if (v instanceof TextView) {
+            ((TextView) v).setText(message);
+        }
     }
 }

@@ -136,6 +136,13 @@ public class FileAndDirectoryPickerDialog extends AlertDialog implements DialogI
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        // 「白い熊 雷起動盤 UI」: the themed bordered panel (yellow DIALOG_BORDER frame + rounded DIALOG_BG).
+        UiDialogStyler.style(this);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         View view = getLayoutInflater().inflate(R.layout.file_dir_picker_dialog, null);
@@ -264,7 +271,7 @@ public class FileAndDirectoryPickerDialog extends AlertDialog implements DialogI
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);
-        builder.create().show();
+        UiDialogStyler.show(builder);
     }
 
     private void showDeleteFontDialog(final File file) {
@@ -282,7 +289,7 @@ public class FileAndDirectoryPickerDialog extends AlertDialog implements DialogI
             }
         });
         builder.setNegativeButton(android.R.string.ok, null);
-        builder.create().show();
+        UiDialogStyler.show(builder);
     }
 
     private boolean matchExtension(String name) {

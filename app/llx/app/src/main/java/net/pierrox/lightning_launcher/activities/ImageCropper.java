@@ -26,7 +26,6 @@ package net.pierrox.lightning_launcher.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -47,6 +46,8 @@ import net.pierrox.lightning_launcher.util.FilesHolder;
 import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.views.CropperView;
 import net.pierrox.lightning_launcher_extreme.R;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
+import net.pierrox.lightning_launcher.util.ThemedProgressDialog;
 
 import org.koin.java.KoinJavaComponent;
 
@@ -116,10 +117,7 @@ public class ImageCropper extends ResourceWrapperActivity implements View.OnClic
                     done(success);
                 } else {
                     // need to crop
-                    final ProgressDialog d = new ProgressDialog(this);
-                    d.setMessage(getString(R.string.please_wait));
-                    d.setCancelable(false);
-                    d.show();
+                    final AlertDialog d = ThemedProgressDialog.show(this, getString(R.string.please_wait));
 
                     new AsyncTask<Void, Void, Boolean>() {
 
@@ -332,6 +330,6 @@ public class ImageCropper extends ResourceWrapperActivity implements View.OnClic
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);
-        builder.create().show();
+        UiDialogStyler.show(builder);
     }
 }

@@ -28,7 +28,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
@@ -74,6 +73,8 @@ import net.pierrox.lightning_launcher.script.Script;
 import net.pierrox.lightning_launcher.script.ScriptManager;
 import net.pierrox.lightning_launcher.template.LLTemplateAPI;
 import net.pierrox.lightning_launcher_extreme.R;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
+import net.pierrox.lightning_launcher.util.ThemedProgressDialog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -131,7 +132,7 @@ public class ApplyTemplate extends ResourceWrapperActivity {
     private int mFromStatusBarHeight;
     private File mAppBaseDir;
     private ArrayList<Page> mImportedPages;
-    private ProgressDialog mDialog;
+    private AlertDialog mDialog;
     private LinkedList<Pair<Integer, File>> mAppWidgetsToLoad;
 
     @Override
@@ -277,7 +278,7 @@ public class ApplyTemplate extends ResourceWrapperActivity {
                         finish();
                     }
                 });
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_NEED_UPGRADE:
                 builder = new AlertDialog.Builder(this);
@@ -296,7 +297,7 @@ public class ApplyTemplate extends ResourceWrapperActivity {
                         finish();
                     }
                 });
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_WARNING:
                 builder = new AlertDialog.Builder(this);
@@ -321,7 +322,7 @@ public class ApplyTemplate extends ResourceWrapperActivity {
                         finish();
                     }
                 });
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
         }
         return super.onCreateDialog(id);
@@ -329,14 +330,11 @@ public class ApplyTemplate extends ResourceWrapperActivity {
 
     private void checkThenApplyTemplate() {
         new AsyncTask<Void, Void, JSONObject>() {
-            private ProgressDialog mDialog;
+            private AlertDialog mDialog;
 
             @Override
             protected void onPreExecute() {
-                mDialog = new ProgressDialog(ApplyTemplate.this);
-                mDialog.setMessage(getString(R.string.tmpl_check));
-                mDialog.setCancelable(false);
-                mDialog.show();
+                mDialog = ThemedProgressDialog.show(ApplyTemplate.this, getString(R.string.tmpl_check));
             }
 
             @Override
@@ -416,10 +414,8 @@ public class ApplyTemplate extends ResourceWrapperActivity {
                 mTranslatedPageIds = null;
                 mTranslatedScriptIds = null;
 
-                mDialog = new ProgressDialog(ApplyTemplate.this);
-                mDialog.setMessage(getString(mBackupFirst ? R.string.backup_in_progress : R.string.apply_tmpl_g));
-                mDialog.setCancelable(false);
-                mDialog.show();
+                mDialog = ThemedProgressDialog.show(ApplyTemplate.this,
+                        getString(mBackupFirst ? R.string.backup_in_progress : R.string.apply_tmpl_g));
             }
 
             @Override
@@ -648,7 +644,7 @@ public class ApplyTemplate extends ResourceWrapperActivity {
 
             @Override
             protected void onProgressUpdate(Boolean... values) {
-                mDialog.setMessage(getString(R.string.apply_tmpl_g));
+                ThemedProgressDialog.setMessage(mDialog, getString(R.string.apply_tmpl_g));
             }
         }.execute((Void) null);
     }

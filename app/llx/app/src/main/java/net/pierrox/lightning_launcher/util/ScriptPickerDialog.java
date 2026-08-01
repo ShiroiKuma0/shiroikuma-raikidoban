@@ -237,6 +237,13 @@ public class ScriptPickerDialog extends AlertDialog implements AdapterView.OnIte
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        // 「白い熊 雷起動盤 UI」: the themed bordered panel (yellow DIALOG_BORDER frame + rounded DIALOG_BG).
+        UiDialogStyler.style(this);
+    }
+
+    @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
         Script script = (Script) adapterView.getItemAtPosition(i);
         mScript = script;

@@ -102,6 +102,7 @@ import net.pierrox.lightning_launcher.util.Indentation;
 import net.pierrox.lightning_launcher.util.Search;
 import net.pierrox.lightning_launcher_extreme.BuildConfig;
 import net.pierrox.lightning_launcher_extreme.R;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 
 import java.io.File;
 import java.io.IOException;
@@ -158,7 +159,7 @@ public class ScriptEditor extends ResourceWrapperActivity implements View.OnClic
                         displayTokenApiReference(tokens.get(which));
                     }
                 });
-                builder.create().show();
+                UiDialogStyler.show(builder);
             }
             return true;
         }
@@ -756,7 +757,7 @@ public class ScriptEditor extends ResourceWrapperActivity implements View.OnClic
                             }
                         });
                 builder.setNegativeButton(android.R.string.cancel, null);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_CONFIRM_DELETE:
                 builder = new AlertDialog.Builder(this);
@@ -802,14 +803,14 @@ public class ScriptEditor extends ResourceWrapperActivity implements View.OnClic
                         });
                 builder.setNegativeButton(android.R.string.cancel, null);
                 builder.setCancelable(false);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_CHECK_RESULT:
                 builder = new AlertDialog.Builder(this);
                 builder.setTitle(R.string.sc_dc_t);
                 builder.setMessage(R.string.sc_dc_ok);
                 builder.setPositiveButton(android.R.string.ok, null);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_SCRIPT_IMPORTER_NOT_INSTALLED:
                 builder = new AlertDialog.Builder(this);
@@ -822,7 +823,7 @@ public class ScriptEditor extends ResourceWrapperActivity implements View.OnClic
                     }
                 });
                 builder.setNegativeButton(android.R.string.cancel, null);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
         }
         return super.onCreateDialog(id);
     }

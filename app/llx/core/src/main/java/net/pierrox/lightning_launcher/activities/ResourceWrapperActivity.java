@@ -23,6 +23,7 @@ import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.configuration.UiConfig;
 import net.pierrox.lightning_launcher.configuration.UiSlot;
 import net.pierrox.lightning_launcher.configuration.UiTheme;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -141,7 +142,7 @@ public abstract class ResourceWrapperActivity extends AppCompatActivity {
                         onRequestPermissionsResult(requestCode, permissionsToRequestArray, grantResults);
                     }
                 });
-                builder.create().show();
+                UiDialogStyler.styleOnShow(builder.create()).show();
                 return false;
             }
     }

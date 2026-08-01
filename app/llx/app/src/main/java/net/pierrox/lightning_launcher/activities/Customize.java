@@ -26,7 +26,6 @@ package net.pierrox.lightning_launcher.activities;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.DialogInterface;
@@ -118,6 +117,8 @@ import net.pierrox.lightning_launcher.views.NativeImage;
 import net.pierrox.lightning_launcher.views.NativeWallpaperView;
 import net.pierrox.lightning_launcher.views.item.ItemView;
 import net.pierrox.lightning_launcher_extreme.R;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
+import net.pierrox.lightning_launcher.util.ThemedProgressDialog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1138,7 +1139,7 @@ public class Customize extends ResourceWrapperActivity implements
                                 }
                             }
                         });
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_RATE:
                 builder = new AlertDialog.Builder(this);
@@ -1162,7 +1163,7 @@ public class Customize extends ResourceWrapperActivity implements
                     }
                 });
                 builder.setCancelable(false);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_CONFIRM_RESET_PAGE:
                 builder = new AlertDialog.Builder(this);
@@ -1213,7 +1214,7 @@ public class Customize extends ResourceWrapperActivity implements
                             }
                         });
                 builder.setNegativeButton(android.R.string.cancel, null);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_CONFIRM_RELAYOUT:
                 builder = new AlertDialog.Builder(this);
@@ -1226,7 +1227,7 @@ public class Customize extends ResourceWrapperActivity implements
                             }
                         });
                 builder.setNegativeButton(android.R.string.cancel, null);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_SELECT_STYLE_NAME:
                 builder = new AlertDialog.Builder(this);
@@ -1253,20 +1254,17 @@ public class Customize extends ResourceWrapperActivity implements
                             }
                         });
                 builder.setNegativeButton(android.R.string.cancel, null);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_PROGRESS:
-                ProgressDialog pd = new ProgressDialog(this);
-                pd.setMessage(getString(R.string.please_wait));
-                pd.setCancelable(false);
-                return pd;
+                return ThemedProgressDialog.create(this, getString(R.string.please_wait));
 
             case DIALOG_LOCK_SCREEN_WARNING:
                 builder = new AlertDialog.Builder(this);
                 builder.setTitle(R.string.s_ls_t);
                 builder.setMessage(R.string.s_ls_w);
                 builder.setPositiveButton(android.R.string.ok, null);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
         }
 
         return super.onCreateDialog(id);

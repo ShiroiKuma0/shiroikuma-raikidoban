@@ -67,6 +67,7 @@ import net.pierrox.lightning_launcher.views.Graphics;
 import net.pierrox.lightning_launcher.views.ItemLayout;
 import net.pierrox.lightning_launcher.views.SharedAsyncGraphicsDrawable;
 import net.pierrox.lightning_launcher.views.item.ItemView;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 
 import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.ContinuationPending;
@@ -350,7 +351,7 @@ public class ScriptExecutor {
             });
             builder.setCancelable(false);
             mCurrentScriptDialog = true;
-            builder.create().show();
+            UiDialogStyler.show(builder);
         } else {
             final String name = mCurrentScript.name;
             mHandler.post(new Runnable() {
@@ -414,7 +415,7 @@ public class ScriptExecutor {
             });
             builder.setCancelable(false);
             mCurrentScriptDialog = true;
-            builder.create().show();
+            UiDialogStyler.show(builder);
         }
         return true;
     }

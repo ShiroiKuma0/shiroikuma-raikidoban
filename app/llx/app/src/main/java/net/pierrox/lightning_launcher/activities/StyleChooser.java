@@ -45,6 +45,7 @@ import net.pierrox.lightning_launcher.data.Box;
 import net.pierrox.lightning_launcher.data.FileUtils;
 import net.pierrox.lightning_launcher.data.JsonLoader;
 import net.pierrox.lightning_launcher_extreme.R;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -120,7 +121,7 @@ public class StyleChooser extends ResourceWrapperListActivity implements OnItemL
 				}
 			});
 			builder.setNegativeButton(android.R.string.cancel, null);
-			return builder.create();
+			return UiDialogStyler.styleOnShow(builder.create());
 		}
 		
 		return super.onCreateDialog(id);

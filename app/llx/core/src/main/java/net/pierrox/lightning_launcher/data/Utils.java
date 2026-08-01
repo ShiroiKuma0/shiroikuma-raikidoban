@@ -80,6 +80,7 @@ import net.pierrox.lightning_launcher.views.ItemLayout;
 import net.pierrox.lightning_launcher.views.SharedAsyncGraphicsDrawable;
 import net.pierrox.lightning_launcher.views.item.ItemView;
 import net.pierrox.lightning_launcher.views.item.StopPointView;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -2132,7 +2133,7 @@ public class Utils {
                     }
                 });
         builder.setNegativeButton(android.R.string.cancel, null);
-        return builder.create();
+        return UiDialogStyler.styleOnShow(builder.create());
     }
 
     public static AlertDialog createFolderSelectionDialog(Context context, LightningEngine engine, final OnFolderSelectionDialogDone listener) {
@@ -2185,7 +2186,7 @@ public class Utils {
                 listener.onNoFolderSelected();
             }
         });
-        return builder.create();
+        return UiDialogStyler.styleOnShow(builder.create());
     }
 
     public static void getItemViewBoundsInItemLayout(ItemView itemView, RectF outRect) {

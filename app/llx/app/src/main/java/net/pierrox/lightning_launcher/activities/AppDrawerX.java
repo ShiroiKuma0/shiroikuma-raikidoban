@@ -92,6 +92,7 @@ import net.pierrox.lightning_launcher.views.SharedAsyncGraphicsDrawable;
 import net.pierrox.lightning_launcher.views.item.ItemView;
 import net.pierrox.lightning_launcher.views.item.ShortcutView;
 import net.pierrox.lightning_launcher_extreme.R;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 
 import org.json.JSONObject;
 import org.mozilla.javascript.Function;
@@ -348,7 +349,7 @@ public class AppDrawerX extends Dashboard implements EditTextIme.OnEditTextImeLi
                 builder.setMessage(R.string.my_drawer_message);
                 builder.setPositiveButton(android.R.string.ok, null);
                 builder.setCancelable(false);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
         }
 
         return super.onCreateDialog(id);

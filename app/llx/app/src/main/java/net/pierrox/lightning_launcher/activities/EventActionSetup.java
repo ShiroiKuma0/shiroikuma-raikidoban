@@ -512,7 +512,6 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
                 }
             });
             folderDialog.show();
-            UiDialogStyler.style(folderDialog);
         } else if (new_action == GlobalConfig.GO_DESKTOP_POSITION) {
             Intent intent = new Intent(Intent.ACTION_CREATE_SHORTCUT);
             intent.setClass(this, ScreenManager.class);

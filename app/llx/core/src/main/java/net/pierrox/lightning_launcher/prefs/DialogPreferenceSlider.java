@@ -14,6 +14,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import net.pierrox.lightning_launcher.R;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 
 import java.text.DecimalFormat;
 
@@ -56,6 +57,13 @@ public class DialogPreferenceSlider extends AlertDialog implements SeekBar.OnSee
             text = String.valueOf(Math.round(value));
         }
         return text;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // 「白い熊 雷起動盤 UI」: the themed bordered panel (yellow DIALOG_BORDER frame + rounded DIALOG_BG).
+        UiDialogStyler.style(this);
     }
 
     @Override

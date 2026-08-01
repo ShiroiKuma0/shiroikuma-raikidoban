@@ -77,6 +77,7 @@ import net.pierrox.lightning_launcher.util.PhoneUtils;
 import net.pierrox.lightning_launcher.views.ItemLayout;
 import net.pierrox.lightning_launcher.views.item.ItemView;
 import net.pierrox.lightning_launcher_extreme.R;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 
 import org.koin.java.KoinJavaComponent;
 
@@ -342,7 +343,7 @@ public class ScreenManager extends ResourceWrapperActivity implements OnClickLis
                     }
                 });
                 builder.setNegativeButton(android.R.string.cancel, null);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_CONFIRM_DELETE:
                 builder = new AlertDialog.Builder(this);
@@ -373,7 +374,7 @@ public class ScreenManager extends ResourceWrapperActivity implements OnClickLis
                     }
                 });
                 builder.setNegativeButton(android.R.string.cancel, null);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
         }
 
         return null;

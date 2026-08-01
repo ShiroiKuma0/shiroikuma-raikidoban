@@ -15,6 +15,7 @@ import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.configuration.GlobalConfig;
 import net.pierrox.lightning_launcher.data.EventAction;
 import net.pierrox.lightning_launcher.script.Script;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 
 public class MultiPurposeTransparentActivity extends ResourceWrapperActivity {
     private final static String INTENT_EXTRA_TYPE = "t";
@@ -78,7 +79,7 @@ public class MultiPurposeTransparentActivity extends ResourceWrapperActivity {
                     }
                 });
                 builder.setCancelable(false);
-                mDialog = builder.create();
+                mDialog = UiDialogStyler.styleOnShow(builder.create());
                 mDialog.show();
                 break;
 

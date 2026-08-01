@@ -29,7 +29,6 @@ import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.app.WallpaperManager;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
@@ -184,6 +183,7 @@ import net.pierrox.lightning_launcher.views.item.StopPointView;
 import net.pierrox.lightning_launcher.views.item.WidgetView;
 import net.pierrox.lightning_launcher_extreme.BuildConfig;
 import net.pierrox.lightning_launcher_extreme.R;
+import net.pierrox.lightning_launcher.util.ThemedProgressDialog;
 
 import org.koin.java.KoinJavaComponent;
 import org.mozilla.javascript.Function;
@@ -1454,7 +1454,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                     }
                 });
                 builder.setNegativeButton(android.R.string.cancel, null);
-                builder.show();
+                UiDialogStyler.show(builder);
             }
         }
     }
@@ -1552,7 +1552,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             Flash.show(this, R.string.fm_need_backup_folder);
             return;
         }
-        new AlertDialog.Builder(this)
+        UiDialogStyler.show(new AlertDialog.Builder(this)
                 .setTitle(R.string.fm_migrate)
                 .setMessage(R.string.fm_migrate_confirm)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -1561,8 +1561,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                         new FoldMigrationTask().execute();
                     }
                 })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .setNegativeButton(android.R.string.cancel, null));
     }
 
     // Backs up first, then binds single-finger swipes to the matrix and clears the now-redundant
@@ -1632,14 +1631,11 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     }
 
     private class FoldMigrationTask extends AsyncTask<Void, Void, Boolean> {
-        private ProgressDialog mDlg;
+        private AlertDialog mDlg;
 
         @Override
         protected void onPreExecute() {
-            mDlg = new ProgressDialog(Dashboard.this);
-            mDlg.setMessage(getString(R.string.fm_migrating));
-            mDlg.setCancelable(false);
-            mDlg.show();
+            mDlg = ThemedProgressDialog.show(Dashboard.this, getString(R.string.fm_migrating));
         }
 
         @Override
@@ -2156,7 +2152,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                                 }
                             });
                     builder.setNegativeButton(android.R.string.cancel, null);
-                    mDialog = builder.create();
+                    mDialog = UiDialogStyler.styleOnShow(builder.create());
                     mDialog.show();
                 }
                 break;
@@ -2861,14 +2857,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                             mNotValidEventActionItem = null;
                         }
                     });
-                    AlertDialog notInstalledDialog = builder.create();
-                    notInstalledDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                        @Override
-                        public void onShow(DialogInterface d) {
-                            net.pierrox.lightning_launcher.util.UiDialogStyler.style((AlertDialog) d);
-                        }
-                    });
-                    return notInstalledDialog;
+                    return UiDialogStyler.styleOnShow(builder.create());
                 }
                 break;
 
@@ -2878,7 +2867,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 builder.setMessage(R.string.first_use_message);
                 builder.setPositiveButton(android.R.string.ok, null);
                 builder.setCancelable(false);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_IMPORT_LL:
                 builder = new AlertDialog.Builder(this);
@@ -2886,7 +2875,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 builder.setMessage(R.string.ll_import_message);
                 builder.setPositiveButton(android.R.string.ok, null);
                 builder.setCancelable(false);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_ADD:
                 return new AddItemDialog(this, showPluginsInAddItemDialog(), new AddItemDialog.AddItemDialogInterface() {
@@ -2973,7 +2962,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 builder.setTitle(R.string.tab_stop_point);
                 builder.setMessage(R.string.sp_w);
                 builder.setPositiveButton(android.R.string.ok, null);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_LAUNCHER_APPS_NO_HOST_PERMISSION:
                 builder = new AlertDialog.Builder(this);
@@ -2986,7 +2975,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                     }
                 });
                 builder.setNegativeButton(android.R.string.cancel, null);
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
 
             case DIALOG_WRAP:
                 builder = new AlertDialog.Builder(this);
@@ -3004,7 +2993,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                                 }
                             }
                         });
-                return builder.create();
+                return UiDialogStyler.styleOnShow(builder.create());
         }
 
         return super.onCreateDialog(id);
@@ -3037,7 +3026,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                     }
                 }
             });
-            builder.create().show();
+            UiDialogStyler.show(builder);
         }
     }
 
@@ -3925,7 +3914,6 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 }
             });
             folderDialog.show();
-            UiDialogStyler.style(folderDialog);
         } else if (a == GlobalConfig.GO_DESKTOP_POSITION) {
             Intent intent = new Intent(Intent.ACTION_CREATE_SHORTCUT);
             intent.setClass(this, ScreenManager.class);
@@ -4014,7 +4002,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     }
 
     private void onActionsClearSlot(final ActionsOverviewDialog.Slot slot) {
-        new AlertDialog.Builder(this)
+        UiDialogStyler.show(new AlertDialog.Builder(this)
                 .setTitle(R.string.acd_clear_title)
                 .setMessage(getString(R.string.acd_clear_warn, getString(slot.titleRes)))
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -4027,8 +4015,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                         }
                     }
                 })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .setNegativeButton(android.R.string.cancel, null));
     }
 
     private void applyActionsSlotEdit(EventAction ea) {
@@ -4913,7 +4900,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         FrameLayout fl = new FrameLayout(this);
         fl.setPadding(30, 10, 30, 10);
         fl.addView(edit);
-        new AlertDialog.Builder(this)
+        UiDialogStyler.show(new AlertDialog.Builder(this)
                 .setTitle(R.string.mi_set_jiyu_widget_name)
                 .setMessage(R.string.jiyu_widget_name_title)
                 .setView(fl)
@@ -4925,8 +4912,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                         LLApp.get().getAppEngine().saveData();
                     }
                 })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .setNegativeButton(android.R.string.cancel, null));
     }
 
     /** Re-establish each jiyusagyoban widget's binding -> appWidgetId mapping: rebind any dead
@@ -5029,7 +5015,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         if (!anyDead) {
             return;
         }
-        new AlertDialog.Builder(this)
+        UiDialogStyler.show(new AlertDialog.Builder(this)
                 .setTitle(R.string.jiyu_reinit_offer_title)
                 .setMessage(R.string.jiyu_reinit_offer_msg)
                 .setPositiveButton(R.string.mi_reinit_jiyu_widgets, new DialogInterface.OnClickListener() {
@@ -5038,8 +5024,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                         reinitJiyuWidgets();
                     }
                 })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .setNegativeButton(android.R.string.cancel, null));
     }
 
     /** Capture (learn) a single jiyusagyoban widget's pull-source template FROM jiyusagyoban and mirror
@@ -7854,10 +7839,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
 
             final File file = filesHolder.getTempImageFile();
 
-            final ProgressDialog d = new ProgressDialog(Dashboard.this);
-            d.setMessage(getString(R.string.please_wait));
-            d.setCancelable(false);
-            d.show();
+            final AlertDialog d = ThemedProgressDialog.show(Dashboard.this, getString(R.string.please_wait));
             new AsyncTask<Void, Void, Boolean>() {
 
                 @Override

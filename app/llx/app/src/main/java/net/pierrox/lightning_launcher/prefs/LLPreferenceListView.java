@@ -63,6 +63,7 @@ import net.pierrox.lightning_launcher.script.api.Property;
 import net.pierrox.lightning_launcher.views.BoxEditorView;
 import net.pierrox.lightning_launcher.views.BoxEditorView.OnBoxEditorEventListener;
 import net.pierrox.lightning_launcher_extreme.R;
+import net.pierrox.lightning_launcher.util.UiDialogStyler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -137,7 +138,7 @@ public class LLPreferenceListView extends ListView implements OnItemClickListene
             builder.setTitle(mDialogListPreference.getTitle());
             builder.setSingleChoiceItems(mDialogListPreference.getLabels(), mDialogListPreference.getValueIndex(), this);
             builder.setNegativeButton(android.R.string.cancel, null);
-            mDialog = builder.create();
+            mDialog = UiDialogStyler.styleOnShow(builder.create());
         }
 
         if (mDialog != null) {
@@ -605,6 +606,13 @@ public class LLPreferenceListView extends ListView implements OnItemClickListene
             super(context);
 
             mValue = value;
+        }
+
+        @Override
+        protected void onStart() {
+            super.onStart();
+            // 「白い熊 雷起動盤 UI」: the themed bordered panel (yellow DIALOG_BORDER frame + rounded DIALOG_BG).
+            UiDialogStyler.style(this);
         }
 
         @Override
