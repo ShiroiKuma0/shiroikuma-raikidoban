@@ -21,7 +21,8 @@
 
     <style name="AppDarkNoActionBar" parent="Theme.AppCompat.NoActionBar" />
 
-    <style name="AppLightNoActionBar" parent="Theme.AppCompat.Light.NoActionBar" />
+    <!-- DayNight, not .Light: the fork pins night mode, and a hard-coded light parent would ignore it. -->
+    <style name="AppLightNoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar" />
 
     <style name="AppLightNoActionBarWallpaper" parent="AppLight">
         <!--<item name="android:windowNoTitle">true</item>-->
@@ -30,7 +31,8 @@
         <item name="android:windowShowWallpaper">true</item>
     </style>
 
-    <style name="AppDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <!-- DayNight, not .Light: the fork pins night mode, and a hard-coded light parent would ignore it. -->
+    <style name="AppDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="colorAccent">@color/color_accent</item>
@@ -49,9 +51,11 @@
         <item name="android:windowDisablePreview">true</item>
     </style>
 
-    <color name="color_accent">#ffff5722</color>
-    <color name="color_primary">#ffff5722</color>
-    <color name="color_primary_dark">#ffE64A19</color>
+    <!-- Base (light) values. The fork pins night mode, so values-night/colors.xml is what actually
+         renders; these are kept in step with it so nothing can fall back to stock LL's deep orange-red. -->
+    <color name="color_accent">#FFFFFF00</color>
+    <color name="color_primary">#FFFFFF00</color>
+    <color name="color_primary_dark">#FF000000</color>
 
     <dimen name="min_handle_content_size">48dp</dimen>
 </resources>

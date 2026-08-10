@@ -31,11 +31,11 @@ import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -68,6 +68,8 @@ import net.pierrox.lightning_launcher.configuration.GlobalConfig;
 import net.pierrox.lightning_launcher.configuration.ItemConfig;
 import net.pierrox.lightning_launcher.configuration.PageConfig;
 import net.pierrox.lightning_launcher.configuration.SystemConfig;
+import net.pierrox.lightning_launcher.configuration.UiSlot;
+import net.pierrox.lightning_launcher.configuration.UiTheme;
 import net.pierrox.lightning_launcher.data.ContainerPath;
 import net.pierrox.lightning_launcher.data.EventAction;
 import net.pierrox.lightning_launcher.data.FileUtils;
@@ -401,15 +403,18 @@ public class AppDrawerX extends Dashboard implements EditTextIme.OnEditTextImeLi
         ((FrameLayout.LayoutParams) mActionBar.getLayoutParams()).topMargin = mDrawerPage.config.statusBarHide ? 0 : mScreen.getSystemBarTintManager().getConfig().getStatusBarHeight();
         mActionBar.requestLayout();
 
-        int ab_text_color = mDrawerPage.config.adActionBarTextColor;
-        if (ab_text_color == 0) {
-            int[] attrs = {android.R.attr.textColor};
-            TypedArray ta = obtainStyledAttributes(R.style.ab_text, attrs);
-            ab_text_color = ta.getColor(0, 0);
-            ta.recycle();
+        // 「白い熊 雷起動盤 UI」: the all-apps action bar follows the TOOLBARS slots — the icon-font glyphs
+        // (mode / zoom / search / more / batch-add) take TOOLBAR_ICON, the labels take TOOLBAR_TEXT. A
+        // per-page adActionBarTextColor still wins, as before.
+        int ab_custom_color = mDrawerPage.config.adActionBarTextColor;
+        int ab_icon_color = ab_custom_color != 0 ? ab_custom_color : UiTheme.color(UiSlot.TOOLBAR_ICON);
+        int ab_text_color = ab_custom_color != 0 ? ab_custom_color : UiTheme.color(UiSlot.TOOLBAR_TEXT);
+        int[] icon_ids = new int[]{R.id.drawer_mode_icon, R.id.drawer_zoom, R.id.drawer_search, R.id.drawer_more, R.id.batch_add};
+        for (int id : icon_ids) {
+            ((TextView) mActionBar.findViewById(id)).setTextColor(ab_icon_color);
         }
-        int[] ids = new int[]{R.id.drawer_mode_icon, R.id.drawer_mode_value, R.id.drawer_zoom, R.id.drawer_search, R.id.drawer_more, R.id.drawer_search_field, R.id.batch_ok, R.id.batch_count, R.id.batch_add};
-        for (int id : ids) {
+        int[] text_ids = new int[]{R.id.drawer_mode_value, R.id.drawer_search_field, R.id.batch_ok, R.id.batch_count};
+        for (int id : text_ids) {
             ((TextView) mActionBar.findViewById(id)).setTextColor(ab_text_color);
         }
         int hint_color = Color.argb(Color.alpha(ab_text_color) / 2, Color.red(ab_text_color), Color.green(ab_text_color), Color.blue(ab_text_color));
@@ -426,9 +431,9 @@ public class AppDrawerX extends Dashboard implements EditTextIme.OnEditTextImeLi
         }
 
         if (mActionBarBackground == null) {
-            int bg_res_id;
-            bg_res_id = R.color.color_primary;
-            mActionBarBackground = getResources().getDrawable(bg_res_id);
+            // Black-yellow chrome: the configurable TOOLBAR_BG slot, not the stock deep-orange
+            // @color/color_primary.
+            mActionBarBackground = new ColorDrawable(UiTheme.color(UiSlot.TOOLBAR_BG));
         }
 
         if (mActionBarBackground instanceof SharedAsyncGraphicsDrawable) {

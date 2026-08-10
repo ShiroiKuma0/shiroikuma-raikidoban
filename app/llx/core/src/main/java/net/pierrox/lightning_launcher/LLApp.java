@@ -86,8 +86,9 @@ public abstract class LLApp extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         // Force the in-app UI locale app-wide (covers app-context string lookups), independent of the
-        // system language and of any external language pack.
-        super.attachBaseContext(net.pierrox.lightning_launcher.configuration.UiConfig.applyStoredLocale(base));
+        // system language and of any external language pack, and pin the night resource set so the
+        // black-yellow chrome also applies to views inflated from the app context.
+        super.attachBaseContext(net.pierrox.lightning_launcher.configuration.UiConfig.applyUiConfiguration(base));
     }
 
     @Override

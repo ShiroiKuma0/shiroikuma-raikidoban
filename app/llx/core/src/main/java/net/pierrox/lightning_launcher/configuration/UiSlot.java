@@ -17,7 +17,7 @@ public enum UiSlot {
     // --- Foundation (cascade roots; literal defaults = today's look) ---
     BACKGROUND("llui_background", UiGroup.FOUNDATION, R.string.llui_background, true, false, null, 0xFF000000),
     TEXT("llui_text", UiGroup.FOUNDATION, R.string.llui_text, true, true, null, 0xFFFFFF00),
-    ACCENT("llui_accent", UiGroup.FOUNDATION, R.string.llui_accent, true, false, null, 0xFFFFA500),
+    ACCENT("llui_accent", UiGroup.FOUNDATION, R.string.llui_accent, true, false, null, 0xFFFFFF00),
 
     // --- Launcher menus (bubble) ---
     MENU_TEXT("llui_menu_text", UiGroup.MENUS, R.string.llui_menu_text, false, true, "llui_text", 0),

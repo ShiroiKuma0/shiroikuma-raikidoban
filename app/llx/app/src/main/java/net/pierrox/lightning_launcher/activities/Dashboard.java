@@ -5279,10 +5279,18 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
      */
     protected void addBubbleHint(int hint, int hint_text_id) {
         View v = getLayoutInflater().inflate(R.layout.hint, null);
-        ((TextView) v.findViewById(R.id.h_ttl)).setText(R.string.h_t);
-        ((TextView) v.findViewById(R.id.h_t)).setText(hint_text_id);
+        TextView ttl = v.findViewById(R.id.h_ttl);
+        ttl.setText(R.string.h_t);
+        TextView body = v.findViewById(R.id.h_t);
+        body.setText(hint_text_id);
         TextView dsa = v.findViewById(R.id.dsa);
         dsa.setText(R.string.dialog_help_hint_dsa);
+        // 「白い熊 雷起動盤 UI」: a hint is a bubble cell — heading in MENU_ACCENT, body in MENU_TEXT.
+        // Without this the hint keeps the platform's textColorPrimary/Secondary greys.
+        ttl.setTextColor(UiTheme.color(UiSlot.MENU_ACCENT));
+        UiTheme.applyFont(ttl, UiSlot.MENU_TEXT);
+        UiTheme.applyTo(body, UiSlot.MENU_TEXT);
+        UiTheme.applyTo(dsa, UiSlot.MENU_TEXT);
         dsa.setTag(Integer.valueOf(hint));
         v.setOnClickListener(this);
         mBubbleContent.addView(v);

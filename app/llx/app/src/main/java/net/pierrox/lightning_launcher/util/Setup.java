@@ -240,8 +240,6 @@ public class Setup {
         final Resources resources = context.getResources();
         final DisplayMetrics displayMetrics = resources.getDisplayMetrics();
         float density = displayMetrics.density;
-        int color_primary_dark = resources.getColor(R.color.color_primary_dark);
-
 
         final PageConfig dashboard_config = dashboard.config;
         dashboard_config.applyDefaultFolderConfig();
@@ -252,7 +250,9 @@ public class Setup {
         dashboard_config.swipeUp = new EventAction(GlobalConfig.USER_MENU, null);
         dashboard_config.swipe2Up = new EventAction(GlobalConfig.USER_MENU, null);
         dashboard_config.bgTap = new EventAction(GlobalConfig.WALLPAPER_TAP, null);
-        dashboard_config.statusBarColor = color_primary_dark;
+        // Fresh install: no status bar, and black rather than the stock deep-orange when it is shown.
+        dashboard_config.statusBarHide = true;
+        dashboard_config.statusBarColor = Color.BLACK;
         dashboard_config.navigationBarColor = Color.BLACK;
         installDockShortcut(dashboard, drawer, 0, 5, CN_DOCK_0);
         installDockShortcut(dashboard, drawer, 1, 5, CN_DOCK_1);
@@ -419,7 +419,9 @@ public class Setup {
         config.defaultFolderConfig.outsideTapClose = true;
         config.gridPRowNum = config.gridLRowNum = 4;
         config.scrollingDirection = PageConfig.ScrollingDirection.X;
-        config.statusBarColor = resources.getColor(R.color.color_primary_dark);
+        // Fresh install: no status bar, and black rather than the stock deep-orange when it is shown.
+        config.statusBarHide = true;
+        config.statusBarColor = Color.BLACK;
         config.navigationBarColor = Color.BLACK;
         config.screenOrientation = PageConfig.ScreenOrientation.PORTRAIT;
 //        config.defaultItemConfig.rotate = true;
@@ -537,7 +539,6 @@ public class Setup {
 
         Resources resources = context.getResources();
         int large_icon_size = resources.getDimensionPixelSize(R.dimen.large_icon_text_size);
-        int color_primary_dark = resources.getColor(R.color.color_primary_dark);
 
         Page page = engine.getOrLoadPage(Page.USER_MENU_PAGE);
         PageConfig page_config = page.config;
@@ -568,8 +569,11 @@ public class Setup {
         folderConfig.animationOut = FolderConfig.FolderAnimation.SLIDE_FROM_TOP;
         folderConfig.titleVisibility = false;
         folderConfig.wAV = Box.AlignV.BOTTOM;
-        folderConfig.box.ccn = resources.getColor(R.color.color_primary);
-        folderConfig.box.border_color[Box.BCT] = color_primary_dark;
+        // Black panel with a yellow top rule. Stock LL painted the user-menu folder in the accent
+        // colour itself (an orange slab); now that the accent is #FFFF00 that would be a yellow slab
+        // under yellow labels, so the accent moves to the border and the panel goes black.
+        folderConfig.box.ccn = Color.BLACK;
+        folderConfig.box.border_color[Box.BCT] = resources.getColor(R.color.color_primary);
 //        folderConfig.box.border_color[Box.BCB] = color_primary_dark;
         folderConfig.box.size[Box.BT] = 1;
 //        folderConfig.box.size[Box.BB] = 2;

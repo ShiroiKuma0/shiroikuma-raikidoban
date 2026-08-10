@@ -16,9 +16,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
-import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.R;
-import net.pierrox.lightning_launcher.configuration.SystemConfig;
 import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.configuration.UiConfig;
 import net.pierrox.lightning_launcher.configuration.UiSlot;
@@ -40,8 +38,13 @@ public abstract class ResourceWrapperActivity extends AppCompatActivity {
 
     @Override
     protected void attachBaseContext(Context newBase) {
+        // 白い熊 雷起動盤 is black-yellow only — never the stock light chrome. Pin AppCompat to night
+        // here, i.e. before super.onCreate() builds the delegate, so every DayNight theme resolves to
+        // values-night whatever the phone's own dark-mode switch says. (This used to follow
+        // SystemConfig.appStyle, whose LIGHT default made a fresh install come up white-on-orange.)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         mForcedLocale = UiConfig.getStoredLocale(newBase);
-        super.attachBaseContext(UiConfig.applyStoredLocale(newBase));
+        super.attachBaseContext(UiConfig.applyUiConfiguration(newBase));
     }
 
     @Override
@@ -57,7 +60,6 @@ public abstract class ResourceWrapperActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme();
         if (themeSystemBars()) {
             // Black-yellow everywhere: chrome activities get a black status + nav bar. The wallpaper home
             // (Dashboard / app drawer) opts out so it can keep its wallpaper-edge bars.
@@ -81,11 +83,6 @@ public abstract class ResourceWrapperActivity extends AppCompatActivity {
 
     public final Resources getRealResources() {
         return super.getResources();
-    }
-
-    private void setTheme() {
-        boolean isLight = LLApp.get().getSystemConfig().appStyle == SystemConfig.AppStyle.LIGHT;
-        AppCompatDelegate.setDefaultNightMode(isLight ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES);
     }
 
     public boolean checkPermissions(String[] permissions, int[] rationales, final int requestCode) {

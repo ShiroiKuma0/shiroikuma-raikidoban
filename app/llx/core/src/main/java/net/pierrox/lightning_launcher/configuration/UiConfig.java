@@ -238,19 +238,25 @@ public final class UiConfig {
     }
 
     /**
-     * Wrap a base context with the stored UI locale, if any. Reads SharedPreferences directly so it is
-     * safe to call from {@code attachBaseContext} (before {@link LLApp#get()} is ready). Returns the
-     * context unchanged when no in-app locale is set (follow the system). This is the device-independent
-     * path — it does not rely on the platform per-app-locale service (absent on this HarmonyOS/API 31).
+     * Wrap a base context with the fork's own resource configuration: the stored UI locale (if any) and
+     * the permanently-pinned night resource set. Reads SharedPreferences directly so it is safe to call
+     * from {@code attachBaseContext} (before {@link LLApp#get()} is ready). The locale part is the
+     * device-independent path — it does not rely on the platform per-app-locale service (absent on this
+     * HarmonyOS/API 31).
      */
-    public static Context applyStoredLocale(Context base) {
+    public static Context applyUiConfiguration(Context base) {
         Locale locale = getStoredLocale(base);
-        if (locale == null) {
-            return base;
-        }
-        Locale.setDefault(locale);
         Configuration config = new Configuration(base.getResources().getConfiguration());
-        config.setLocale(locale);
+        // 白い熊 雷起動盤 is a black-yellow app: pin the whole process to the night resource set so the
+        // values-night palette applies even when the phone itself is in light mode. Without this the
+        // DayNight themes fall back to the stock light chrome (white bubbles/hints, orange bars) —
+        // which is exactly what a fresh install looked like on a light-mode phone.
+        config.uiMode = (config.uiMode & ~Configuration.UI_MODE_NIGHT_MASK)
+                | Configuration.UI_MODE_NIGHT_YES;
+        if (locale != null) {
+            Locale.setDefault(locale);
+            config.setLocale(locale);
+        }
         return base.createConfigurationContext(config);
     }
 

@@ -5,7 +5,9 @@
     <color name="color_text">?android:attr/colorForeground</color>
     <color name="color_text_pressed">?android:attr/colorPressedHighlight</color>
     <color name="color_text_disabled">?android:attr/textColorPrimary</color>
-    <color name="eb_btn_pressed">#fff</color>
-    <color name="eb_btn_activated">#dfff</color>
-    <color name="eb_bar_bg">#8fff</color>
+    <!-- Edit-mode toolbar: translucent YELLOW, not the stock translucent white. The button text stays
+         black (res/color/eb_btn_text.xml), which reads cleanly on yellow. -->
+    <color name="eb_btn_pressed">#ff0</color>
+    <color name="eb_btn_activated">#dff0</color>
+    <color name="eb_bar_bg">#8ff0</color>
 </resources>

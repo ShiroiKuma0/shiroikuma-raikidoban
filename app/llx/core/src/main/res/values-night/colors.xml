@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Dark-mode accent: the deep orange-red #ff5722 used for menu heading lines (@color/color_primary)
-     and heading text (colorAccent) is too dark on black, so brighten it to orange in night mode.
-     Light mode keeps #ff5722 (res/values/styles.xml). -->
+<!-- The accent is #FFFF00, same yellow as the chrome text (UiSlot.ACCENT). @color/color_primary paints
+     the bubble separator lines / scrollbar and a few dialog heading rules; colorAccent paints heading
+     text, checkboxes and switches. Stock LL used the deep orange-red #ff5722 here (see
+     res/values/styles.xml), which has no place in a black-yellow launcher. -->
 <resources>
-    <color name="color_primary">#FFFFA500</color>
-    <color name="color_accent">#FFFFA500</color>
+    <color name="color_primary">#FFFFFF00</color>
+    <color name="color_accent">#FFFFFF00</color>
 </resources>

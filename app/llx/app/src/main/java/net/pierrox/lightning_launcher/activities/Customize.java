@@ -1607,7 +1607,9 @@ public class Customize extends ResourceWrapperActivity implements
         mPreferencesGlobalConfig = new ArrayList<LLPreference>(4);
         mPreferencesGlobalConfig.add(mGCExpertMode = new LLPreferenceCheckBox(this, ID_mGCExpertMode, R.string.em_t, R.string.em_s, mSystemConfig.expertMode, null));
 
-        mPreferencesGlobalConfig.add(mGCAppStyle = new LLPreferenceList(this, ID_mGCAppStyle, R.string.gc_as_t, R.array.gc_as_e, mSystemConfig.appStyle, null));
+        // The stock "Application style" (Light/Dark) list is gone: this fork is black-yellow only and
+        // pins AppCompat to night mode (ResourceWrapperActivity.attachBaseContext), so the choice had no
+        // effect. mGCAppStyle stays null; every use of it is null-guarded. Colours live in 「白い熊 雷起動盤 UI」.
 
         mPreferencesGlobalConfig.add(mGCEventsCategory = new LLPreference(this, ID_mGCEventsCategory,
                 R.string.events_t, R.string.events_s));

@@ -34,7 +34,9 @@ public class SystemConfig extends JsonLoader {
     public String language=null;
     public boolean expertMode=false;
     public boolean hotwords=false;
-    public AppStyle appStyle=AppStyle.LIGHT;
+    // Black-yellow only: the fork always runs the dark resource set (the chrome no longer reads this,
+    // but a fresh install should not persist "LIGHT" either).
+    public AppStyle appStyle=AppStyle.DARK;
 
     public int hints=0;
 

@@ -72,6 +72,11 @@ android {
 
     buildTypes {
         debug {
+            // Ship a NON-debuggable APK. Android 15+ pops an "Android App Compatibility" dialog on
+            // first launch of a debuggable app ("this is a debuggable app which is currently being
+            // tested"); 白い熊 does not want that on his phones. Build with -PdebuggableApk when
+            // `adb shell run-as shiroikuma.raikidoban` is needed to inspect app data.
+            debuggable project.hasProperty("debuggableApk")
             manifestPlaceholders += [provider_authority: "net.pierrox.lightning_launcher"]
         }
         release {

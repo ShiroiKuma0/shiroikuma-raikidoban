@@ -87,7 +87,8 @@
         <item name="android:layout_height">1px</item>
         <item name="android:layout_marginLeft">3dp</item>
         <item name="android:layout_marginRight">3dp</item>
-        <item name="android:background">#dfff</item>
+        <!-- Matches the translucent-yellow edit bar (@color/eb_btn_activated). -->
+        <item name="android:background">#dff0</item>
     </style>
     <style name="hs_btn" parent="eb_btn">
         <item name="android:layout_width">48dp</item>
@@ -122,9 +123,12 @@
         <item name="android:background">@drawable/bubble_item_bg</item>
     </style>
 
+    <!-- Action bar of the app drawer and the screen manager. Black (?android:colorBackground is pinned
+         to #000 by values-night), never the stock deep-orange @color/color_primary. AppDrawerX repaints
+         it at runtime with the configurable TOOLBAR_BG slot; this is the static fallback. -->
     <style name="ab_bg">
         <item name="android:elevation">8dp</item>
-        <item name="android:background">@color/color_primary</item>
+        <item name="android:background">?android:attr/colorBackground</item>
     </style>
 
     <style name="ab_text" parent="@android:style/TextAppearance.Material.Widget.ActionBar.Title.Inverse" />

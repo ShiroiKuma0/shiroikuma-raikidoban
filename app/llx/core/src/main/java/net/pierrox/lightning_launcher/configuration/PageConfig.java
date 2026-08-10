@@ -90,6 +90,8 @@ public class PageConfig extends JsonLoader {
 	public ScaleType bgScaleType=ScaleType.CENTER;
 
 	
+	// Stays false: flipping this default would also hide the bar on existing desktops that never stored
+	// the setting. The fresh-install desktop and app drawer set it to true explicitly in Setup instead.
 	public boolean statusBarHide=false;
 	public boolean statusBarOverlap=false;
 	public boolean navigationBarOverlap =false;
