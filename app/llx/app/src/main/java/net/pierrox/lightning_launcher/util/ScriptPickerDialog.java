@@ -150,8 +150,7 @@ public class ScriptPickerDialog extends AlertDialog implements AdapterView.OnIte
         });
         mHasDataCheckBox.setText(R.string.sc_data);
 
-        mScriptAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, mAllScripts);
-        mScriptAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mScriptAdapter = new UiSpinnerAdapter<>(context, mAllScripts);
         updateScriptsSpinner();
 
         mScriptSpinner.setOnItemSelectedListener(this);
@@ -168,9 +167,7 @@ public class ScriptPickerDialog extends AlertDialog implements AdapterView.OnIte
                     context.getString(R.string.tg_ls),
                     context.getString(R.string.tg_bg),
             };
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, target_names);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            mTargetsSpinner.setAdapter(adapter);
+            mTargetsSpinner.setAdapter(new UiSpinnerAdapter<>(context, target_names));
             mTargetsSpinner.setSelection(mInitialTarget);
             targets_group.setVisibility(View.VISIBLE);
         }

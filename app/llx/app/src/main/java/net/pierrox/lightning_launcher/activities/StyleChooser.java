@@ -41,6 +41,8 @@ import net.pierrox.lightning_launcher.configuration.ItemConfig;
 import net.pierrox.lightning_launcher.configuration.JsonFields;
 import net.pierrox.lightning_launcher.configuration.PageConfig;
 import net.pierrox.lightning_launcher.configuration.ShortcutConfig;
+import net.pierrox.lightning_launcher.configuration.UiSlot;
+import net.pierrox.lightning_launcher.configuration.UiTheme;
 import net.pierrox.lightning_launcher.data.Box;
 import net.pierrox.lightning_launcher.data.FileUtils;
 import net.pierrox.lightning_launcher.data.JsonLoader;
@@ -278,6 +280,8 @@ public class StyleChooser extends ResourceWrapperListActivity implements OnItemL
 		
 		ArrayAdapter<StyleEntry> adapter=new ArrayAdapter<StyleEntry>(this, android.R.layout.simple_list_item_1, mStyles);
 		setListAdapter(adapter);
+		// simple_list_item_1 has no colour of its own: paint the rows instead of leaving them white.
+		UiTheme.paintUnstyledText(getListView(), UiSlot.PREF_TITLE);
 	}
 
     private static class StyleEntry {

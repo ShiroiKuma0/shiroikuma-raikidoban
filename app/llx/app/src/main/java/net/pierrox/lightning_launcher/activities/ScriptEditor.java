@@ -103,6 +103,7 @@ import net.pierrox.lightning_launcher.util.Search;
 import net.pierrox.lightning_launcher_extreme.BuildConfig;
 import net.pierrox.lightning_launcher_extreme.R;
 import net.pierrox.lightning_launcher.util.UiDialogStyler;
+import net.pierrox.lightning_launcher.util.UiSpinnerAdapter;
 
 import java.io.File;
 import java.io.IOException;
@@ -382,8 +383,7 @@ public class ScriptEditor extends ResourceWrapperActivity implements View.OnClic
         btn.setOnClickListener(this);
         btn.setText(R.string.sc_send);
 
-        mScriptAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, mAllScripts);
-        mScriptAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mScriptAdapter = new UiSpinnerAdapter<>(this, mAllScripts);
 
         ((TextView) findViewById(R.id.sc_path)).setText(R.string.sc_path);
         ((TextView) findViewById(R.id.sc_name)).setText(R.string.sc_name);

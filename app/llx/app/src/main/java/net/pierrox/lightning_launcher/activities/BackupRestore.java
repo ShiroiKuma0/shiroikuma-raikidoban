@@ -56,6 +56,8 @@ import androidx.documentfile.provider.DocumentFile;
 
 import net.pierrox.lightning_launcher.API;
 import net.pierrox.lightning_launcher.LLApp;
+import net.pierrox.lightning_launcher.configuration.UiSlot;
+import net.pierrox.lightning_launcher.configuration.UiTheme;
 import net.pierrox.lightning_launcher.data.BackupRestoreTool;
 import net.pierrox.lightning_launcher.data.FileUtils;
 import net.pierrox.lightning_launcher.data.LightningIntent;
@@ -146,6 +148,11 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         mListView.setOnItemLongClickListener(this);
 
         mEmptyView = findViewById(R.id.empty);
+
+        // The archive list rows come from the platform's simple_list_item_1 and the empty label from
+        // ?textAppearanceLarge — both white until painted.
+        UiTheme.paintUnstyledText(mListView, UiSlot.PREF_TITLE);
+        UiTheme.applyTo(mEmptyView, UiSlot.PREF_TITLE);
 
         styleButtons();
 

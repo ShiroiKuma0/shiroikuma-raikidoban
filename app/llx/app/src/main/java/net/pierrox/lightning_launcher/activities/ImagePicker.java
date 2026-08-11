@@ -82,6 +82,7 @@ import net.pierrox.lightning_launcher.data.Utils;
 import net.pierrox.lightning_launcher.util.FilesHolder;
 import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.LruCache;
+import net.pierrox.lightning_launcher.util.UiSpinnerAdapter;
 import net.pierrox.lightning_launcher.views.EditTextIme;
 import net.pierrox.lightning_launcher_extreme.R;
 
@@ -266,9 +267,7 @@ public class ImagePicker extends ResourceWrapperActivity implements AdapterView.
         setContentView(R.layout.image_picker);
 
         mSourceSpinner = findViewById(R.id.source);
-        ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.ip_s));
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mSourceSpinner.setAdapter(adapter);
+        mSourceSpinner.setAdapter(new UiSpinnerAdapter<>(this, getResources().getStringArray(R.array.ip_s)));
         mSourceSpinner.setOnItemSelectedListener(this);
 
         mIconPackSpinner = findViewById(R.id.icon_pack);
@@ -650,8 +649,7 @@ public class ImagePicker extends ResourceWrapperActivity implements AdapterView.
                             pages.add(String.valueOf(p));
                         }
                     }
-                    mLauncherPageAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, pages);
-                    mLauncherPageAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    mLauncherPageAdapter = new UiSpinnerAdapter<>(this, pages);
                     mLauncherPageSpinner.setAdapter(mLauncherPageAdapter);
                 }
 
@@ -1195,7 +1193,7 @@ public class ImagePicker extends ResourceWrapperActivity implements AdapterView.
 
             ((TextView) convertView.findViewById(android.R.id.text1)).setText(getItem(position).label);
 
-            return convertView;
+            return UiSpinnerAdapter.paint(convertView);
         }
 
         @Override
@@ -1206,7 +1204,7 @@ public class ImagePicker extends ResourceWrapperActivity implements AdapterView.
 
             ((TextView) convertView.findViewById(android.R.id.text1)).setText(getItem(position).label);
 
-            return convertView;
+            return UiSpinnerAdapter.paint(convertView);
         }
     }
 

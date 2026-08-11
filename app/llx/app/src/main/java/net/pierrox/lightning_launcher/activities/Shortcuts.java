@@ -35,6 +35,8 @@ import android.widget.ListView;
 
 import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.configuration.GlobalConfig;
+import net.pierrox.lightning_launcher.configuration.UiSlot;
+import net.pierrox.lightning_launcher.configuration.UiTheme;
 import net.pierrox.lightning_launcher.data.ContainerPath;
 import net.pierrox.lightning_launcher.data.LightningIntent;
 import net.pierrox.lightning_launcher.data.Page;
@@ -137,6 +139,8 @@ public class Shortcuts extends ResourceWrapperListActivity {
 
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mItems);
             setListAdapter(adapter);
+            // simple_list_item_1 has no colour of its own: paint the rows instead of leaving them white.
+            UiTheme.paintUnstyledText(getListView(), UiSlot.PREF_TITLE);
         }
     }
 

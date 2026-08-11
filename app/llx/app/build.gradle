@@ -4,16 +4,17 @@ plugins {
 }
 
 // Versioning — see .claude/skills/build-apk/SKILL.md.
-// VERSION_NAME is the semver triplet (e.g. "14.3.0"); BUILD_NUMBER is the per-build "+N" counter
-// (0 = a published build, with no "+N" suffix). The buildApk task bumps BUILD_NUMBER after each
-// successful build.
+// VERSION_NAME is the semver triplet (e.g. "14.3.0"); BUILD_NUMBER is the per-build "+N" counter,
+// i.e. the number THIS build takes. The buildApk task bumps it after each successful build.
 def versionTriplet = project.property("VERSION_NAME").toString()
-def buildNumber = project.property("BUILD_NUMBER").toString().toInteger()
-// The counter is always written zero-padded to three digits (+001, +014) so ~/tmp and the release
-// list sort in build order; the versionCode keeps the plain integer.
-def forkVersionName = buildNumber == 0 ? versionTriplet : "${versionTriplet}+${String.format('%03d', buildNumber)}"
+// The counter is ALWAYS present and ALWAYS zero-padded to three digits (+001, +014): no build may
+// ever carry a bare version name, or it would re-emit a published APK's name and versionCode. The
+// count starts at 1, so a 0 left behind by a publish means "the next build is +001".
+def buildNumber = Math.max(1, project.property("BUILD_NUMBER").toString().toInteger())
+def forkVersionName = "${versionTriplet}+${String.format('%03d', buildNumber)}"
 // versionCode for the 14.3 line: base 3300000 (LightningLauncher's legacy code 330 for 14.3, *10000)
-// + patch*10000 + the build counter. e.g. 14.3.0+1 -> 3300001, 14.3.1 -> 3310000, 14.3.1+1 -> 3310001.
+// + patch*10000 + the build counter. e.g. 14.3.0+001 -> 3300001, 14.3.1+001 -> 3310001. The bare
+// patch code (3310000) belongs to no build, which is what keeps every APK's code unique.
 // If major.minor ever moves off 14.3, update the 3300000 base.
 def forkVersionCode = 3300000 + (versionTriplet.tokenize('.')[2].toInteger() * 10000) + buildNumber
 
@@ -146,10 +147,11 @@ tasks.register("buildApk") {
             throw new GradleException("No APK found in ${outputDir}")
         }
 
-        // Auto-increment BUILD_NUMBER for the next build (consumed only on success).
+        // Auto-increment BUILD_NUMBER for the next build (consumed only on success). The bump is
+        // computed from the number this build actually used, so the one just shipped is never reused.
         def propsFile = rootProject.file("gradle.properties")
         def current = project.property("BUILD_NUMBER").toString().toInteger()
-        def next = current + 1
+        def next = buildNumber + 1
         propsFile.text = propsFile.text.replace("BUILD_NUMBER=${current}", "BUILD_NUMBER=${next}")
         println("[1;36m>>> BUILD_NUMBER bumped to ${next}[0m")
     }

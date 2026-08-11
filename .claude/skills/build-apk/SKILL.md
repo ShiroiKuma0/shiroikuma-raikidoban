@@ -30,22 +30,26 @@ This is the user's fork of LightningLauncher (TrianguloY → pierrehebert). It i
 `app/llx/gradle.properties` holds two keys; `app/build.gradle` derives the rest:
 
 - **`VERSION_NAME`** — the semver triplet, e.g. `14.3.0`. We added the `.0` triplet on top of upstream's `14.3`.
-- **`BUILD_NUMBER`** — the per-build `+N` counter. `0` means a *published* build (no `+N` suffix).
+- **`BUILD_NUMBER`** — the `+N` counter this build takes. Starts at 1 and only ever goes up.
 
 Derived in `app/build.gradle`:
-- **versionName** = `<VERSION_NAME>+<BUILD_NUMBER>` (e.g. `14.3.0+1`), or just `<VERSION_NAME>` when `BUILD_NUMBER=0`.
+- **versionName** = `<VERSION_NAME>+<BUILD_NUMBER zero-padded to three digits>` — e.g. `14.3.0+001`, `14.3.0+014`.
 - **versionCode** = `3300000 + patch*10000 + BUILD_NUMBER`, where `patch` is the third triplet component. `3300000` is LightningLauncher's legacy code `330` for the 14.3 line ×10000.
-  - `14.3.0+1` → `3300001`; `14.3.0+2` → `3300002`; … `14.3.1` → `3310000`; `14.3.1+1` → `3310001`.
+  - `14.3.0+001` → `3300001`; `14.3.0+002` → `3300002`; … `14.3.1+001` → `3310001`.
   - 9999 builds of headroom per patch before it reaches the next patch's base.
   - **If major.minor ever moves off `14.3`, update the `3300000` base in `app/build.gradle`.**
 
-**Day-to-day:** every build bumps `BUILD_NUMBER` by 1 (the `buildApk` task does this on success). So builds run `14.3.0+1`, `14.3.0+2`, …
+**Never build the same version twice (hard rule, 白い熊 2026-08-11).** Every build carries a `+N` higher than any build before it, so no APK name and no versionCode is ever re-emitted — this holds for throwaway spikes as much as for releases, and it holds for **publishing** too: a release is tagged with the padded counter (`14.3.7+008`), never a bare `14.3.7`. `app/build.gradle` enforces it — the counter is always present, always three digits, and floors at 1, so a `BUILD_NUMBER=0` left behind by anything means "the next build is `+001`", not "rebuild the published one".
 
-**Publishing a new version:** when the user decides on a new version (e.g. `14.3.1`), set `VERSION_NAME=14.3.1` and `BUILD_NUMBER=0` in `gradle.properties` → that build is `14.3.1` / versionCode `3310000`. Then builds resume at `14.3.1+1` (`3310001`), etc.
+*(2026-08-11: the old rule was "`0` = a published build, no suffix". A build on top of the published `14.3.7` therefore re-emitted `shiroikuma-raikidoban_14.3.7_arm64-v8a.apk` with versionCode `3370000` — the released artifact's own name and code. Hence this rule.)*
+
+**Day-to-day:** every build bumps `BUILD_NUMBER` by 1 (the `buildApk` task does this on success). So builds run `14.3.0+001`, `14.3.0+002`, …
+
+**Publishing a new version:** when 白い熊 decides on a new version (e.g. `14.3.1`), set `VERSION_NAME=14.3.1` in `gradle.properties`; the next build is `14.3.1+<next N>` and that is what gets tagged and attached. The counter keeps running across version bumps — resetting it would let an old name come back.
 
 ## Steps
 
-1. **Note the output name.** `grep -E 'VERSION_NAME|BUILD_NUMBER' app/llx/gradle.properties`. The APK will be `shiroikuma-raikidoban_<VERSION_NAME>+<BUILD_NUMBER>_arm64-v8a.apk` using `BUILD_NUMBER` **before** the build (the task bumps it afterward; `+0` is omitted when `BUILD_NUMBER=0`).
+1. **Note the output name.** `grep -E 'VERSION_NAME|BUILD_NUMBER' app/llx/gradle.properties`. The APK will be `shiroikuma-raikidoban_<VERSION_NAME>+<BUILD_NUMBER padded to 3>_arm64-v8a.apk` using `BUILD_NUMBER` **as it stands before** the build (the task bumps it afterward). Check `~/tmp/` and the release list: that name must not exist yet.
 
 2. **Build** (from `app/llx`, with the build JDK + SDK exported):
    ```bash

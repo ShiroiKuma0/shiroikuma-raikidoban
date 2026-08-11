@@ -49,6 +49,8 @@ import com.mobeta.android.dslv.DragSortListView;
 
 import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.configuration.GlobalConfig;
+import net.pierrox.lightning_launcher.configuration.UiSlot;
+import net.pierrox.lightning_launcher.configuration.UiTheme;
 import net.pierrox.lightning_launcher.data.Action;
 import net.pierrox.lightning_launcher.data.ActionsDescription;
 import net.pierrox.lightning_launcher.data.EventAction;
@@ -184,6 +186,9 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
         builder.setNeutralButton(R.string.eas_add, null);
 
         AlertDialog dialog = builder.show();
+        // The views below are moved into this activity, colours and all: style them while they still
+        // belong to a dialog (title + buttons), then paint the list rows once the adapter is set.
+        UiDialogStyler.style(dialog);
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -220,6 +225,9 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
         final DragSortListView list = dialogContent.findViewById(android.R.id.list);
         mAdapter = new EventActionAdapter(this, mEventActions);
         list.setAdapter(mAdapter);
+        // event_action_item carries no colour: without this its rows (action, summary, the drag and
+        // delete glyphs) keep the platform's white.
+        UiTheme.paintUnstyledText(list, UiSlot.DIALOG_TEXT);
         list.setOnItemClickListener(this);
         list.setDropListener(new DragSortListView.DragSortListener() {
             @Override

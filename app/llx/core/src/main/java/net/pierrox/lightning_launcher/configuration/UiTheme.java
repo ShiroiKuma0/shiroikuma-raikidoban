@@ -1,9 +1,13 @@
 package net.pierrox.lightning_launcher.configuration;
 
 import android.app.Activity;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
 /**
@@ -133,5 +137,69 @@ public final class UiTheme {
         if (activity != null) {
             activity.getWindow().setStatusBarColor(color(slot));
         }
+    }
+
+    /**
+     * Paint the text nobody painted. Walks {@code root} and gives {@code slot}'s colour to every
+     * {@link TextView} still carrying the platform's own: an unpainted view is white or a light grey
+     * (the stock themes never touch {@code textColorPrimary}, see values-night/styles.xml), while every
+     * colour this app sets on purpose is chromatic — or black, which is left alone too. Typefaces are
+     * never touched, so an icon font, a monospace editor or a font preview keeps its face.
+     * <p>
+     * List rows are built after this call and again on every recycle, so each {@link AdapterView} found
+     * also gets a hierarchy listener that paints a row as the list attaches it. Rows of a spinner's
+     * dropdown live in another window and are out of reach — those adapters paint their own rows (see
+     * {@code UiSpinnerAdapter}).
+     * <p>
+     * This is the safety net under the explicit per-render-point styling, not a replacement for it: a
+     * view that must carry a specific slot (a title, a button, an inherited-action row) is painted by
+     * its own code, and this walk then leaves it alone.
+     */
+    public static void paintUnstyledText(View root, UiSlot slot) {
+        if (root != null) {
+            paintUnstyledText(root, color(slot));
+        }
+    }
+
+    private static void paintUnstyledText(View view, int color) {
+        if (view instanceof TextView) {
+            paintUnstyledText((TextView) view, color);
+            return;
+        }
+        if (view instanceof AdapterView) {
+            ((AdapterView<?>) view).setOnHierarchyChangeListener(new ViewGroup.OnHierarchyChangeListener() {
+                @Override
+                public void onChildViewAdded(View parent, View child) {
+                    paintUnstyledText(child, color);
+                }
+
+                @Override
+                public void onChildViewRemoved(View parent, View child) {
+                }
+            });
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = group.getChildCount() - 1; i >= 0; i--) {
+                paintUnstyledText(group.getChildAt(i), color);
+            }
+        }
+    }
+
+    private static void paintUnstyledText(TextView tv, int color) {
+        ColorStateList colors = tv.getTextColors();
+        if (colors != null && !isPlatformDefault(colors.getDefaultColor())) {
+            return;
+        }
+        // Keep a disabled state so a greyed out row still reads as unavailable.
+        tv.setTextColor(new ColorStateList(
+                new int[][]{new int[]{-android.R.attr.state_enabled}, new int[0]},
+                new int[]{adjustAlpha(color, 0.4f), color}));
+    }
+
+    /** True for the platform's unpainted text: white or a light grey, translucent or not. */
+    private static boolean isPlatformDefault(int color) {
+        int r = Color.red(color);
+        return r >= 0x80 && r == Color.green(color) && r == Color.blue(color);
     }
 }

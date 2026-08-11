@@ -20,6 +20,8 @@ import net.pierrox.lightning_launcher.configuration.UiTheme;
  * colours/fonts, plus the rounded {@link UiSlot#DIALOG_BG} panel with its {@link UiSlot#DIALOG_BORDER}
  * frame. Works on the framework {@link AlertDialog} and on AppCompat's — every view is looked up by id
  * (both use {@code android.R.id.message} / {@code button1..3}), so nothing here needs the concrete type.
+ * Any other text in the dialog — list rows, an EditText, a custom {@code setView} layout — is caught by
+ * {@link UiTheme#paintUnstyledText}, so no dialog is left with white platform text.
  */
 public final class UiDialogStyler {
 
@@ -34,6 +36,14 @@ public final class UiDialogStyler {
         int textColor = UiTheme.color(UiSlot.DIALOG_TEXT);
         int titleColor = UiTheme.color(UiSlot.DIALOG_TITLE);
         int buttonColor = UiTheme.color(UiSlot.DIALOG_BUTTON);
+
+        // Everything the slots below do not own — the rows of a setItems() / setSingleChoiceItems()
+        // list, an EditText, a custom setView layout — keeps the platform's white text on our black
+        // panel. Paint it DIALOG_TEXT first, so the specific slots still win on the views they own.
+        Window w = dialog.getWindow();
+        if (w != null) {
+            UiTheme.paintUnstyledText(w.getDecorView(), UiSlot.DIALOG_TEXT);
+        }
 
         TextView title = findTitle(dialog);
         if (title != null) {
