@@ -11,6 +11,36 @@ Lightning Launcher eXtreme 14.3.
 
 ---
 
+## 白い熊 雷起動盤 14.3.7+001 — 2026-08-11
+
+Every text the app never painted by hand was white — starting with the radio labels of the desktop's
+**Screen orientation** picker, yellow ring around a white word.
+
+- **One net for unpainted text: `UiTheme.paintUnstyledText(View, UiSlot)`.** Nothing in the fork
+  overrides `android:textColorPrimary` (`values-night` sets `colorForeground` only), so every platform
+  layout the code does not colour itself — `setItems` / `setSingleChoiceItems` rows,
+  `simple_list_item_1`, `?textAppearanceLarge`, an `EditText` — drew white on the black chrome. The
+  walk repaints every `TextView` still carrying a platform default (white or a light grey; deliberate
+  colours are chromatic or black and are left alone), never touches typefaces — icon fonts, font
+  previews and the monospace editor keep their faces — and hooks every `AdapterView` with a hierarchy
+  listener, because list rows are built after a dialog is shown and again on each recycle.
+- **Every dialog is covered at once**: `UiDialogStyler.style()` runs the walk over the whole dialog
+  before the DIALOG_* slots, which still win on the views they own. So the orientation, language and
+  font-weight pickers, the backup-action chooser, the import-backup picker, the fold-matrix menu, the
+  script token list, "go to page", the variable picker, the file and font pickers, and the slider
+  dialog's value, unit and ± buttons all turn yellow.
+- **Surfaces that are not dialogs paint themselves**: the "List of actions" window (rows, summaries and
+  the drag / delete glyphs — and it no longer shows its dialog bare), the Backup/restore archive list
+  and its empty label, and the Shortcuts and Style-chooser lists.
+- **Spinner dropdowns get `UiSpinnerAdapter`** — they live in their own window, out of the walk's
+  reach: script editor, script picker (script and target), image picker (source, page, icon pack,
+  package).
+- **No version is ever built twice.** `BUILD_NUMBER=0` used to mean "a published build, no `+N`
+  suffix", so the first build on top of the released `14.3.7` re-emitted that release's own APK name
+  and its versionCode `3370000`. The counter is now always present, always zero-padded to three digits
+  (`14.3.7+001`), and floors at 1 — a stray `0` means "the next build is `+001`" — and publishing tags
+  the padded counter instead of a bare version.
+
 ## 白い熊 雷起動盤 14.3.7 — 2026-08-10
 
 A fresh install had almost none of the fork's look — white bubble menus, a white hint box, grey body
