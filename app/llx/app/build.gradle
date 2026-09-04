@@ -24,10 +24,26 @@ def renameApkOutput(variant, forkVersionName) {
     }
 }
 
-if(project.hasProperty("signing.properties") && new File(project.property("signing.properties")).exists()) {
+// --- Release signing -----------------------------------------------------------------------------
+// The key data lives in a GITIGNORED `signing.properties` beside gradle.properties (sp.storeFile /
+// sp.keyAlias / sp.storePassword / sp.keyPassword); pass -Psigning.properties=<path> to override.
+// The keystore is ~/.android-keystores/shiroikuma-raikidoban.jks, backed up in the 暗号 vault along
+// with its password.
+//
+// Until 2026-09-04 this block was guarded on the `signing.properties` PROPERTY existing, and that
+// property was set nowhere in the repo. So the block never ran, Gradle silently fell back to the
+// Android debug key, and the build still reported success and wrote a file named exactly like a
+// release — indistinguishable from a real one by every check except `apksigner`. 14.3.7+002 was
+// published and installed that way. A guard that degrades silently is worse than no guard at all,
+// because it buys the reviewer's confidence, so that fallback is now a hard failure (below).
+def signingPropsFile = project.hasProperty("signing.properties")
+        ? new File(project.property("signing.properties").toString())
+        : rootProject.file("signing.properties")
+def signingConfigured = signingPropsFile.exists()
 
+if (signingConfigured) {
     Properties props = new Properties()
-    props.load(new FileInputStream(file(project.property("signing.properties"))))
+    signingPropsFile.withInputStream { props.load(it) }
 
     android {
         signingConfigs {
@@ -39,6 +55,8 @@ if(project.hasProperty("signing.properties") && new File(project.property("signi
             }
         }
 
+        // `buildApk` ships the `debug` build type, so it must carry the real key too — otherwise the
+        // one artefact 白い熊 actually installs is the one still signed with the debug certificate.
         buildTypes {
             debug {
                 signingConfig signingConfigs.release
@@ -47,6 +65,20 @@ if(project.hasProperty("signing.properties") && new File(project.property("signi
                 signingConfig signingConfigs.release
             }
         }
+    }
+}
+
+// No key, no APK. Scoped to the task graph rather than thrown at configuration time, so `clean`,
+// `tasks` and the like still work on a machine without the key.
+gradle.taskGraph.whenReady { graph ->
+    if (!signingConfigured && graph.allTasks.any { it.name ==~ /^(assemble|bundle|buildApk).*/ }) {
+        throw new GradleException(
+                "No signing key: ${signingPropsFile} is missing.\n" +
+                "Refusing to build an APK, because Gradle would fall back to the Android debug key " +
+                "and emit something named like a release. Create that file with sp.storeFile / " +
+                "sp.keyAlias / sp.storePassword / sp.keyPassword (keystore: " +
+                "~/.android-keystores/shiroikuma-raikidoban.jks; password in the 暗号 vault's " +
+                "android-keystores.org).")
     }
 }
 
@@ -128,10 +160,10 @@ dependencies {
     implementation libs.androidx.documentfile
 }
 
-// Build the (debug-signed) APK, copy it to ~/tmp under the release filename, and bump BUILD_NUMBER.
+// Build the release-signed APK, copy it to ~/tmp under the release filename, and bump BUILD_NUMBER.
 // See .claude/skills/build-apk/SKILL.md.
 tasks.register("buildApk") {
-    description = "Assemble the debug APK, copy it to ~/tmp, and auto-increment BUILD_NUMBER"
+    description = "Assemble the APK, verify its signer, copy it to ~/tmp, and auto-increment BUILD_NUMBER"
     dependsOn("assembleExtremeDebug")
     doLast {
         def apkName = "shiroikuma-raikidoban_${forkVersionName}_arm64-v8a.apk"
@@ -142,7 +174,31 @@ tasks.register("buildApk") {
             targetDir.mkdirs()
             def targetFile = new File(targetDir, apkName)
             targetFile.bytes = apk.bytes
+
+            // Prove what we just wrote is not debug-signed. This is precisely the check
+            // whose absence let 14.3.7+002 ship under the Android debug key: the build
+            // succeeded, the file was named like a release, and only apksigner could tell
+            // the difference.
+            def apksigner = new File(android.sdkDirectory,
+                    "build-tools/${android.buildToolsVersion}/apksigner")
+            if (!apksigner.canExecute()) {
+                throw new GradleException("Cannot verify the signer: ${apksigner} is not executable.")
+            }
+            def proc = [apksigner.absolutePath, "verify", "--print-certs",
+                        targetFile.absolutePath].execute()
+            def certs = proc.text
+            proc.waitFor()
+            if (proc.exitValue() != 0) {
+                throw new GradleException("apksigner rejected ${apkName}:\n${certs}")
+            }
+            if (certs.contains("CN=Android Debug")) {
+                throw new GradleException(
+                        "${apkName} is signed with the ANDROID DEBUG KEY - refusing to ship it.\n"
+                        + certs)
+            }
             println("[1;36m>>> ~/tmp/${apkName}[0m")
+            println("[1;32m>>> signer: "
+                    + certs.readLines().find { it.contains("certificate DN") } + "[0m")
         } else {
             throw new GradleException("No APK found in ${outputDir}")
         }
