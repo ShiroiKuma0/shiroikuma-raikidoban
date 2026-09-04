@@ -11,6 +11,54 @@ Lightning Launcher eXtreme 14.3.
 
 ---
 
+## 白い熊 雷起動盤 14.3.7+003 — 2026-09-04
+
+**This release changes the app's signing identity, so it cannot install over any earlier build.**
+Every APK this repo had ever produced — `14.3.7+002` included — was signed with the Android **debug**
+key. From here it is signed with its own release key.
+
+> **Upgrading from `14.3.7+002` or earlier requires an uninstall, which takes the launcher's data.**
+> Export through the Export / Import window first (白い熊 UI page), uninstall, install this build,
+> then import. Widget *bindings* cannot survive regardless — the widget host dies with the app, so
+> every `appWidgetId` is dead on reinstall. 自由作業盤 widgets are offered a **one-tap re-init** at
+> startup that rebinds them and re-pushes their names and pull-templates; any other app's widgets
+> have to be re-added by hand.
+
+### Why it was debug-signed, and why that is the interesting part
+
+The signing block in `app/llx/app/build.gradle` was guarded on a `signing.properties` **project
+property** — which is set nowhere in this repo, and never has been. Both arms of the guard were
+always false, so the block never ran and Gradle fell back to the debug certificate. The build then
+reported success and wrote a file named exactly like a release, **indistinguishable from a properly
+signed one by every check except `apksigner`**.
+
+That shape is worse than an obviously wrong line, because the guard *reads* as defensive programming:
+it checks that the property exists **and** that the file exists, so it looks like someone thought
+about it. A guard that degrades silently buys the reviewer's confidence and spends it on nothing.
+
+### What replaces it
+
+- **The key data lives in a gitignored `app/llx/signing.properties`** (`sp.storeFile` / `sp.keyAlias` /
+  `sp.storePassword` / `sp.keyPassword`); `-Psigning.properties=<path>` is still honoured as an
+  override. The keystore itself is outside the repo, backed up with its password.
+- **A missing key now FAILS the build**, with a message naming the keystore and where its password is
+  recorded. The check is scoped to the task graph, so `clean` and `tasks` still work without it.
+- **`buildApk` verifies the artefact it just wrote**, running `apksigner` over it and refusing to ship
+  anything carrying `CN=Android Debug`; on success it prints the real signer. This is the check whose
+  absence let the debug-signed build through, and it now runs on every build.
+- **The `debug` build type carries the release key too**, deliberately — `buildApk` ships that build
+  type, so signing only `release` would have left the one artefact actually installed as the one still
+  signed with the debug certificate.
+
+### The key
+
+RSA 4096, valid 10 000 days, `CN=shiroikuma raikidoban, O=shiroikuma, C=JP`, alias `raikidoban` —
+the same pattern as every sister app's. Its SHA-256 is
+`e876d1d80d04905cb2a263b76618ded9749a50c0ef3e9f2dede1e15bd54b8129`; anything claiming to be
+白い熊 雷起動盤 that does not present it is not this app.
+
+*(No functional change to the launcher itself: the code is `14.3.7+002` plus the build change.)*
+
 ## 白い熊 雷起動盤 14.3.7+002 — 2026-09-04
 
 The sister-app automation contract moves to **v2**, and the reason is the clean phone: 白い熊 応用管理

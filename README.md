@@ -10,7 +10,7 @@ A fork of [Lightning Launcher](https://github.com/pierrehebert/LightningLauncher
 
 Installs **side-by-side** with the original Lightning Launcher (package `shiroikuma.raikidoban`).
 
-**📥 Latest release: [`14.3.7+002`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases) · [changelog »](CHANGELOG.md)
+**📥 Latest release: [`14.3.7+003`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases) · [changelog »](CHANGELOG.md)
 
 *(雷起動盤 — “raikidōban”, the “lightning launch board”.)*
 
@@ -66,7 +66,7 @@ Black-and-yellow replacements for the framework choosers: the shortcut-app picke
 
 This is a personal fork of **[Lightning Launcher](https://github.com/pierrehebert/LightningLauncher)** by Pierre Hébert, continued on the [TrianguloY](https://github.com/TrianguloY/LightningLauncher) `developer` line — a famously fast, light and *extremely* customizable home screen. All upstream credit belongs to Pierre and the Lightning Launcher contributors; see the upstream repository for the canonical source, issues and licence.
 
-The fork re-brands its `applicationId` to `shiroikuma.raikidoban` so it installs **alongside** the original (the build-time `namespace` is left unchanged, so the original install keeps answering its own scripting API). It is built and debug-signed for personal sideloading.
+The fork re-brands its `applicationId` to `shiroikuma.raikidoban` so it installs **alongside** the original (the build-time `namespace` is left unchanged, so the original install keeps answering its own scripting API). It is built for personal sideloading and signed with its own release key — so a build can be updated over the last one, and an APK claiming to be 雷起動盤 can be told from one that is not.
 
 ## Building
 
@@ -75,4 +75,6 @@ cd app/llx
 JAVA_HOME=<jdk17> ANDROID_HOME=<android-sdk> ./gradlew assembleExtremeDebug
 ```
 
-This produces an arm64-v8a debug APK under `app/llx/app/build/outputs/apk/extreme/debug/`. (Day-to-day builds use the in-repo `build-apk` skill / `buildApk` Gradle task, which also versions and archives the APK.)
+This produces an arm64-v8a APK under `app/llx/app/build/outputs/apk/extreme/debug/` — the `debug` build *type*, but signed with the release key like every other artefact here. Day-to-day builds use the in-repo `build-apk` skill / `buildApk` Gradle task, which versions the APK, verifies its signer and archives it.
+
+Signing needs a gitignored `app/llx/signing.properties` (`sp.storeFile` / `sp.keyAlias` / `sp.storePassword` / `sp.keyPassword`). Without it the build **fails** rather than quietly falling back to the Android debug key.
