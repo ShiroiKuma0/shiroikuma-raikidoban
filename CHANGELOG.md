@@ -11,6 +11,89 @@ Lightning Launcher eXtreme 14.3.
 
 ---
 
+## 白い熊 雷起動盤 14.3.7+002 — 2026-09-04
+
+The sister-app automation contract moves to **v2**, and the reason is the clean phone: 白い熊 応用管理
+restores apps *and their data* onto a wiped device, where nothing has been configured and nobody has
+pasted anything. A gate that only works once the phone is already set up is no gate for setting one
+up. So the switch now ships on, the token becomes opt-in, and a second, identified door is opened for
+the data itself.
+
+### The gate — a switch that is ON, and a token that is OFF
+
+- **`automation_enabled` now defaults to on**, and a new **`automation_require_token` defaults to
+  off**. The master switch stays rather than being removed, because it is the only way to close this
+  app off again, and a feature that can be turned on but never off is one that cannot be retreated
+  from.
+- **A token sent to this app while it is not asking for one is ignored, never refused.** Tokens live
+  in task arguments and workspace variables that outlive the setting they were pasted for; refusing
+  one would turn "a switch was turned off" into "half the batch mysteriously fails".
+- **One gate, in one place**: `AutomationAuth.refuse()` returns either `null` or the exact `ERROR:`
+  line, and every entry point — `EXPORT_STATE`, `LIST_CATEGORIES`, `CANCEL_EXPORT` and the new
+  provider — calls it. Two checks written out at each entry point is how "automation disabled" and
+  "bad token" drift apart. The constant-time compare stays for when the token *is* required.
+- **The 白い熊 UI page gains 「認可トークンを使う？」** directly under the automation switch, and the
+  token row is now drawn **only while that switch is on** — a 48-character secret sitting under an
+  off switch invites pasting it somewhere it will do nothing. Both rows stay inside the
+  Export / Import section rather than becoming a section of their own, because this is a backup
+  feature. New strings in English, Japanese, Czech and Russian.
+
+### The data door — a provider, a verified caller, and a file descriptor
+
+A new `net.pierrox.lightning_launcher.automation` package, sitting **alongside** the existing
+broadcast receiver rather than replacing it.
+
+- **`AutomationProvider`** — an exported `ContentProvider` at `shiroikuma.raikidoban.automation`
+  answering `describe` / `export` / `import` / `cancel` in the same `OK:` / `ERROR:` grammar the
+  broadcast contract already uses, so a caller has one vocabulary rather than two. It exists because
+  **a broadcast cannot tell you who sent it** — and since the caller supplies the destination an
+  export is written into, "no idea who is asking" would mean any app on the phone could harvest the
+  launcher's entire configuration. **Refusals are returned, never thrown**: an exception across a
+  binder reaches the caller as a stack trace, which is useless to read and tells a misbehaving caller
+  rather more than it should.
+- **`AutomationCallers`** — the caller is checked three ways, each because the one before it is not
+  enough: an **exact package name** from a two-entry map (never a prefix — package names are not a
+  namespace anyone owns, so any sideloaded app can satisfy `shiroikuma.*`), the **uid the kernel
+  reports** via `getPackagesForUid`, and a **pinned SHA-256 signing certificate**. The pin closes the
+  real gap: whichever caller package is absent from the device is a name anyone can take, and a clean
+  phone is precisely such a device. Includes the API 26–27 `GET_SIGNATURES` fallback, without which
+  the door would refuse every caller on an older phone.
+- **`AutomationDataService`** — a foreground service where the work actually runs, holding a
+  **partial wakelock** because EMUI force-releases a backgrounded app's and the archive otherwise
+  stops part-way with no crash, no ANR and no log. The payload moves through a **caller-supplied
+  `ParcelFileDescriptor`** — not a path and not a URI, because the destination is renamed on commit,
+  encrypted per known file and checksummed per known file, so a file dropped in by this app would be
+  moved out from under it, left in plaintext inside an encrypted backup, and unverified. The
+  descriptor is **duplicated before it leaves the provider call** (the original belongs to the binder
+  transaction and closes when `call()` returns) and closed in a `finally`. Bytes are **counted as
+  they are written** rather than stat'ed afterwards, since the destination may be a pipe.
+- **`import` exists only behind the provider.** It never gets a broadcast action: an import
+  overwrites the desktops, and the export receiver is exported with no permission, so an import there
+  would let any app on the phone wipe the home screen.
+- **`AutomationJobs`** — process-local cancellation flags, never persisted. A persisted "running"
+  flag survives the crash that stranded it and wedges the app for good.
+
+### Manifest and discovery
+
+- **The `<queries>` element existed but named neither caller.** That is worse than it sounds: as well
+  as `setPackage` on a reply broadcast failing **silently** on Android 11+, `getPackageInfo` and
+  `getPackagesForUid` are themselves visibility-filtered, so an invisible caller fails the *identity*
+  check as "signature unreadable". Both 白い熊 応用管理 and 白い熊 自由作業盤 are named now.
+- **Three `shiroikuma.automation.*` `<meta-data>` entries** (contract 2, format 1, min\_format 1) let
+  a caller read this app's capabilities **without waking it** — necessary because a frozen package
+  cannot be asked anything. Note that `aapt2` stores `android:value="2"` as an **integer**: a caller
+  must read these with `getInt`, and `getString` returns null.
+- **`foregroundServiceType` is `dataSync`, not the contract's `specialUse`** — this module compiles
+  against SDK 33 and `specialUse` is an API 34 literal that `aapt2` rejects outright.
+- **`WAKE_LOCK`** added for the data service.
+
+### Unchanged on purpose
+
+The launcher's **outgoing** automation calls to 自由作業盤 (`SET_WIDGET_NAME`, `GET_WIDGET_BINDING`,
+`GET_TASK_TARGET_PACKAGE`, `QUERY_STATUS`) are untouched. They carry no token at all — they are gated
+the other way, by the `com.opentasker.permission.AUTOMATION` this app holds — so there was nothing to
+strip, and an app whose owner switches the token requirement back on stays reachable.
+
 ## 白い熊 雷起動盤 14.3.7+001 — 2026-08-11
 
 Every text the app never painted by hand was white — starting with the radio labels of the desktop's

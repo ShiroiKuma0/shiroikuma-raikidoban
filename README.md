@@ -4,13 +4,13 @@
 
 # 白い熊 雷起動盤
 
-**The most customizable Android home screen — re-themed black-and-yellow, made fold-aware, and fully self-contained.**
+**The most customizable Android home screen — re-themed black-and-yellow, made fold-aware, fully self-contained, and restorable onto a wiped phone.**
 
-A fork of [Lightning Launcher](https://github.com/pierrehebert/LightningLauncher) with **major additions**: a launcher-wide font / colour / border theming system, a native tri-fold desktop matrix, an at-a-glance gesture editor, bundled in-app languages, backups that work on modern Android, and tight integration with 白い熊's own [自由作業盤](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban) automation app.
+A fork of [Lightning Launcher](https://github.com/pierrehebert/LightningLauncher) with **major additions**: a launcher-wide font / colour / border theming system, a native tri-fold desktop matrix, an at-a-glance gesture editor, bundled in-app languages, backups that work on modern Android, a headless export/import door that lets the whole desktop be restored onto a clean phone, and tight integration with 白い熊's own [自由作業盤](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban) automation app.
 
 Installs **side-by-side** with the original Lightning Launcher (package `shiroikuma.raikidoban`).
 
-**📥 Latest release: [`14.3.7+001`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases) · [changelog »](CHANGELOG.md)
+**📥 Latest release: [`14.3.7+002`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases) · [changelog »](CHANGELOG.md)
 
 *(雷起動盤 — “raikidōban”, the “lightning launch board”.)*
 
@@ -50,7 +50,11 @@ Restores the ability to **create** backups on Android 13 (targetSdk 33), which s
 
 ## 📤 Export / Import — one zip, ticked by category
 
-A dedicated Export / Import window at the top of the UI page backs up **everything settable in the launcher** into a single timestamped `.zip`: the appearance theme and imported fonts, launcher settings, the fold matrix, desktops and items (with item icons and desktop wallpapers as separate sub-options), scripts, item styles and script variables. Tick what to carry, pick a backup folder once, and import restores just the parts you tick — merged, never wiped. The same export runs **headlessly** on a token-gated intent, so [自由作業盤](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban) can back this app up alongside every other sister app in one run — announcing which parts start ticked rather than letting the caller guess, and **stopping cleanly** when told to: a cancelled export unwinds at the next entry, deletes its half-written archive, and leaves the backup folder exactly as it found it.
+A dedicated Export / Import window at the top of the UI page backs up **everything settable in the launcher** into a single timestamped `.zip`: the appearance theme and imported fonts, launcher settings, the fold matrix, desktops and items (with item icons and desktop wallpapers as separate sub-options), scripts, item styles and script variables. Tick what to carry, pick a backup folder once, and import restores just the parts you tick — merged, never wiped. The same export runs **headlessly** on request, so [自由作業盤](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban) can back this app up alongside every other sister app in one run — announcing which parts start ticked rather than letting the caller guess, and **stopping cleanly** when told to: a cancelled export unwinds at the next entry, deletes its half-written archive, and leaves the backup folder exactly as it found it. It answers out of the box, with an authorization token available as an **opt-in** extra rather than a thing you must paste before anything works.
+
+## 🔐 Restorable onto a clean phone
+
+A second, **identified** door lets [応用管理](https://github.com/ShiroiKuma0/shiroikuma-oyokanri) back the launcher up *with its data* and put it back on a wiped device — the desktop layout, the widget bindings, the theme and the fold matrix all returning together, which without root is otherwise the one thing a phone migration loses. A caller here is not taken at its word: it must present an **exact package name**, a uid that agrees with the kernel, and a **signing certificate matching a pinned hash** — because the app that is *missing* from a fresh phone is precisely the name anyone could take. The backup itself travels through a file handle the caller opens, so the launcher writes bytes and never touches the backup folder, and the restore side of it exists **only** behind that check, never on an open broadcast.
 
 ## 🧰 Themed pickers & dialogs
 
