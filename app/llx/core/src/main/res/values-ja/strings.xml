@@ -1136,11 +1136,16 @@ Mar. 23, 2015 : add translations"</string>
     <string name="rkb_eim_cat_themes">項目のスタイル</string>
     <string name="rkb_eim_cat_variables">スクリプト変数</string>
     <string name="rkb_auto_switch">自動書き出し</string>
-    <string name="rkb_auto_switch_desc">白い熊 自由作業盤 のタスクが下のトークンでこの書き出しを画面なしで実行できるようにします。</string>
+    <string name="rkb_auto_switch_desc">姉妹アプリ（白い熊 応用管理・白い熊 自由作業盤）が画面なしでこの書き出しを実行し、データを保存できるようにします。既定で有効。</string>
     <string name="rkb_auto_token">自動化トークン</string>
     <string name="rkb_auto_regenerate">再生成</string>
     <string name="rkb_auto_token_copied">トークンをクリップボードにコピーしました。</string>
     <string name="rkb_auto_token_regen_title">トークンを再生成しますか？</string>
     <string name="rkb_auto_token_regen_msg">古いトークンは直ちに無効になります。白い熊 自由作業盤 に貼り付け済みの複製はすべて更新が必要です。</string>
     <string name="rkb_auto_token_regenerated">新しいトークンを生成しました — 貼り付け済みの複製を更新してください。</string>
+    <string name="rkb_auto_require_token">認可トークンを使う？</string>
+    <string name="rkb_auto_require_token_desc">オフ：どの姉妹アプリでも自動化を実行できます。オン：呼び出し側は下のトークンも提示する必要があります。どちらの場合もデータ扉は呼び出し元のパッケージ名と署名を確認します。</string>
+    <string name="rkb_auto_notif_channel">自動化データ</string>
+    <string name="rkb_auto_notif_export">データを書き出しています…</string>
+    <string name="rkb_auto_notif_import">データを戻しています…</string>
 </resources>

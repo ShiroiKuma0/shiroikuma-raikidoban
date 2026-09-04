@@ -1499,11 +1499,16 @@
     <string name="rkb_eim_cat_themes">Item styles</string>
     <string name="rkb_eim_cat_variables">Script variables</string>
     <string name="rkb_auto_switch">Automation export</string>
-    <string name="rkb_auto_switch_desc">Let sister-app tasks (白い熊 自由作業盤) run this export headlessly with the token below.</string>
+    <string name="rkb_auto_switch_desc">Let sister apps (白い熊 応用管理, 白い熊 自由作業盤) run this export headlessly and back its data up. On by default.</string>
     <string name="rkb_auto_token">Automation token</string>
     <string name="rkb_auto_regenerate">Regenerate</string>
     <string name="rkb_auto_token_copied">Token copied to the clipboard.</string>
     <string name="rkb_auto_token_regen_title">Regenerate the token?</string>
     <string name="rkb_auto_token_regen_msg">The old token stops working at once. Every copy already pasted into 白い熊 自由作業盤 must be updated.</string>
     <string name="rkb_auto_token_regenerated">New token generated — update the pasted copies.</string>
+    <string name="rkb_auto_require_token">Use authorization token?</string>
+    <string name="rkb_auto_require_token_desc">Off: any sister app may drive the automation. On: a caller must also present the token below. Either way the data door checks the caller’s package name and signature.</string>
+    <string name="rkb_auto_notif_channel">Automation data</string>
+    <string name="rkb_auto_notif_export">Writing data out…</string>
+    <string name="rkb_auto_notif_import">Restoring data…</string>
 </resources>

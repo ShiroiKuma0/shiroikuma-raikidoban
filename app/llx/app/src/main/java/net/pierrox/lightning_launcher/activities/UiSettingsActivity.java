@@ -556,12 +556,33 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         }
     }
 
-    // --- 保存復元 automation (the sister-app state-export contract) ---
+    // --- 保存復元 automation (the sister-app state-export contract, v2) ---
 
+    /**
+     * Three rows, in the order every sister app shows them, and inside the Export/Import section
+     * rather than a section of their own — this is a backup feature, so 白い熊 finds it where backup
+     * lives.
+     *
+     * <p>The master switch ships <b>ON</b> and the token is <b>opt-in</b>: a clean phone being
+     * restored by 応用管理 has nobody to turn anything on and nothing pasted anywhere. The token row
+     * is therefore drawn only while it is actually being asked for — a 48-character secret sitting
+     * under an off switch invites 白い熊 to paste it somewhere it will do nothing.
+     */
     private void addAutomationRows() {
         addSwitchRow(getString(R.string.rkb_auto_switch), getString(R.string.rkb_auto_switch_desc),
                 AutomationAuth.isEnabled(this), mStepPx, checked -> AutomationAuth.setEnabled(this, checked));
-        addTokenRow();
+        addSwitchRow(getString(R.string.rkb_auto_require_token),
+                getString(R.string.rkb_auto_require_token_desc),
+                AutomationAuth.isTokenRequired(this), mStepPx, checked -> {
+                    AutomationAuth.setTokenRequired(this, checked);
+                    // The token row appears/disappears with this switch. Posted rather than called
+                    // straight out of the listener, so the Switch that fired it finishes drawing
+                    // itself before the whole holder is rebuilt underneath it.
+                    mHolder.post(this::buildRows);
+                });
+        if (AutomationAuth.isTokenRequired(this)) {
+            addTokenRow();
+        }
     }
 
     /** Tap = copy the full token; "Regenerate" on the right = a fresh secret (revokes pasted copies). */

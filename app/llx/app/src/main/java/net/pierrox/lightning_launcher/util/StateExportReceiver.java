@@ -28,18 +28,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * <ul>
  * <li>{@code <pkg>.action.EXPORT_STATE}: run the category-ZIP export ({@link RkbExport}) with no UI.
- * Extras (all String): {@code token} (required), {@code path} (optional absolute directory; wins over
+ * Extras (all String): {@code token} (OPTIONAL — checked only while 「認可トークンを使う」 is on, and
+ * silently ignored otherwise), {@code path} (optional absolute directory; wins over
  * the configured export directory when this app may write it), {@code items} (optional comma list of
  * {@link RkbExport.Cat} ids, sub-option ids included; absent/empty = everything),
  * {@code progress_action} (optional), plus the reply trio {@code reply_action} / {@code reply_package}
  * / {@code reply_id}.</li>
- * <li>{@code <pkg>.action.LIST_CATEGORIES}: token-gated, instant enumeration for the caller's picker.
+ * <li>{@code <pkg>.action.LIST_CATEGORIES}: gated the same way, instant enumeration for the picker.
  * One {@code id<TAB>label<TAB>parent<TAB>on|off} line per category: the third field names the parent
  * for a sub-option (item icons / wallpapers sit under Desktops, imported fonts under UI) and is empty
  * for a top-level one, the fourth states whether the item starts ticked ({@link RkbExport.Cat#defaultSelected}
  * — this app says {@code on} to all of them). Both trailing fields are positional; a caller that
  * predates them reads the first two and is unaffected.</li>
- * <li>{@code <pkg>.action.CANCEL_EXPORT}: stop a running export. Extras {@code token} (the same gate)
+ * <li>{@code <pkg>.action.CANCEL_EXPORT}: stop a running export. Extras {@code token} (the same gate,
+ * equally optional)
  * and an optional {@code reply_id} (absent = every export in flight). Fire-and-forget — it never
  * replies, not even to a bad token, and is a silent no-op when nothing is running or the export has
  * already finished. The export itself unwinds at the next entry boundary, deletes the half-written
@@ -63,9 +65,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * configured export directory is used, and with neither the reply is {@code ERROR:no-storage-access} /
  * {@code ERROR:no-directory}.
  *
- * <p>Security: exported with NO {@code android:permission} (the caller cannot hold one) — the master
- * switch plus the token are the gate ({@link AutomationAuth}); both live on the 白い熊 雷起動盤 UI page
- * under Export / Import.
+ * <p>Security: exported with NO {@code android:permission} (the caller cannot hold one). In v2 this
+ * receiver is deliberately the <b>unauthenticated</b> half of the surface — it only ever writes where
+ * it was told to and reports what it did. Everything that moves data through a caller-supplied
+ * descriptor lives behind {@link net.pierrox.lightning_launcher.automation.AutomationProvider}, which
+ * knows who is calling. The master switch (and the opt-in token) are {@link AutomationAuth}; both
+ * live on the 白い熊 雷起動盤 UI page under Export / Import.
  */
 public class StateExportReceiver extends BroadcastReceiver {
 
@@ -127,7 +132,7 @@ public class StateExportReceiver extends BroadcastReceiver {
         // rejected token is silence too. Safe to send at any time — when nothing matches, nothing
         // happens.
         if (ACTION_CANCEL_EXPORT.equals(action)) {
-            if (AutomationAuth.isEnabled(app) && AutomationAuth.isTokenValid(app, token)) {
+            if (AutomationAuth.refuse(app, token) == null) {
                 for (Run run : sRunning) {
                     if (replyId.isEmpty() || replyId.equals(run.replyId)) {
                         run.cancelled.set(true);
@@ -153,13 +158,13 @@ public class StateExportReceiver extends BroadcastReceiver {
             app.sendBroadcast(out);
         };
 
-        // Gate first — "disabled" and "bad token" are distinct on purpose (they debug differently).
-        if (!AutomationAuth.isEnabled(app)) {
-            reply.send("ERROR:automation disabled");
-            return;
-        }
-        if (!AutomationAuth.isTokenValid(app, token)) {
-            reply.send("ERROR:bad token");
+        // Gate first, in ONE place (contract v2 §2). The switch is on by default and the token is
+        // opt-in, so a `token` extra sent to this app while it is not asking for one is IGNORED
+        // rather than refused — callers keep sending secrets long after the setting they were pasted
+        // for was turned off, and failing them would break half the batch for no security gain.
+        String refusal = AutomationAuth.refuse(app, token);
+        if (refusal != null) {
+            reply.send(refusal);
             return;
         }
 

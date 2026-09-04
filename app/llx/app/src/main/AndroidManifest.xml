@@ -30,6 +30,12 @@
     <!-- Tasker -->
     <uses-permission android:name="net.dinglisch.android.tasker.PERMISSION_RUN_TASKS"/>
 
+    <!-- 保存復元 automation: the data door's foreground service holds a partial wakelock for the
+         duration of an export/import, because EMUI force-releases a backgrounded app's CPU otherwise
+         and the archive simply stops part-way with no crash and no log. (FOREGROUND_SERVICE itself
+         comes from the core module's manifest.) -->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
     <!-- 白い熊 自由作業盤: its AutomationTargetReceiver is permission-guarded, and QUERY_STATUS (has the
          user shut 自由作業盤 down?) goes there. Without this the probe simply never answers, which is
          read as "not stopped" — nothing breaks, task shortcuts just stop being dimmed. -->
@@ -54,6 +60,12 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent>
+        <!-- 保存復元: BOTH automation callers, always. Without the package being visible here, the
+             setPackage() on our reply broadcast fails SILENTLY on Android 11+ — the export runs,
+             writes correctly, and is never heard of. 応用管理 drives the data door (§2a); 自由作業盤
+             drives the EXPORT_STATE batch and has been the caller all along. -->
+        <package android:name="shiroikuma.oyokanri" />
+        <package android:name="shiroikuma.jiyusagyoban" />
     </queries>
 
 
@@ -366,8 +378,10 @@
             </intent-filter>
         </receiver>
 
-        <!-- 保存復元: the sister-app state-export automation contract. No android:permission — the
-             caller cannot hold one; the master switch + token (AutomationAuth) are the gate. -->
+        <!-- 保存復元 §1: the sister-app state-export contract. No android:permission — the caller
+             cannot hold one. In v2 this receiver is deliberately the UNAUTHENTICATED half of the
+             surface: it only ever writes where it was told to and reports what it did. The master
+             switch (and the now opt-in token) are AutomationAuth. -->
         <receiver
             android:name="net.pierrox.lightning_launcher.util.StateExportReceiver"
             android:exported="true">
@@ -377,6 +391,39 @@
                 <action android:name="${applicationId}.action.CANCEL_EXPORT" />
             </intent-filter>
         </receiver>
+
+        <!-- 保存復元 §2a: the data door. Everything that moves data through a CALLER-SUPPLIED file
+             descriptor lives here rather than on the receiver above, because a provider can be told
+             who is calling and a broadcast cannot — see AutomationCallers (exact package name, uid
+             cross-check, pinned signing certificate). `import` exists ONLY here: an import overwrites
+             the desktops, and putting one on an exported receiver with no permission would let any
+             app on the phone wipe the home screen.
+
+             No android:permission, and this time for a real reason rather than v1's: a custom
+             permission would have to be `normal` (any app may hold it) or `signature` (impossible —
+             every app in this family has its own keystore). Neither buys anything the caller check
+             does not. -->
+        <provider
+            android:name="net.pierrox.lightning_launcher.automation.AutomationProvider"
+            android:authorities="${applicationId}.automation"
+            android:exported="true" />
+
+        <!-- Where an export/import actually runs. foregroundServiceType is `dataSync` rather than the
+             contract's `specialUse`: this module compiles against SDK 33 and `specialUse` is an API
+             34 value that aapt2 would reject here. `dataSync` is what §1's own snippet uses and is
+             the honest description of the work either way. -->
+        <service
+            android:name="net.pierrox.lightning_launcher.automation.AutomationDataService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <!-- Capability discovery, read WITHOUT waking us — 応用管理 builds its list across every
+             installed package at once with MATCH_UNINSTALLED_PACKAGES | MATCH_DISABLED_COMPONENTS,
+             because a frozen app (白い熊 freezes aggressively) cannot be asked anything. An app
+             without these entries is simply not offered for data backup or restore. -->
+        <meta-data android:name="shiroikuma.automation.contract" android:value="2" />
+        <meta-data android:name="shiroikuma.automation.format" android:value="1" />
+        <meta-data android:name="shiroikuma.automation.min_format" android:value="1" />
 
 		<!-- Home reset -->
 		<activity

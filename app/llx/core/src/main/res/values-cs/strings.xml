@@ -1354,11 +1354,16 @@ Oprávnění:
     <string name="rkb_eim_cat_themes">Styly položek</string>
     <string name="rkb_eim_cat_variables">Proměnné skriptů</string>
     <string name="rkb_auto_switch">Automatický export</string>
-    <string name="rkb_auto_switch_desc">Umožní úlohám 白い熊 自由作業盤 spustit tento export bez rozhraní pomocí tokenu níže.</string>
+    <string name="rkb_auto_switch_desc">Umožní sesterským aplikacím (白い熊 応用管理, 白い熊 自由作業盤) spustit tento export bez rozhraní a zálohovat jeho data. Ve výchozím stavu zapnuto.</string>
     <string name="rkb_auto_token">Token automatizace</string>
     <string name="rkb_auto_regenerate">Vygenerovat znovu</string>
     <string name="rkb_auto_token_copied">Token zkopírován do schránky.</string>
     <string name="rkb_auto_token_regen_title">Vygenerovat token znovu?</string>
     <string name="rkb_auto_token_regen_msg">Starý token okamžitě přestane fungovat. Všechny kopie vložené do 白い熊 自由作業盤 je nutné aktualizovat.</string>
     <string name="rkb_auto_token_regenerated">Nový token vygenerován — aktualizujte vložené kopie.</string>
+    <string name="rkb_auto_require_token">Použít autorizační token?</string>
+    <string name="rkb_auto_require_token_desc">Vypnuto: automatizaci může řídit kterákoli sesterská aplikace. Zapnuto: volající musí navíc předložit token níže. V obou případech datová brána ověřuje název balíčku a podpis volajícího.</string>
+    <string name="rkb_auto_notif_channel">Data automatizace</string>
+    <string name="rkb_auto_notif_export">Zapisuji data…</string>
+    <string name="rkb_auto_notif_import">Obnovuji data…</string>
 </resources>
