@@ -8,6 +8,7 @@ import android.os.Environment;
 
 import androidx.documentfile.provider.DocumentFile;
 
+import net.pierrox.lightning_launcher.automation.AutomationProgress;
 import net.pierrox.lightning_launcher.data.RkbExport;
 import net.pierrox.lightning_launcher_extreme.BuildConfig;
 
@@ -87,14 +88,6 @@ public class StateExportReceiver extends BroadcastReceiver {
     private static final String EXTRA_REPLY_PACKAGE = "reply_package";
     private static final String EXTRA_REPLY_ID = "reply_id";
     private static final String EXTRA_RESULT = "result";
-    private static final String EXTRA_PROGRESS_APP = "app";
-    private static final String EXTRA_PROGRESS_TEXT = "text";
-    private static final String EXTRA_PROGRESS_CURRENT = "current";
-    private static final String EXTRA_PROGRESS_TOTAL = "total";
-    private static final String EXTRA_PROGRESS_UNIT = "unit";
-
-    private static final long PROGRESS_MIN_INTERVAL_MS = 500;
-    private static final String PROGRESS_UNIT = "区分"; // categories — what this app counts
 
     /**
      * The exports currently writing, so a CANCEL_EXPORT arriving on a fresh receiver instance can
@@ -218,28 +211,11 @@ public class StateExportReceiver extends BroadcastReceiver {
 
         final String appLabel = app.getString(net.pierrox.lightning_launcher_extreme.R.string.app_name);
         final String fileName = RkbExport.exportFileName();
-        final long[] lastProgressMs = {0};
-        final RkbExport.Progress progress = (done, total, catLabel) -> {
-            if (progressAction.isEmpty() || replyPackage.isEmpty()) {
-                return;
-            }
-            long now = System.currentTimeMillis();
-            // At most one every 500 ms — but the final one always goes out.
-            if (done < total && now - lastProgressMs[0] < PROGRESS_MIN_INTERVAL_MS) {
-                return;
-            }
-            lastProgressMs[0] = now;
-            Intent out = new Intent(progressAction);
-            out.setPackage(replyPackage);
-            out.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-            out.putExtra(EXTRA_REPLY_ID, replyId);
-            out.putExtra(EXTRA_PROGRESS_APP, appLabel);
-            out.putExtra(EXTRA_PROGRESS_TEXT, PROGRESS_UNIT + " " + done + "/" + total + " — " + catLabel);
-            out.putExtra(EXTRA_PROGRESS_CURRENT, (long) done);
-            out.putExtra(EXTRA_PROGRESS_TOTAL, (long) total);
-            out.putExtra(EXTRA_PROGRESS_UNIT, PROGRESS_UNIT);
-            app.sendBroadcast(out);
-        };
+        // The shared §3 sender, not a private copy — this door's correlation id is the echoed
+        // `reply_id`. It also carries the heartbeat, so a desktop whose icons take a minute to zip
+        // is not presumed dead by a caller that has heard nothing.
+        final AutomationProgress progress = new AutomationProgress(app, progressAction, replyPackage,
+                replyId, new String[]{EXTRA_REPLY_ID}, appLabel, cats, null);
 
         // The export walks the whole data dir — hold the broadcast open and work off the main thread.
         final Run run = new Run(replyId);
@@ -251,6 +227,7 @@ public class StateExportReceiver extends BroadcastReceiver {
             File partialFile = null;
             DocumentFile partialDoc = null;
             boolean written = false;
+            progress.start();
             try {
                 // Directory precedence: `path` extra -> configured export directory -> error. Writing
                 // an arbitrary absolute path needs All-Files-Access; without it we may only fall back
@@ -314,6 +291,7 @@ public class StateExportReceiver extends BroadcastReceiver {
                 String message = t.getMessage();
                 reply.send("ERROR:" + (message != null ? message : t.getClass().getSimpleName()));
             } finally {
+                progress.stop();
                 if (!written) {
                     deleteQuietly(partialFile, partialDoc);
                 }

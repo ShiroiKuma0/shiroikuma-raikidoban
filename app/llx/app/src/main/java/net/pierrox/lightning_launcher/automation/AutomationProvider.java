@@ -66,6 +66,9 @@ public class AutomationProvider extends ContentProvider {
     public static final String KEY_FD = "fd";
     public static final String KEY_TOKEN = "token";
     public static final String KEY_JOB_ID = "job_id";
+    /** The broadcast door's correlation extra. The provider door mirrors its job_id into it too,
+     * so ONE progress/reply reader on the caller's side serves both doors. */
+    public static final String KEY_REPLY_ID = "reply_id";
     public static final String KEY_ITEMS = "items";
     public static final String KEY_REPLY_ACTION = "reply_action";
     public static final String KEY_REPLY_PACKAGE = "reply_package";

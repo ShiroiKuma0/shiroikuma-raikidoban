@@ -538,10 +538,44 @@ public final class RkbExport {
     // IMPORT
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Where an archive's bytes come from. A restore must read the WHOLE archive before writing
+     * anything — a partial read that failed half way would otherwise half-restore a desktop, which
+     * is worse than refusing — but "read it all first" does not have to mean "hold it all in RAM".
+     * This lets the same code walk a {@code byte[]} (the panel, which already has one) or a spooled
+     * cache {@link File} (the automation door, whose archives carry every icon and wallpaper and are
+     * exactly the ones that get big).
+     */
+    private interface Source {
+        InputStream open() throws IOException;
+    }
+
+    private static Source sourceOf(final byte[] data) {
+        return () -> new ByteArrayInputStream(data);
+    }
+
+    private static Source sourceOf(final File file) {
+        return () -> new FileInputStream(file);
+    }
+
     /** The category ids the ZIP's manifest declares (empty when it is not one of our archives). */
     public static List<String> categoriesIn(byte[] data) {
+        return categoriesIn(sourceOf(data));
+    }
+
+    /** As above, for an archive spooled to disk rather than held in memory. */
+    public static List<String> categoriesIn(File file) {
+        return categoriesIn(sourceOf(file));
+    }
+
+    private static List<String> categoriesIn(Source source) {
         List<String> out = new ArrayList<>();
-        ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(data));
+        ZipInputStream zis;
+        try {
+            zis = new ZipInputStream(source.open());
+        } catch (IOException e) {
+            return out; // unreadable is "not one of our archives", same as a bad manifest
+        }
         try {
             ZipEntry ze;
             while ((ze = zis.getNextEntry()) != null) {
@@ -580,10 +614,23 @@ public final class RkbExport {
      * before anything is written.
      */
     public static String importZip(Context context, byte[] data, Set<Cat> cats) throws IOException {
+        return importZip(context, sourceOf(data), cats);
+    }
+
+    /**
+     * As above, reading a spooled archive from disk. The automation import uses this so a large
+     * backup — this launcher's carries every item icon and desktop wallpaper — never has to fit in
+     * memory to be restored.
+     */
+    public static String importZip(Context context, File file, Set<Cat> cats) throws IOException {
+        return importZip(context, sourceOf(file), cats);
+    }
+
+    private static String importZip(Context context, Source source, Set<Cat> cats) throws IOException {
         LightningEngine engine = LLApp.get().getAppEngine();
         File base = engine.getBaseDir();
 
-        List<String> present = categoriesIn(data);
+        List<String> present = categoriesIn(source);
         if (present.isEmpty()) {
             throw new IOException(context.getString(R.string.rkb_eim_import_none));
         }
@@ -605,7 +652,7 @@ public final class RkbExport {
         String uiJson = null;
         String foldJson = null;
 
-        ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(data));
+        ZipInputStream zis = new ZipInputStream(source.open());
         try {
             ZipEntry ze;
             while ((ze = zis.getNextEntry()) != null) {

@@ -15,11 +15,11 @@ import android.os.PowerManager;
 import net.pierrox.lightning_launcher.data.RkbExport;
 import net.pierrox.lightning_launcher_extreme.R;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,12 +45,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>EMUI additionally force-releases a background app's partial wakelock seconds after it starts, so
  * one is held here for the duration and released in the {@code finally}.
  *
- * <h3>The descriptor</h3>
+ * <h3>The descriptor has an owner from the moment it leaves the map</h3>
  *
- * Already duplicated by {@link AutomationProvider} before it got here, because the original belongs
- * to the binder transaction and is closed the moment {@code call()} returns. This service owns the
- * copy and closes it in a {@code finally} — leaking one would hold the caller's file open
- * indefinitely, and the caller cannot checksum or encrypt a file that is still open.
+ * It was duplicated by {@link AutomationProvider} before it got here, because the original belongs to
+ * the binder transaction and is closed the moment {@code call()} returns. Taking it out of
+ * {@link #HANDOVER} and calling {@code startForeground} now happen inside <b>one</b>
+ * {@code try}/{@code finally}, because {@code startForeground} can fail: a service started from a
+ * binder call is a <i>background</i> start, and API 31+ can refuse it outright with
+ * {@code ForegroundServiceStartNotAllowedException} unless the app is exempt from battery
+ * optimisation. On a phone where 雷起動盤 is not exempt that refusal is the ordinary path, not an
+ * exotic one — and before this, it left the caller's file open with no reply ever sent, so the caller
+ * could neither checksum nor encrypt it and was told nothing.
  */
 public class AutomationDataService extends Service {
 
@@ -59,8 +64,6 @@ public class AutomationDataService extends Service {
     private static final String EXTRA_JOB = "job";
     private static final String EXTRA_IMPORTING = "importing";
 
-    private static final long PROGRESS_MIN_INTERVAL_MS = 500;
-    private static final String PROGRESS_UNIT = "区分"; // categories — what this app counts
     /** Long enough for a desktop full of icons and wallpapers, short enough not to strand the CPU. */
     private static final long WAKELOCK_TIMEOUT_MS = 15 * 60 * 1000L;
 
@@ -69,8 +72,7 @@ public class AutomationDataService extends Service {
      *
      * <p>A {@link ParcelFileDescriptor} in an Intent extra is duplicated by the system on delivery
      * and the copy's lifetime stops being ours to reason about. Handing it through a map keyed by the
-     * job id keeps exactly one open descriptor with exactly one owner — this service, which closes it
-     * in a {@code finally}.
+     * job id keeps exactly one open descriptor with exactly one owner.
      */
     private static final ConcurrentHashMap<String, ParcelFileDescriptor> HANDOVER = new ConcurrentHashMap<>();
 
@@ -109,20 +111,14 @@ public class AutomationDataService extends Service {
         if (jobId == null) {
             return stop(startId);
         }
-        final ParcelFileDescriptor fd = HANDOVER.remove(jobId);
-        if (fd == null) {
-            AutomationJobs.finish(jobId);
-            return stop(startId);
-        }
         final boolean importing = intent.getBooleanExtra(EXTRA_IMPORTING, false);
         final String items = intent.getStringExtra(AutomationProvider.KEY_ITEMS);
         final String replyAction = intent.getStringExtra(AutomationProvider.KEY_REPLY_ACTION);
         final String replyPackage = intent.getStringExtra(AutomationProvider.KEY_REPLY_PACKAGE);
         final String progressAction = intent.getStringExtra(AutomationProvider.KEY_PROGRESS_ACTION);
 
-        // MUST be within 5 s of the service starting or the system kills us for that alone.
-        startForeground(NOTIFICATION_ID, notification(importing));
-
+        // Built BEFORE anything that can throw, so a failure to even start still gets reported
+        // instead of leaving the caller waiting on a reply that can never come.
         final AtomicBoolean replied = new AtomicBoolean(false);
         final Replier reply = result -> {
             // Exactly one terminal answer per job, whatever path got here — a synchronous failure and
@@ -141,39 +137,70 @@ public class AutomationDataService extends Service {
             // Without this a backgrounded caller never hears the answer, and on a clean phone the
             // caller may not have been launched at all.
             out.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+            // The same id under both names, so one reader on the caller's side serves both doors.
             out.putExtra(AutomationProvider.KEY_JOB_ID, jobId);
+            out.putExtra(AutomationProvider.KEY_REPLY_ID, jobId);
             out.putExtra(AutomationProvider.KEY_RESULT, result);
             sendBroadcast(out);
         };
 
-        new Thread(() -> {
-            PowerManager.WakeLock wakeLock = null;
-            try {
-                PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-                if (pm != null) {
-                    wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                            "raikidoban:automation-data");
-                    wakeLock.acquire(WAKELOCK_TIMEOUT_MS);
+        final ParcelFileDescriptor fd = HANDOVER.remove(jobId);
+        if (fd == null) {
+            AutomationJobs.finish(jobId);
+            return stop(startId);
+        }
+
+        // From here the descriptor is ours and MUST be closed on every path out.
+        boolean started = false;
+        try {
+            // MUST be within 5 s of the service starting, or the system kills us for that alone —
+            // and it can be refused outright, which is what the finally below exists for.
+            startForeground(NOTIFICATION_ID, notification(importing));
+
+            new Thread(() -> {
+                PowerManager.WakeLock wakeLock = null;
+                try {
+                    PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                    if (pm != null) {
+                        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                                "raikidoban:automation-data");
+                        wakeLock.acquire(WAKELOCK_TIMEOUT_MS);
+                    }
+                    if (importing) {
+                        runImport(jobId, fd, items, progressAction, replyPackage, reply);
+                    } else {
+                        runExport(jobId, fd, items, progressAction, replyPackage, reply);
+                    }
+                } catch (RkbExport.CancelledException e) {
+                    reply.send("ERROR:cancelled");
+                } catch (Throwable t) {
+                    String message = t.getMessage();
+                    reply.send("ERROR:" + (message != null ? message : t.getClass().getSimpleName()));
+                } finally {
+                    closeQuietly(fd);
+                    if (wakeLock != null && wakeLock.isHeld()) {
+                        wakeLock.release();
+                    }
+                    stopForeground(true);
+                    stopSelf(startId);
                 }
-                if (importing) {
-                    runImport(fd, items, reply);
-                } else {
-                    runExport(jobId, fd, items, progressAction, replyPackage, reply);
-                }
-            } catch (RkbExport.CancelledException e) {
-                reply.send("ERROR:cancelled");
-            } catch (Throwable t) {
-                String message = t.getMessage();
-                reply.send("ERROR:" + (message != null ? message : t.getClass().getSimpleName()));
-            } finally {
+            }, "rkb-automation-data").start();
+            started = true;
+        } catch (Throwable t) {
+            String message = t.getMessage();
+            reply.send("ERROR:" + (message != null ? message : t.getClass().getSimpleName()));
+        } finally {
+            if (!started) {
+                // The worker never took ownership, so the descriptor is still ours to close.
                 closeQuietly(fd);
-                if (wakeLock != null && wakeLock.isHeld()) {
-                    wakeLock.release();
+                try {
+                    stopForeground(true);
+                } catch (Throwable ignored) {
+                    // we may never have been foreground at all
                 }
-                stopForeground(true);
                 stopSelf(startId);
             }
-        }, "rkb-automation-data").start();
+        }
 
         return START_NOT_STICKY;
     }
@@ -183,7 +210,7 @@ public class AutomationDataService extends Service {
     // ---------------------------------------------------------------------------------------------
 
     private void runExport(final String jobId, ParcelFileDescriptor fd, String items,
-                           final String progressAction, final String replyPackage, Replier reply)
+                           String progressAction, String replyPackage, Replier reply)
             throws IOException {
         final Set<RkbExport.Cat> cats = resolve(items);
         if (cats == null) {
@@ -191,46 +218,15 @@ public class AutomationDataService extends Service {
             return;
         }
 
-        // The order RkbExport walks them in, so a progress broadcast can name the category its
-        // number refers to rather than leaving the caller to guess from a count.
-        final List<RkbExport.Cat> ordered = new ArrayList<>();
-        for (RkbExport.Cat c : RkbExport.Cat.values()) {
-            if (cats.contains(c)) {
-                ordered.add(c);
-            }
-        }
-
-        final String appLabel = getString(R.string.app_name);
-        final long[] lastProgressMs = {0};
         final long[] written = {0};
-        final RkbExport.Progress progress = (done, total, catLabel) -> {
-            if (progressAction == null || progressAction.isEmpty()
-                    || replyPackage == null || replyPackage.isEmpty()) {
-                return;
-            }
-            long now = System.currentTimeMillis();
-            // At most one every 500 ms — but the final one always goes out.
-            if (done < total && now - lastProgressMs[0] < PROGRESS_MIN_INTERVAL_MS) {
-                return;
-            }
-            lastProgressMs[0] = now;
-            Intent out = new Intent(progressAction);
-            out.setPackage(replyPackage);
-            out.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-            out.putExtra(AutomationProvider.KEY_JOB_ID, jobId);
-            out.putExtra("app", appLabel);
-            // WHICH row is running — the panel cannot work that out from a bare count.
-            if (done >= 1 && done <= ordered.size()) {
-                out.putExtra("item", ordered.get(done - 1).id);
-            }
-            out.putExtra("text", PROGRESS_UNIT + " " + done + "/" + total + " — " + catLabel);
-            out.putExtra("current", (long) done);
-            out.putExtra("total", (long) total);
-            out.putExtra("unit", PROGRESS_UNIT);
-            // The second counter: bytes into the caller's descriptor so far.
-            out.putExtra("bytes", written[0]);
-            sendBroadcast(out);
-        };
+        // The shared §3 sender. The correlation id is this job's id, written into BOTH `job_id` and
+        // `reply_id` so one progress reader on the caller's side serves this door and the broadcast
+        // one alike. It carries the heartbeat too, so an export spending a minute inside one category
+        // of icons is not presumed dead.
+        AutomationProgress progress = new AutomationProgress(this, progressAction, replyPackage,
+                jobId, new String[]{AutomationProvider.KEY_JOB_ID, AutomationProvider.KEY_REPLY_ID},
+                getString(R.string.app_name), cats, () -> written[0]);
+        progress.start();
 
         OutputStream raw = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
         try {
@@ -253,6 +249,7 @@ public class AutomationDataService extends Service {
             RkbExport.export(this, cats, counting, progress, () -> AutomationJobs.isCancelled(jobId));
             counting.flush();
         } finally {
+            progress.stop();
             raw.close();
         }
 
@@ -269,57 +266,89 @@ public class AutomationDataService extends Service {
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Read the whole archive before touching anything: a partial read that failed halfway would
-     * otherwise import half an archive, and a half-restored launcher is worse than one that refused.
+     * Spool the archive to a cache file, validate it there, then apply it.
+     *
+     * <p>Reading the whole archive before touching anything is deliberate: a partial read that failed
+     * half way would import half an archive, and a half-restored launcher is worse than one that
+     * refused. But "read it all first" must not mean "hold it all in RAM" — this app's backup carries
+     * every item icon and every desktop wallpaper, so it is exactly the archive that gets big, and a
+     * big enough one used to be an {@code OutOfMemoryError} in the middle of a restore. The guarantee
+     * is unchanged; only the bound moves from memory to disk.
      */
-    private void runImport(ParcelFileDescriptor fd, String items, Replier reply) throws IOException {
-        byte[] bytes;
-        InputStream in = new ParcelFileDescriptor.AutoCloseInputStream(fd);
+    private void runImport(String jobId, ParcelFileDescriptor fd, String items,
+                           String progressAction, String replyPackage, Replier reply)
+            throws IOException {
+        File spool = new File(getCacheDir(), "automation-import-" + jobId + ".zip");
+        // The import has no per-category callback to report through, so this exists for the
+        // heartbeat: the caller must keep hearing something, and inventing counts we are not walking
+        // would be worse than sending none.
+        AutomationProgress progress = new AutomationProgress(this, progressAction, replyPackage,
+                jobId, new String[]{AutomationProvider.KEY_JOB_ID, AutomationProvider.KEY_REPLY_ID},
+                getString(R.string.app_name), RkbExport.Cat.defaults(), null);
+        progress.start();
         try {
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            byte[] chunk = new byte[64 * 1024];
-            int read;
-            while ((read = in.read(chunk)) != -1) {
-                buffer.write(chunk, 0, read);
+            progress.note(getString(R.string.rkb_auto_notif_import));
+
+            long total = 0;
+            InputStream in = new ParcelFileDescriptor.AutoCloseInputStream(fd);
+            try {
+                OutputStream out = new FileOutputStream(spool);
+                try {
+                    byte[] chunk = new byte[64 * 1024];
+                    int read;
+                    while ((read = in.read(chunk)) != -1) {
+                        out.write(chunk, 0, read);
+                        total += read;
+                    }
+                    out.flush();
+                } finally {
+                    out.close();
+                }
+            } finally {
+                in.close();
             }
-            bytes = buffer.toByteArray();
+
+            if (total == 0) {
+                reply.send("ERROR:empty archive");
+                return;
+            }
+
+            // Every category the archive actually carries, not every category we know about: asking
+            // for one the archive lacks is how a restore ends up reporting success over nothing.
+            List<String> present = RkbExport.categoriesIn(spool);
+            if (present.isEmpty()) {
+                reply.send("ERROR:archive carries no categories");
+                return;
+            }
+            Set<RkbExport.Cat> wanted = resolve(items);
+            if (wanted == null) {
+                reply.send("ERROR:unknown category in items: " + items);
+                return;
+            }
+            Set<RkbExport.Cat> cats = new LinkedHashSet<>();
+            for (String id : present) {
+                RkbExport.Cat cat = RkbExport.Cat.byId(id);
+                if (cat != null && wanted.contains(cat)) {
+                    cats.add(cat);
+                }
+            }
+            if (cats.isEmpty()) {
+                reply.send("ERROR:archive carries none of the requested categories");
+                return;
+            }
+
+            RkbExport.importZip(this, spool, cats);
+            // 応用管理 force-stops us straight after this, and that belongs on its side: a running
+            // process writes its cached SharedPreferences back out at orderly shutdown and would
+            // silently undo the import that just happened.
+            reply.send("OK:" + cats.size() + " categories restored");
         } finally {
-            in.close();
-        }
-        if (bytes.length == 0) {
-            reply.send("ERROR:empty archive");
-            return;
-        }
-
-        // Every category the archive actually carries, not every category we know about: asking for
-        // one the archive lacks is how a restore ends up reporting success over nothing.
-        List<String> present = RkbExport.categoriesIn(bytes);
-        if (present.isEmpty()) {
-            reply.send("ERROR:archive carries no categories");
-            return;
-        }
-        Set<RkbExport.Cat> wanted = resolve(items);
-        if (wanted == null) {
-            reply.send("ERROR:unknown category in items: " + items);
-            return;
-        }
-        Set<RkbExport.Cat> cats = new LinkedHashSet<>();
-        for (String id : present) {
-            RkbExport.Cat cat = RkbExport.Cat.byId(id);
-            if (cat != null && wanted.contains(cat)) {
-                cats.add(cat);
+            progress.stop();
+            // Never leave it behind: it is a complete copy of the desktop's backup sitting in cache.
+            if (spool.exists() && !spool.delete()) {
+                spool.deleteOnExit();
             }
         }
-        if (cats.isEmpty()) {
-            reply.send("ERROR:archive carries none of the requested categories");
-            return;
-        }
-
-        RkbExport.importZip(this, bytes, cats);
-        // 応用管理 force-stops us straight after this, and that belongs on its side: a running process
-        // writes its cached SharedPreferences back out at orderly shutdown and would silently undo the
-        // import that just happened.
-        reply.send("OK:" + cats.size() + " categories restored");
     }
 
     // ---------------------------------------------------------------------------------------------
