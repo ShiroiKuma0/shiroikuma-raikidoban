@@ -11,6 +11,35 @@ Lightning Launcher eXtreme 14.3.
 
 ---
 
+## 白い熊 雷起動盤 14.3.7+005 — 2026-09-05
+
+Closes the one item `14.3.7+004` left open: a restore driven through the data door could only send a
+single line and then beat, because `importZip` had no callback to report through. However long it
+ran, no progress row on the caller's side moved.
+
+**Still the release key from `14.3.7+003`**, so from `14.3.7+002` or earlier the crossing is the same
+one-time uninstall — export through Export / Import, uninstall, install, import — and coming from
+`+002` this is a single uninstall, not one per release.
+
+### Per-category progress while restoring
+
+- **Real boundaries, not sampling.** The archive is written category by category, so the entry walk
+  crosses each category exactly once; every crossing is a genuine boundary. Each reports the
+  **position of the category being restored** — the contract's rule for a count of categories — and a
+  final message with `current == total` closes the run out whatever the walk happened to end on.
+- **The denominator is what will actually be restored**: asked for **and** carried by the archive, in
+  the order the export wrote them, never the whole catalogue. That is the number the caller builds
+  its row list from, so sending the catalogue size would leave rows that could never tick.
+- **Still one progress sender.** The import only learns its category list after reading the archive,
+  so `AutomationProgress` gained `setCategories()` rather than the import building a second sender
+  for its second phase. It starts on the default list, says 「Reading the backup…」 while spooling —
+  where it genuinely has no count of its own, and the heartbeat is what keeps the caller from giving
+  up — then switches to real numbers once the restore set is known.
+- New string in English, Japanese, Czech and Russian.
+
+The Export / Import window's own import path is untouched: the three-argument `importZip` remains and
+passes no progress.
+
 ## 白い熊 雷起動盤 14.3.7+004 — 2026-09-05
 
 The three hardening items named under **Known gaps** in `14.3.7+002`, from the revision of the
