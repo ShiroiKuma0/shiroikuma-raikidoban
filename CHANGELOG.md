@@ -11,6 +11,65 @@ Lightning Launcher eXtreme 14.3.
 
 ---
 
+## 白い熊 雷起動盤 14.3.7+004 — 2026-09-05
+
+The three hardening items named under **Known gaps** in `14.3.7+002`, from the revision of the
+sister-app contract that landed after that build was made. All three sit in the data door — the
+`ContentProvider` path 白い熊 応用管理 uses — and none of them touch the Export / Import window.
+
+**Still signed with the release key introduced in `14.3.7+003`**, so if you are coming from
+`14.3.7+002` or earlier the crossing is the same one-time uninstall: export through Export / Import
+first, uninstall, install, import. Coming from `+002` you can skip `+003` entirely — it is one
+uninstall, not two.
+
+### One progress sender, not two
+
+There were two implementations of the same §3 watchdog: one in `StateExportReceiver` for the
+broadcast door, one inside `AutomationDataService` for the provider. The contract is explicit that an
+app which already has a §1 sender **parameterises that one on the correlation-id extra rather than
+writing a second**, because two implementations of the same watchdog drift, and the one that drifts
+is always the one nobody is looking at.
+
+So the second is gone. Both doors now use `AutomationProgress`, which is told which extras the id
+belongs under: the broadcast door passes `reply_id`, the provider door passes **both** `job_id` and
+`reply_id` carrying the same value, so one progress reader on the caller's side serves both. The
+terminal reply carries both names for the same reason.
+
+- **And with it, the heartbeat — the half that actually mattered.** §3 wants a message at least every
+  30 s *even when the numbers have not moved*, because a caller presumes an app silent for two
+  minutes to be dead and fails its slot. `RkbExport` only calls back when a whole category is
+  finished, and one category here can be every item icon or every desktop wallpaper. A daemon thread
+  now re-sends the last line every 20 s. **The broadcast export gains this too**, having never had it.
+- The broadcast door also now sends `item` — the id of the category the count refers to — so the
+  caller highlights the right row instead of guessing from a bare number.
+
+### The descriptor has an owner from the moment it leaves the map
+
+Taking the caller's descriptor out of the hand-over map and calling `startForeground` now happen
+inside **one** `try`/`finally`. That call can be refused: a service started from a binder call is a
+*background* start, and API 31+ can refuse it outright unless the app is exempt from battery
+optimisation — which, on a phone where this app is not exempt, makes that the **ordinary** path
+rather than an exotic one. Before, the throw left the caller's file open with no reply ever sent, so
+the caller could neither checksum nor encrypt it and was told nothing about why.
+
+### A large import is spooled to disk, not into memory
+
+`RkbExport` gains file-based paths — `categoriesIn(File)` and `importZip(Context, File, Set)` —
+behind a small internal source abstraction, so the Export / Import window's existing `byte[]` path is
+untouched. The automation import now streams the descriptor into a cache file, validates it there,
+applies it, and deletes the spool in a `finally`.
+
+Reading the whole archive before writing anything is unchanged and deliberate: a partial read that
+failed half way would import half an archive, and a half-restored launcher is worse than one that
+refused. Only the bound moves, from RAM to disk — and this app's backup carries every item icon and
+every desktop wallpaper, so it is precisely the archive that gets big enough for that to matter.
+
+### Not covered
+
+The import still has no per-category progress, because `importZip` has no callback to report
+through. It sends one line and then heartbeats, which keeps the caller from giving up but moves no
+progress bar.
+
 ## 白い熊 雷起動盤 14.3.7+003 — 2026-09-04
 
 **This release changes the app's signing identity, so it cannot install over any earlier build.**
