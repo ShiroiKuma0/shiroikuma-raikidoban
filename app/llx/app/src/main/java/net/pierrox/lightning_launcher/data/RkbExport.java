@@ -614,7 +614,7 @@ public final class RkbExport {
      * before anything is written.
      */
     public static String importZip(Context context, byte[] data, Set<Cat> cats) throws IOException {
-        return importZip(context, sourceOf(data), cats);
+        return importZip(context, sourceOf(data), cats, null);
     }
 
     /**
@@ -623,10 +623,23 @@ public final class RkbExport {
      * memory to be restored.
      */
     public static String importZip(Context context, File file, Set<Cat> cats) throws IOException {
-        return importZip(context, sourceOf(file), cats);
+        return importZip(context, sourceOf(file), cats, null);
     }
 
-    private static String importZip(Context context, Source source, Set<Cat> cats) throws IOException {
+    /**
+     * As above, reporting per-category progress as it goes.
+     *
+     * <p>{@code progress} is called with the <b>position of the category being restored</b>, which is
+     * §3's rule for a count of categories — the archive is written category by category, so the entry
+     * walk crosses them in order and each crossing is a real boundary rather than a guess.
+     */
+    public static String importZip(Context context, File file, Set<Cat> cats, Progress progress)
+            throws IOException {
+        return importZip(context, sourceOf(file), cats, progress);
+    }
+
+    private static String importZip(Context context, Source source, Set<Cat> cats, Progress progress)
+            throws IOException {
         LightningEngine engine = LLApp.get().getAppEngine();
         File base = engine.getBaseDir();
 
@@ -634,6 +647,18 @@ public final class RkbExport {
         if (present.isEmpty()) {
             throw new IOException(context.getString(R.string.rkb_eim_import_none));
         }
+
+        // What is ACTUALLY going to be restored — asked for AND carried by the archive — in the same
+        // order the export wrote them. That is the denominator the caller's row list is built from,
+        // so it must not be the whole catalogue.
+        List<Cat> restoring = new ArrayList<>();
+        for (Cat c : Cat.values()) {
+            if (cats.contains(c) && present.contains(c.id)) {
+                restoring.add(c);
+            }
+        }
+        int totalCats = restoring.size();
+        Cat reported = null;
 
         boolean touchesFiles = false;
         for (Cat c : cats) {
@@ -662,12 +687,14 @@ public final class RkbExport {
                 }
                 if (UI_ENTRY.equals(name)) {
                     if (cats.contains(Cat.UI)) {
+                        reported = report(context, progress, restoring, reported, Cat.UI, totalCats);
                         uiJson = new String(readEntry(zis), StandardCharsets.UTF_8);
                     }
                     continue;
                 }
                 if (FOLD_ENTRY.equals(name)) {
                     if (cats.contains(Cat.FOLD)) {
+                        reported = report(context, progress, restoring, reported, Cat.FOLD, totalCats);
                         foldJson = new String(readEntry(zis), StandardCharsets.UTF_8);
                     }
                     continue;
@@ -676,6 +703,9 @@ public final class RkbExport {
                 if (cat == null || !cats.contains(cat)) {
                     continue;
                 }
+                // The archive is written category by category, so this fires once per category
+                // rather than once per file: a real boundary, not a sampled guess.
+                reported = report(context, progress, restoring, reported, cat, totalCats);
                 String rel = name.substring(cat.id.length() + 1);
                 File outFile = new File(base, rel);
                 File parent = outFile.getParentFile();
@@ -714,6 +744,12 @@ public final class RkbExport {
             engine.reloadGlobalConfig();
         }
 
+        // §3 wants a final message with current == total, whatever the walk happened to end on.
+        if (progress != null && totalCats > 0) {
+            progress.onProgress(totalCats, totalCats,
+                    context.getString(restoring.get(totalCats - 1).labelRes));
+        }
+
         StringBuilder summary = new StringBuilder();
         for (Cat c : Cat.values()) {
             if (!cats.contains(c) || !present.contains(c.id)) {
@@ -728,6 +764,23 @@ public final class RkbExport {
             summary.append(context.getString(R.string.rkb_eim_import_nothing));
         }
         return summary.toString();
+    }
+
+    /**
+     * Announce a category the moment the walk first reaches it, once each. Returns the category now
+     * being reported, so the caller can keep track of what it last said.
+     */
+    private static Cat report(Context context, Progress progress, List<Cat> restoring, Cat reported,
+                              Cat now, int totalCats) {
+        if (progress == null || now == reported) {
+            return reported;
+        }
+        int position = restoring.indexOf(now) + 1;
+        if (position <= 0) {
+            return reported; // not part of this restore after all
+        }
+        progress.onProgress(position, totalCats, context.getString(now.labelRes));
+        return now;
     }
 
     /** The file-based category owning a ZIP entry, or null. Ids never prefix each other ambiguously. */

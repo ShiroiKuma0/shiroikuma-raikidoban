@@ -1366,4 +1366,5 @@ Oprávnění:
     <string name="rkb_auto_notif_channel">Data automatizace</string>
     <string name="rkb_auto_notif_export">Zapisuji data…</string>
     <string name="rkb_auto_notif_import">Obnovuji data…</string>
+    <string name="rkb_auto_notif_spooling">Načítám zálohu…</string>
 </resources>

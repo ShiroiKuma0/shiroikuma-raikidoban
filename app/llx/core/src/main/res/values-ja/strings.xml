@@ -1148,4 +1148,5 @@ Mar. 23, 2015 : add translations"</string>
     <string name="rkb_auto_notif_channel">自動化データ</string>
     <string name="rkb_auto_notif_export">データを書き出しています…</string>
     <string name="rkb_auto_notif_import">データを戻しています…</string>
+    <string name="rkb_auto_notif_spooling">バックアップを読み込んでいます…</string>
 </resources>

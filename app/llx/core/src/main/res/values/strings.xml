@@ -1511,4 +1511,5 @@
     <string name="rkb_auto_notif_channel">Automation data</string>
     <string name="rkb_auto_notif_export">Writing data out…</string>
     <string name="rkb_auto_notif_import">Restoring data…</string>
+    <string name="rkb_auto_notif_spooling">Reading the backup…</string>
 </resources>

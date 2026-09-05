@@ -1346,4 +1346,5 @@ Support the developer and help making 白い熊 雷起動盤 the best launcher e
     <string name="rkb_auto_notif_channel">Данные автоматизации</string>
     <string name="rkb_auto_notif_export">Запись данных…</string>
     <string name="rkb_auto_notif_import">Восстановление данных…</string>
+    <string name="rkb_auto_notif_spooling">Чтение резервной копии…</string>
 </resources>

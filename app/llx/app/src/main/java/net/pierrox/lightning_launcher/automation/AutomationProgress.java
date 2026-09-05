@@ -55,7 +55,9 @@ public final class AutomationProgress implements RkbExport.Progress {
     private final String[] correlationExtras;
     private final String correlationId;
     private final String appLabel;
-    private final List<RkbExport.Cat> ordered;
+    /** Not final: the import only learns which categories it is restoring after it has read the
+     * archive, and it must keep ONE sender across both phases rather than build a second. */
+    private volatile List<RkbExport.Cat> ordered;
     private final Bytes bytes;
     private final boolean active;
 
@@ -82,6 +84,15 @@ public final class AutomationProgress implements RkbExport.Progress {
         // all: since API 26 an implicit broadcast never reaches a manifest receiver, and every
         // broadcast we send must therefore carry setPackage.
         this.active = !this.action.isEmpty() && !this.replyPackage.isEmpty();
+    }
+
+    /**
+     * Narrow the category list once it is actually known — the import resolves it only after the
+     * archive has been read, and building a second sender for the second phase is exactly what this
+     * class exists to prevent.
+     */
+    public void setCategories(Set<RkbExport.Cat> cats) {
+        this.ordered = ordered(cats);
     }
 
     /** The order {@link RkbExport#export} walks them in, so a count can name the category it means. */

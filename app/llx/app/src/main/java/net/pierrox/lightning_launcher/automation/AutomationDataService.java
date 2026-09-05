@@ -279,15 +279,17 @@ public class AutomationDataService extends Service {
                            String progressAction, String replyPackage, Replier reply)
             throws IOException {
         File spool = new File(getCacheDir(), "automation-import-" + jobId + ".zip");
-        // The import has no per-category callback to report through, so this exists for the
-        // heartbeat: the caller must keep hearing something, and inventing counts we are not walking
-        // would be worse than sending none.
+        // Built before the archive has been read, so it starts on the default category list and is
+        // narrowed by setCategories() once the real restore set is known — one sender across both
+        // phases rather than a second one for the second half.
         AutomationProgress progress = new AutomationProgress(this, progressAction, replyPackage,
                 jobId, new String[]{AutomationProvider.KEY_JOB_ID, AutomationProvider.KEY_REPLY_ID},
                 getString(R.string.app_name), RkbExport.Cat.defaults(), null);
         progress.start();
         try {
-            progress.note(getString(R.string.rkb_auto_notif_import));
+            // Spooling has no honest count of its own, so it says what it is doing and lets the
+            // heartbeat carry the caller until the real per-category numbers begin.
+            progress.note(getString(R.string.rkb_auto_notif_spooling));
 
             long total = 0;
             InputStream in = new ParcelFileDescriptor.AutoCloseInputStream(fd);
@@ -337,7 +339,9 @@ public class AutomationDataService extends Service {
                 return;
             }
 
-            RkbExport.importZip(this, spool, cats);
+            // Now the restore set is known, so the counts can be real ones.
+            progress.setCategories(cats);
+            RkbExport.importZip(this, spool, cats, progress);
             // 応用管理 force-stops us straight after this, and that belongs on its side: a running
             // process writes its cached SharedPreferences back out at orderly shutdown and would
             // silently undo the import that just happened.
