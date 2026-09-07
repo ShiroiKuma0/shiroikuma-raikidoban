@@ -11,6 +11,51 @@ Lightning Launcher eXtreme 14.3.
 
 ---
 
+## 白い熊 雷起動盤 14.3.7+006 — 2026-09-07
+
+Restoring onto a new phone landed on **"No backup folder selected"**, however complete the rest of
+the restore had been. The cause was not subtle: the `settings` category shipped `config`, `system`,
+`state` and `statistics` and nothing else, so the app's SharedPreferences — where the Backup/restore
+folder is kept — were in no backup at all, and neither was the Export / Import directory.
+
+**Still the release key from `14.3.7+003`**, so from `14.3.7+002` or earlier the crossing is the same
+one-time uninstall — export through Export / Import, uninstall, install, import — and coming from
+`+002` this is a single uninstall, not one per release.
+
+### The app's own preferences now travel
+
+- `settings` carries a top-level **`prefs.json`**: the app's default preferences and the
+  export-directory preferences, written as the same type-tagged dump `ui.json` already used and keyed
+  by logical name, so renaming a preferences file later cannot orphan an existing archive.
+- Both backup folders are in it — the Backup/restore screen's and the Export / Import window's.
+- Older archives, which have no such entry, import exactly as before; an older build simply skips one
+  that has it.
+- The automation token stays out of every backup, deliberately: a backup travels, and a secret
+  should not.
+
+### A folder is a Uri **plus** a grant, and only the Uri can travel
+
+- A folder picked through the system file picker is two things: the Uri, which is ordinary app data,
+  and the **persisted grant** behind it, which the platform issues to one install on one device and
+  drops when that install goes away. No backup can carry the grant — not this app's, not a
+  whole-data one — and nothing can ask for one covering a folder the picker never handed to this
+  install.
+- Importing therefore **re-takes the grant when the platform still holds one**, which makes a restore
+  onto the same install seamless where it previously lost the folder outright.
+- When the grant is gone, the folder is kept **only if nothing usable is configured on this phone**.
+  A pointer carried from another device can never evict a folder that currently works — landing on a
+  phone that already has one, the archive's dead folder would otherwise break the very next export.
+
+### Remembered folders, instead of "not set"
+
+- A folder restored without its grant is now **named on screen** with a short line saying access was
+  lost with the install, rather than reported as though it had never been chosen — on the
+  Backup/restore screen (whose message is now tappable), in the Export / Import window's folder box,
+  and on the UI page's directory row.
+- Every folder picker opens **at the remembered folder**, so restoring access is one tap in the
+  folder already on screen instead of a walk back down the tree.
+- New strings in English, Japanese, Czech and Russian.
+
 ## 白い熊 雷起動盤 14.3.7+005 — 2026-09-05
 
 Closes the one item `14.3.7+004` left open: a restore driven through the data door could only send a

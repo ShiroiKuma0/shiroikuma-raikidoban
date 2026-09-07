@@ -10,7 +10,7 @@ A fork of [Lightning Launcher](https://github.com/pierrehebert/LightningLauncher
 
 Installs **side-by-side** with the original Lightning Launcher (package `shiroikuma.raikidoban`).
 
-**📥 Latest release: [`14.3.7+005`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases) · [changelog »](CHANGELOG.md)
+**📥 Latest release: [`14.3.7+006`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases) · [changelog »](CHANGELOG.md)
 
 *(雷起動盤 — “raikidōban”, the “lightning launch board”.)*
 
@@ -46,11 +46,11 @@ English, **Japanese, Czech and Russian** are bundled right into the app — no e
 
 ## 💾 Backups that work on modern Android
 
-Restores the ability to **create** backups on Android 13 (targetSdk 33), which scoped storage had blocked, by writing to a folder you choose through the system file picker. Also stops a restore from wiping your system wallpaper.
+Restores the ability to **create** backups on Android 13 (targetSdk 33), which scoped storage had blocked, by writing to a folder you choose through the system file picker. Also stops a restore from wiping your system wallpaper. The folder you pick is **remembered across a restore** — Android cannot hand its access permission to a new install, so instead of pretending you never chose one, the screen names the folder and the picker opens right there: one tap and it works again.
 
 ## 📤 Export / Import — one zip, ticked by category
 
-A dedicated Export / Import window at the top of the UI page backs up **everything settable in the launcher** into a single timestamped `.zip`: the appearance theme and imported fonts, launcher settings, the fold matrix, desktops and items (with item icons and desktop wallpapers as separate sub-options), scripts, item styles and script variables. Tick what to carry, pick a backup folder once, and import restores just the parts you tick — merged, never wiped. The same export runs **headlessly** on request, so [自由作業盤](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban) can back this app up alongside every other sister app in one run — announcing which parts start ticked rather than letting the caller guess, and **stopping cleanly** when told to: a cancelled export unwinds at the next entry, deletes its half-written archive, and leaves the backup folder exactly as it found it. It answers out of the box, with an authorization token available as an **opt-in** extra rather than a thing you must paste before anything works.
+A dedicated Export / Import window at the top of the UI page backs up **everything settable in the launcher** into a single timestamped `.zip`: the appearance theme and imported fonts, launcher settings, the fold matrix, desktops and items (with item icons and desktop wallpapers as separate sub-options), scripts, item styles and script variables. Tick what to carry, pick a backup folder once, and import restores just the parts you tick — merged, never wiped. **Every setting travels**, down to the app's own preferences and both backup folders, so a phone restored from a zip is the phone you backed up. The same export runs **headlessly** on request, so [自由作業盤](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban) can back this app up alongside every other sister app in one run — announcing which parts start ticked rather than letting the caller guess, and **stopping cleanly** when told to: a cancelled export unwinds at the next entry, deletes its half-written archive, and leaves the backup folder exactly as it found it. It answers out of the box, with an authorization token available as an **opt-in** extra rather than a thing you must paste before anything works.
 
 ## 🔐 Restorable onto a clean phone
 
