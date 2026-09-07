@@ -507,13 +507,20 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         mHolder.addView(line);
     }
 
-    /** The backup directory — red while unset, so a launcher with nowhere to back up to says so loudly. */
+    /**
+     * The backup directory — red while unset, so a launcher with nowhere to back up to says so
+     * loudly. A folder a restore remembered but the platform no longer grants is named too, with the
+     * re-grant line under it: the picker below opens straight at it, so it is one tap away from
+     * working again.
+     */
     private void addDirRow() {
         String label = ExportImportPanel.dirLabel(this);
-        boolean unset = label == null;
-        addTwoLineRow(getString(R.string.rkb_eim_dir),
-                unset ? getString(R.string.rkb_eim_dir_unset) : label,
-                unset ? WARN_COLOR : UiTheme.color(UiSlot.TEXT),
+        String remembered = label == null ? ExportImportPanel.rememberedDirLabel(this) : null;
+        CharSequence value = label != null ? label
+                : remembered != null ? remembered + "\n" + getString(R.string.rkb_eim_dir_regrant)
+                : getString(R.string.rkb_eim_dir_unset);
+        addTwoLineRow(getString(R.string.rkb_eim_dir), value,
+                label != null ? UiTheme.color(UiSlot.TEXT) : WARN_COLOR,
                 mStepPx, v -> mPickExportDir.launch(RkbExport.exportDirUri(this)));
     }
 

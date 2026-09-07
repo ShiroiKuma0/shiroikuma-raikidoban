@@ -25,14 +25,10 @@ SOFTWARE.
 package net.pierrox.lightning_launcher.util;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.UriPermission;
 import android.net.Uri;
 
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
-
-import java.util.List;
 
 /**
  * Stores and resolves the user-chosen backup folder, granted through the Storage Access
@@ -45,7 +41,12 @@ public final class BackupFolder {
     /** MIME type used when creating backup documents. */
     public static final String MIME_TYPE = "application/octet-stream";
 
-    private static final String PREF_KEY = "backup_folder_uri";
+    /**
+     * Where the chosen tree Uri is remembered — in the app's default preferences, and therefore part
+     * of what a backup carries (see {@code RkbExport}'s {@code prefs.json}). The grant that makes it
+     * usable is not: see {@link SafFolder}.
+     */
+    public static final String PREF_KEY = "backup_folder_uri";
 
     private BackupFolder() {
     }
@@ -55,19 +56,18 @@ public final class BackupFolder {
      * configured, or the persistable permission has been lost).
      */
     public static Uri getTreeUri(Context context) {
-        String stored = PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(PREF_KEY, null);
-        if (stored == null) {
-            return null;
-        }
-        Uri uri = Uri.parse(stored);
-        List<UriPermission> permissions = context.getContentResolver().getPersistedUriPermissions();
-        for (UriPermission permission : permissions) {
-            if (permission.getUri().equals(uri) && permission.isReadPermission() && permission.isWritePermission()) {
-                return uri;
-            }
-        }
-        return null;
+        Uri uri = getRememberedUri(context);
+        return SafFolder.hasGrant(context, uri) ? uri : null;
+    }
+
+    /**
+     * The folder the user last chose, grant or no grant — what a restored backup brings back, and
+     * what the screen shows instead of "no folder selected" so the picker can open right there.
+     * Never use it to write: {@link #getDir} is the only thing that says a folder is usable.
+     */
+    public static Uri getRememberedUri(Context context) {
+        return SafFolder.parse(PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(PREF_KEY, null));
     }
 
     /**
@@ -75,12 +75,18 @@ public final class BackupFolder {
      * read/write permission so it survives reboots.
      */
     public static void setTreeUri(Context context, Uri treeUri) {
-        context.getContentResolver().takePersistableUriPermission(
-                treeUri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        SafFolder.reclaim(context, treeUri);
+        remember(context, treeUri);
+    }
+
+    /**
+     * Write down the folder without asking for a grant — for a Uri restored from a backup, where
+     * asking would throw. {@link SafFolder#reclaim} has already had its chance by then.
+     */
+    public static void remember(Context context, Uri treeUri) {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
-                .putString(PREF_KEY, treeUri.toString())
+                .putString(PREF_KEY, treeUri == null ? null : treeUri.toString())
                 .apply();
     }
 

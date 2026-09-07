@@ -38,6 +38,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.provider.OpenableColumns;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -64,6 +65,7 @@ import net.pierrox.lightning_launcher.data.LightningIntent;
 import net.pierrox.lightning_launcher.data.Folder;
 import net.pierrox.lightning_launcher.data.Item;
 import net.pierrox.lightning_launcher.data.Page;
+import net.pierrox.lightning_launcher.data.RkbExport;
 import net.pierrox.lightning_launcher.util.BackupFolder;
 import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.ThemedProgressDialog;
@@ -215,11 +217,27 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         mArchiveDir = BackupFolder.getDir(this);
 
         if (mArchiveDir == null) {
-            mEmptyView.setText(R.string.backup_folder_none);
+            // Two different states, and telling them apart is the whole point: never chosen, or
+            // chosen on a phone that is gone — a backup carries the folder's Uri but no platform can
+            // carry its grant (see SafFolder). The remembered one is named and tappable, and the
+            // picker opens right there.
+            Uri remembered = BackupFolder.getRememberedUri(this);
+            String path = RkbExport.absolutePathOf(remembered, null);
+            if (remembered != null) {
+                mEmptyView.setText(getString(R.string.backup_folder_regrant,
+                        path != null ? path : remembered.toString()));
+                mEmptyView.setOnClickListener(v -> pickFolder(PENDING_NONE));
+            } else {
+                mEmptyView.setText(R.string.backup_folder_none);
+                mEmptyView.setOnClickListener(null);
+                mEmptyView.setClickable(false);
+            }
             mEmptyView.setVisibility(View.VISIBLE);
             mListView.setVisibility(View.GONE);
             return;
         }
+        mEmptyView.setOnClickListener(null);
+        mEmptyView.setClickable(false);
 
         for (DocumentFile f : mArchiveDir.listFiles()) {
             if (f.isFile()) {
@@ -285,6 +303,12 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        // Open at the folder we remember, so re-granting a restored one is a single tap rather than
+        // a walk back down the tree.
+        Uri remembered = BackupFolder.getRememberedUri(this);
+        if (remembered != null) {
+            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, remembered);
+        }
         startActivityForResult(intent, REQUEST_PICK_FOLDER);
     }
 

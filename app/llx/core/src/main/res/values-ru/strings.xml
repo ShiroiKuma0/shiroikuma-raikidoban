@@ -1300,7 +1300,10 @@ Support the developer and help making 白い熊 雷起動盤 the best launcher e
     <string name="rkb_eim_desc">Отметьте, что перенести, и выгрузите это в один .zip — или загрузите .zip и восстановите только эти части.</string>
     <string name="rkb_eim_dir">Папка резервных копий</string>
     <string name="rkb_eim_dir_unset">Не задана — нажмите, чтобы выбрать папку</string>
+    <string name="rkb_eim_dir_regrant">Доступ утрачен вместе с установкой — нажмите, чтобы выбрать заново</string>
     <string name="rkb_eim_warn_nodir">Папка резервных копий не задана.</string>
+    <string name="rkb_eim_warn_regrant">Папку резервных копий нужно выбрать заново.</string>
+    <string name="backup_folder_regrant">Папка резервных копий: %s\n\nAndroid не переносит доступ к папке в новую установку.\nНажмите здесь, чтобы выбрать её заново.</string>
     <string name="rkb_eim_warn_none">В этой папке ещё нет резервных копий.</string>
     <string name="rkb_eim_last">Последняя копия: %1$s</string>
     <string name="rkb_eim_select_all">Выбрать всё</string>

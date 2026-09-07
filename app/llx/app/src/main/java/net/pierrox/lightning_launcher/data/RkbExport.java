@@ -31,10 +31,13 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 
 import androidx.documentfile.provider.DocumentFile;
+import androidx.preference.PreferenceManager;
 
 import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.configuration.UiConfig;
 import net.pierrox.lightning_launcher.engine.LightningEngine;
+import net.pierrox.lightning_launcher.util.BackupFolder;
+import net.pierrox.lightning_launcher.util.SafFolder;
 import net.pierrox.lightning_launcher_extreme.R;
 
 import org.json.JSONArray;
@@ -75,9 +78,12 @@ import java.util.zip.ZipOutputStream;
  * selected {@link Cat}. File-based categories store paths <i>relative to the engine base dir</i>
  * under their id, so the importer is a plain "strip the id, write under the base dir" copy.
  *
- * <p>The configured export directory is a persisted SAF tree kept in its OWN prefs file, which is
- * deliberately not part of any category — neither the directory nor the automation token ever
- * travels inside a backup.
+ * <p>The app's SharedPreferences travel too, as {@code prefs.json} inside {@code settings} — that is
+ * where the two backup folders live (the legacy Backup/restore folder and this engine's export
+ * directory), so "all settings" really means all of them. What cannot travel is the SAF <i>grant</i>
+ * behind such a folder: see {@link SafFolder}, and {@link #restoreBackupFolder} for the one rule the
+ * import follows because of it. The automation token is the deliberate exception — it keeps its own
+ * prefs file and never enters a backup, because a backup travels and a secret should not.
  */
 public final class RkbExport {
 
@@ -92,6 +98,12 @@ public final class RkbExport {
     private static final String UI_ENTRY = "ui.json";
     private static final String FOLD_ENTRY = "fold.json";
     private static final String FOLD_KEY = "foldGrid";
+
+    // The app's own preferences, carried inside `settings`. Keyed by a stable logical name rather
+    // than the on-disk file name, so renaming a prefs file never orphans an existing backup.
+    private static final String PREFS_ENTRY = "prefs.json";
+    private static final String PREFS_DEFAULT = "default";
+    private static final String PREFS_EXIMPORT = "eximport";
 
     // Device-local: the export directory lives here and is never exported.
     private static final String EXIMPORT_PREFS = "rkb_eximport";
@@ -209,23 +221,16 @@ public final class RkbExport {
         return name != null && name.endsWith(".zip") && name.startsWith(EXPORT_PREFIX);
     }
 
+    /**
+     * The export directory the user last chose, grant or no grant — so the picker can open right
+     * there. {@link #exportDir} is the one that says whether it is usable now.
+     */
     public static Uri exportDirUri(Context context) {
-        String stored = context.getApplicationContext()
-                .getSharedPreferences(EXIMPORT_PREFS, Context.MODE_PRIVATE)
-                .getString(KEY_DIR_URI, null);
-        if (stored == null || stored.isEmpty()) {
-            return null;
-        }
-        try {
-            return Uri.parse(stored);
-        } catch (Exception e) {
-            return null;
-        }
+        return SafFolder.parse(eximportPrefs(context).getString(KEY_DIR_URI, null));
     }
 
     public static void setExportDirUri(Context context, Uri uri) {
-        context.getApplicationContext()
-                .getSharedPreferences(EXIMPORT_PREFS, Context.MODE_PRIVATE)
+        eximportPrefs(context)
                 .edit()
                 .putString(KEY_DIR_URI, uri == null ? null : uri.toString())
                 .apply();
@@ -251,10 +256,18 @@ public final class RkbExport {
      * resolved this way; anything else returns null.
      */
     public static String absolutePathOf(DocumentFile dir, String fileName) {
-        if (dir == null) {
+        return dir == null ? null : absolutePathOf(dir.getUri(), fileName);
+    }
+
+    /**
+     * As above from the bare tree Uri, which needs no grant to read — this is how a folder that is
+     * only <i>remembered</i> (restored from a backup, not yet re-granted) can still be named on
+     * screen instead of showing as unset.
+     */
+    public static String absolutePathOf(Uri treeUri, String fileName) {
+        if (treeUri == null) {
             return null;
         }
-        Uri treeUri = dir.getUri();
         if (!EXTERNAL_STORAGE_AUTHORITY.equals(treeUri.getAuthority())) {
             return null;
         }
@@ -418,6 +431,10 @@ public final class RkbExport {
                 zipFile(zip, cat.id, base, FileUtils.getSystemConfigFile(context), cancel);
                 zipFile(zip, cat.id, base, FileUtils.getStateFile(base), cancel);
                 zipFile(zip, cat.id, base, FileUtils.getStatisticsFile(base), cancel);
+                // Everything the app keeps in SharedPreferences rather than in a config file — the
+                // two backup folders above all, which used to be the one thing a restored install
+                // silently lost.
+                writeEntry(zip, PREFS_ENTRY, dumpAppPrefs(context).getBytes(StandardCharsets.UTF_8));
                 break;
 
             case FOLD: {
@@ -676,6 +693,7 @@ public final class RkbExport {
         int[] counts = new int[Cat.values().length];
         String uiJson = null;
         String foldJson = null;
+        String prefsJson = null;
 
         ZipInputStream zis = new ZipInputStream(source.open());
         try {
@@ -696,6 +714,13 @@ public final class RkbExport {
                     if (cats.contains(Cat.FOLD)) {
                         reported = report(context, progress, restoring, reported, Cat.FOLD, totalCats);
                         foldJson = new String(readEntry(zis), StandardCharsets.UTF_8);
+                    }
+                    continue;
+                }
+                if (PREFS_ENTRY.equals(name)) {
+                    if (cats.contains(Cat.SETTINGS)) {
+                        reported = report(context, progress, restoring, reported, Cat.SETTINGS, totalCats);
+                        prefsJson = new String(readEntry(zis), StandardCharsets.UTF_8);
                     }
                     continue;
                 }
@@ -734,6 +759,9 @@ public final class RkbExport {
 
         if (uiJson != null) {
             counts[Cat.UI.ordinal()] = mergePrefs(uiPrefs(context), uiJson);
+        }
+        if (prefsJson != null) {
+            counts[Cat.SETTINGS.ordinal()] += mergeAppPrefs(context, prefsJson);
         }
         if (foldJson != null) {
             counts[Cat.FOLD.ordinal()] = patchFoldGrid(base, foldJson) ? 1 : 0;
@@ -848,6 +876,96 @@ public final class RkbExport {
         return context.getApplicationContext().getSharedPreferences(UiConfig.PREFS, Context.MODE_PRIVATE);
     }
 
+    /** The app's default prefs file — where the legacy Backup/restore folder and odds and ends live. */
+    private static SharedPreferences defaultPrefs(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+    }
+
+    private static SharedPreferences eximportPrefs(Context context) {
+        return context.getApplicationContext().getSharedPreferences(EXIMPORT_PREFS, Context.MODE_PRIVATE);
+    }
+
+    /** Every prefs file the app settles into, keyed by logical name: {@code settings}' prefs.json. */
+    private static String dumpAppPrefs(Context context) {
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put(PREFS_DEFAULT, new JSONObject(dumpPrefs(defaultPrefs(context))));
+            obj.put(PREFS_EXIMPORT, new JSONObject(dumpPrefs(eximportPrefs(context))));
+        } catch (JSONException e) {
+            // pass — a prefs file that will not serialise is not worth failing an export over
+        }
+        return obj.toString();
+    }
+
+    /**
+     * Merge {@code prefs.json} back in. The two SAF folder Uris are pulled out of the plain merge
+     * and handled by {@link #restoreBackupFolder} / {@link #restoreExportDir}, which know that a
+     * folder is a Uri plus a grant and that only the Uri can travel.
+     */
+    private static int mergeAppPrefs(Context context, String json) {
+        int n = 0;
+        try {
+            JSONObject obj = new JSONObject(json);
+            JSONObject def = obj.optJSONObject(PREFS_DEFAULT);
+            if (def != null) {
+                n += mergePrefs(defaultPrefs(context), def, BackupFolder.PREF_KEY);
+                n += restoreBackupFolder(context, prefString(def, BackupFolder.PREF_KEY));
+            }
+            JSONObject eximport = obj.optJSONObject(PREFS_EXIMPORT);
+            if (eximport != null) {
+                n += mergePrefs(eximportPrefs(context), eximport, KEY_DIR_URI);
+                n += restoreExportDir(context, prefString(eximport, KEY_DIR_URI));
+            }
+        } catch (JSONException e) {
+            // pass — a malformed prefs entry must not cost the rest of the restore
+        }
+        return n;
+    }
+
+    /**
+     * Bring back a remembered folder, under the one rule {@link SafFolder} forces on us: take the
+     * grant when the platform still holds one — a restore onto the same install, where the folder
+     * then simply works again — and otherwise keep the Uri <b>only when nothing usable is configured
+     * here</b>. A pointer carried from another device must never evict a folder that works: landing
+     * on a new phone where a folder has already been chosen, the archive's dead Uri would break the
+     * very next export. When it is kept, it is kept as a remembered folder — named on screen, and
+     * seeding the picker so one tap re-grants it.
+     */
+    private static int restoreBackupFolder(Context context, String stored) {
+        Uri uri = SafFolder.parse(stored);
+        if (uri == null) {
+            return 0;
+        }
+        if (SafFolder.reclaim(context, uri) || BackupFolder.getTreeUri(context) == null) {
+            BackupFolder.remember(context, uri);
+            return 1;
+        }
+        return 0;
+    }
+
+    /** As above for this engine's own export directory. */
+    private static int restoreExportDir(Context context, String stored) {
+        Uri uri = SafFolder.parse(stored);
+        if (uri == null) {
+            return 0;
+        }
+        if (SafFolder.reclaim(context, uri) || exportDir(context) == null) {
+            setExportDirUri(context, uri);
+            return 1;
+        }
+        return 0;
+    }
+
+    /** The value of a string-typed key in a dump, or null. */
+    private static String prefString(JSONObject dump, String key) {
+        JSONObject entry = dump.optJSONObject(key);
+        if (entry == null || !"s".equals(entry.optString("t"))) {
+            return null;
+        }
+        String v = entry.optString("v");
+        return v.isEmpty() ? null : v;
+    }
+
     private static String dumpPrefs(SharedPreferences sp) {
         JSONObject obj = new JSONObject();
         for (Map.Entry<String, ?> e : sp.getAll().entrySet()) {
@@ -877,12 +995,26 @@ public final class RkbExport {
 
     /** Merge a dump back in, per key (never a wipe). Returns the number of values written. */
     private static int mergePrefs(SharedPreferences sp, String json) {
+        try {
+            return mergePrefs(sp, new JSONObject(json), null);
+        } catch (JSONException e) {
+            return 0;
+        }
+    }
+
+    /**
+     * As above from a parsed dump, optionally holding one key back for the caller to write itself —
+     * that is how the SAF folder Uris skip the blind merge and go through their own rule.
+     */
+    private static int mergePrefs(SharedPreferences sp, JSONObject obj, String skipKey) {
         int n = 0;
         try {
-            JSONObject obj = new JSONObject(json);
             SharedPreferences.Editor editor = sp.edit();
             for (java.util.Iterator<String> it = obj.keys(); it.hasNext(); ) {
                 String key = it.next();
+                if (key.equals(skipKey)) {
+                    continue;
+                }
                 JSONObject entry = obj.optJSONObject(key);
                 if (entry == null) {
                     continue;
@@ -911,7 +1043,7 @@ public final class RkbExport {
             }
             // commit(): the import is normally followed by a process restart.
             editor.commit();
-        } catch (JSONException e) {
+        } catch (Exception e) {
             return n;
         }
         return n;

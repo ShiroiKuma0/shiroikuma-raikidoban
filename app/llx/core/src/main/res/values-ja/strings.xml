@@ -1102,7 +1102,10 @@ Mar. 23, 2015 : add translations"</string>
     <string name="rkb_eim_desc">持ち出す対象にチェックを入れて 1 つの .zip に書き出す、または .zip を読み込んでその部分だけ復元します。</string>
     <string name="rkb_eim_dir">保存先フォルダー</string>
     <string name="rkb_eim_dir_unset">未設定 — タップしてフォルダーを選択</string>
+    <string name="rkb_eim_dir_regrant">アクセス権が失われました — タップして選び直す</string>
     <string name="rkb_eim_warn_nodir">保存先フォルダーが未設定です。</string>
+    <string name="rkb_eim_warn_regrant">保存先フォルダーを選び直してください。</string>
+    <string name="backup_folder_regrant">保存先フォルダー: %s\n\nAndroid はフォルダーへのアクセス権を新しいインストールへ引き継ぎません。\nここをタップして選び直してください。</string>
     <string name="rkb_eim_warn_none">このフォルダーにはまだバックアップがありません。</string>
     <string name="rkb_eim_last">最終バックアップ: %1$s</string>
     <string name="rkb_eim_select_all">全選択</string>

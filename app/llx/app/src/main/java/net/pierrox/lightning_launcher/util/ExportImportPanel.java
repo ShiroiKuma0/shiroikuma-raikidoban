@@ -177,9 +177,18 @@ public class ExportImportPanel {
 
         box.addView(text(mActivity.getString(R.string.rkb_eim_dir), 12, UiTheme.color(UiSlot.DIALOG_TITLE), false));
         String label = dirLabel();
-        TextView value = text(label != null ? label : mActivity.getString(R.string.rkb_eim_dir_unset), 15,
-                label != null ? UiTheme.color(UiSlot.DIALOG_TEXT) : WARN_COLOR, true);
-        box.addView(value);
+        String remembered = label == null ? rememberedDirLabel(mActivity) : null;
+        String shown = label != null ? label
+                : remembered != null ? remembered
+                : mActivity.getString(R.string.rkb_eim_dir_unset);
+        box.addView(text(shown, 15, label != null ? UiTheme.color(UiSlot.DIALOG_TEXT) : WARN_COLOR, true));
+        if (remembered != null) {
+            // Restored from a backup: the folder is known, only the grant is gone. Say which of the
+            // two is missing, because the fix is one tap in a picker that already opens there.
+            TextView hint = text(mActivity.getString(R.string.rkb_eim_dir_regrant), 12, WARN_COLOR, false);
+            hint.setPadding(0, dp(2), 0, 0);
+            box.addView(hint);
+        }
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -207,11 +216,37 @@ public class ExportImportPanel {
         return dir.getName();
     }
 
+    /**
+     * The folder a restore brought back but the platform no longer grants — a path we can name and
+     * open the picker at, never one we can write to. Null when the directory works, or when there
+     * has never been one. See {@code SafFolder} for why the two halves come apart.
+     */
+    public static String rememberedDirLabel(Context context) {
+        if (RkbExport.exportDir(context) != null) {
+            return null;
+        }
+        Uri uri = RkbExport.exportDirUri(context);
+        if (uri == null) {
+            return null;
+        }
+        String abs = RkbExport.absolutePathOf(uri, null);
+        if (abs != null) {
+            return abs;
+        }
+        String last = uri.getLastPathSegment();
+        if (last == null) {
+            return uri.toString();
+        }
+        int colon = last.lastIndexOf(':');
+        return colon >= 0 && colon + 1 < last.length() ? last.substring(colon + 1) : last;
+    }
+
     private View statusLine() {
         String msg;
         boolean warn;
         if (RkbExport.exportDir(mActivity) == null) {
-            msg = mActivity.getString(R.string.rkb_eim_warn_nodir);
+            msg = mActivity.getString(rememberedDirLabel(mActivity) != null
+                    ? R.string.rkb_eim_warn_regrant : R.string.rkb_eim_warn_nodir);
             warn = true;
         } else {
             DocumentFile newest = RkbExport.newestExport(mActivity);
@@ -467,12 +502,7 @@ public class ExportImportPanel {
         if (uri == null) {
             return;
         }
-        try {
-            context.getContentResolver().takePersistableUriPermission(uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        } catch (Exception e) {
-            // pass — some providers do not offer a persistable grant; the session grant still works
-        }
+        SafFolder.reclaim(context, uri);
         RkbExport.setExportDirUri(context, uri);
     }
 

@@ -1465,7 +1465,10 @@
     <string name="rkb_eim_desc">Tick what to carry, then export it as a single .zip — or import one and restore just those parts.</string>
     <string name="rkb_eim_dir">Backup directory</string>
     <string name="rkb_eim_dir_unset">Not set — tap to choose a folder</string>
+    <string name="rkb_eim_dir_regrant">Access lost with the install — tap to choose it again</string>
     <string name="rkb_eim_warn_nodir">No backup directory set.</string>
+    <string name="rkb_eim_warn_regrant">The backup directory has to be chosen again.</string>
+    <string name="backup_folder_regrant">Backup folder: %s\n\nAndroid does not carry folder access over to a new install.\nTap here to choose it again.</string>
     <string name="rkb_eim_warn_none">No backup in this directory yet.</string>
     <string name="rkb_eim_last">Last backup: %1$s</string>
     <string name="rkb_eim_select_all">Select all</string>

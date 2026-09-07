@@ -1320,7 +1320,10 @@ Oprávnění:
     <string name="rkb_eim_desc">Zaškrtněte, co přenést, a vyexportujte to do jednoho .zip — nebo .zip importujte a obnovte jen tyto části.</string>
     <string name="rkb_eim_dir">Složka pro zálohy</string>
     <string name="rkb_eim_dir_unset">Nenastaveno — klepnutím zvolte složku</string>
+    <string name="rkb_eim_dir_regrant">Přístup s instalací zanikl — klepnutím zvolte znovu</string>
     <string name="rkb_eim_warn_nodir">Není nastavena složka pro zálohy.</string>
+    <string name="rkb_eim_warn_regrant">Složku pro zálohy je třeba zvolit znovu.</string>
+    <string name="backup_folder_regrant">Složka pro zálohy: %s\n\nAndroid nepřenáší přístup ke složce do nové instalace.\nKlepnutím sem ji zvolte znovu.</string>
     <string name="rkb_eim_warn_none">V této složce zatím není žádná záloha.</string>
     <string name="rkb_eim_last">Poslední záloha: %1$s</string>
     <string name="rkb_eim_select_all">Vybrat vše</string>
