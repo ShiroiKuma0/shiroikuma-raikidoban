@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.WallpaperManager;
 import android.content.ClipDescription;
 import android.content.Context;
+import android.content.pm.ShortcutInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -102,6 +103,7 @@ public class ItemLayout extends ViewGroup {
     private static Bitmap sPinnedItemY;
     private static Bitmap sCheckBox;
     private static Field sDragEventX, sDragEventY;
+    private static boolean sDragEventFieldsResolved;
 
     static {
         sGridDotPaint.setStyle(Paint.Style.STROKE);
@@ -911,46 +913,69 @@ public class ItemLayout extends ViewGroup {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    // Only drags this launcher started itself (an app shortcut dragged out of a bubble, carrying
+    // its ShortcutInfo as local state) are ours. A global drag from another process – e.g. the
+    // Huawei Multi-Window dock – is delivered to every visible window with a null local state and
+    // must be ignored, or it is taken for a shortcut drop.
+    private static boolean isOwnDrag(DragEvent event) {
+        return event.getLocalState() instanceof ShortcutInfo;
+    }
+
+    // true when the reflection hack below managed to rewrite the event into page coordinates
+    private boolean mDragCoordsRewritten;
+
     @Override
     public boolean dispatchDragEvent(DragEvent event) {
-        // really awful hack
-        if (sDragEventX == null) {
+        if (!isOwnDrag(event)) {
+            return super.dispatchDragEvent(event);
+        }
+        // really awful hack: rewrite the event coordinates into page space. DragEvent.mX/mY are
+        // hidden API, so on recent Android the lookup fails: try it once, then fall back to
+        // mapping the coordinates in onDragEvent.
+        if (!sDragEventFieldsResolved) {
+            sDragEventFieldsResolved = true;
             try {
-                sDragEventX = DragEvent.class.getDeclaredField("mX");
-                sDragEventX.setAccessible(true);
-                sDragEventY = DragEvent.class.getDeclaredField("mY");
-                sDragEventY.setAccessible(true);
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
+                Field x = DragEvent.class.getDeclaredField("mX");
+                x.setAccessible(true);
+                Field y = DragEvent.class.getDeclaredField("mY");
+                y.setAccessible(true);
+                sDragEventX = x;
+                sDragEventY = y;
+            } catch (Exception e) {
+                // hidden API blocked
             }
         }
-        mTempPts[0] = event.getX();
-        mTempPts[1] = event.getY();
-        mLocalInverseTransform.mapPoints(mTempPts);
-        try {
-            sDragEventX.set(event, mTempPts[0]);
-            sDragEventY.set(event, mTempPts[1]);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        mDragCoordsRewritten = false;
+        if (sDragEventX != null) {
+            mTempPts[0] = event.getX();
+            mTempPts[1] = event.getY();
+            mLocalInverseTransform.mapPoints(mTempPts);
+            try {
+                sDragEventX.set(event, mTempPts[0]);
+                sDragEventY.set(event, mTempPts[1]);
+                mDragCoordsRewritten = true;
+            } catch (Exception e) {
+                sDragEventX = sDragEventY = null;
+            }
         }
         return super.dispatchDragEvent(event);
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     public boolean onDragEvent(DragEvent event) {
         int action = event.getAction();
 
         switch (action) {
             case DragEvent.ACTION_DRAG_STARTED:
-                return event.getClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN);
+                return isOwnDrag(event) && event.getClipDescription() != null && event.getClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN);
 
             case DragEvent.ACTION_DRAG_LOCATION:
                 if (!mPage.isFolder()) {
                     mTempPts[0] = event.getX();
                     mTempPts[1] = event.getY();
-                    mLocalTransform.mapPoints(mTempPts);
+                    if (mDragCoordsRewritten) {
+                        mLocalTransform.mapPoints(mTempPts);
+                    }
                     float ex = mTempPts[0];
                     float ey = mTempPts[1];
                     float ax = 0;
@@ -981,7 +1006,15 @@ public class ItemLayout extends ViewGroup {
 
             case DragEvent.ACTION_DROP:
                 mAutoScrolling = false;
-                mScreen.onItemLayoutAppShortcutDropped(this, event.getLocalState(), event.getX(), event.getY());
+                if (!isOwnDrag(event)) {
+                    return false;
+                }
+                mTempPts[0] = event.getX();
+                mTempPts[1] = event.getY();
+                if (!mDragCoordsRewritten) {
+                    mLocalInverseTransform.mapPoints(mTempPts);
+                }
+                mScreen.onItemLayoutAppShortcutDropped(this, event.getLocalState(), mTempPts[0], mTempPts[1]);
                 return true;
         }
         return super.onDragEvent(event);

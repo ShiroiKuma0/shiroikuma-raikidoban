@@ -336,7 +336,7 @@ public class FoldMatrixActivity extends ResourceWrapperActivity
             mDragRow = h.rowKey;
             mDragPageId = h.pageId;
             ClipData data = ClipData.newPlainText("page", String.valueOf(h.pageId));
-            v.startDragAndDrop(data, new View.DragShadowBuilder(v), null, 0);
+            v.startDragAndDrop(data, new View.DragShadowBuilder(v), this, 0);
             return true;
         }
         return false;
@@ -367,6 +367,11 @@ public class FoldMatrixActivity extends ResourceWrapperActivity
 
     @Override
     public boolean onDrag(View v, DragEvent event) {
+        // Only our own desktop drags (local state = this activity); a global drag from another
+        // app, e.g. the Huawei Multi-Window dock, must be ignored.
+        if (event.getLocalState() != this) {
+            return false;
+        }
         if (event.getAction() == DragEvent.ACTION_DROP) {
             Object tag = v.getTag();
             if (tag instanceof Holder) {
