@@ -11,6 +11,39 @@ Lightning Launcher eXtreme 14.3.
 
 ---
 
+## 白い熊 雷起動盤 14.3.7+008 — 2026-10-11
+
+Pulling the **Huawei Multi-Window dock** out from the screen edge and dragging an app into a split
+crashed the launcher every time — 「白い熊 雷起動盤」が繰り返し停止しています — while the split itself
+went through. With Huawei Home as launcher there was no crash.
+
+**Still the release key from `14.3.7+003`**, so it installs over `+006`; from `14.3.7+002` or earlier
+the crossing is the same one-time uninstall as before.
+
+### Other apps' drags are ignored
+
+- The dock's drag is **global**: the system delivers its start to every visible window, the
+  launcher's desktop included. The desktop then tried to rewrite the drag's coordinates through two
+  hidden `DragEvent` fields that Android blocks for this app, never found them, and used them anyway —
+  a `NullPointerException` in `ItemLayout.dispatchDragEvent`.
+- The desktop now handles **only its own drags** — an app shortcut dragged out of a long-press
+  bubble. Any other drag passes straight through and is declined the moment it starts, so it can
+  never be taken for a shortcut drop either (that would have crashed one step later).
+- The hidden-field lookup is attempted **once**; where it is blocked, it is never touched again.
+- The **fold matrix editor** accepted every drag as well, and a drop from another app would have
+  moved a desktop using leftover state. Its own drags are now marked, and anything unmarked is
+  ignored.
+
+### Dragging an app shortcut onto the desktop works again
+
+- On this phone the same blocked lookup meant that dragging an app shortcut out of a bubble onto
+  the desktop was **already crashing the same way** — the feature was broken, not merely imprecise.
+- Where the hidden fields are unavailable, the desktop now converts the drag position into page
+  coordinates itself, for the drop and for the edge auto-scroll alike, so a shortcut lands where it
+  is let go, on a zoomed or scrolled desktop too.
+
+---
+
 ## 白い熊 雷起動盤 14.3.7+006 — 2026-09-07
 
 Restoring onto a new phone landed on **"No backup folder selected"**, however complete the rest of
