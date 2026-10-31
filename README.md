@@ -6,11 +6,11 @@
 
 **The most customizable Android home screen — re-themed black-and-yellow, made fold-aware, fully self-contained, and restorable onto a wiped phone.**
 
-A fork of [Lightning Launcher](https://github.com/pierrehebert/LightningLauncher) with **major additions**: a launcher-wide font / colour / border theming system, a native tri-fold desktop matrix, an at-a-glance gesture editor, bundled in-app languages, backups that work on modern Android, a headless export/import door that lets the whole desktop be restored onto a clean phone, and tight integration with 白い熊's own [自由作業盤](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban) automation app.
+A fork of [Lightning Launcher](https://github.com/pierrehebert/LightningLauncher) with **major additions**: a launcher-wide font / colour / border theming system, a native tri-fold desktop matrix, an at-a-glance gesture editor, a desktop manager that shows and sets every desktop's navigation, bundled in-app languages, backups that work on modern Android, a headless export/import door that lets the whole desktop be restored onto a clean phone, and tight integration with 白い熊's own [自由作業盤](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban) automation app.
 
 Installs **side-by-side** with the original Lightning Launcher (package `shiroikuma.raikidoban`).
 
-**📥 Latest release: [`14.3.7+008`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases) · [changelog »](CHANGELOG.md)
+**📥 Latest release: [`14.3.7+014`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases) · [changelog »](CHANGELOG.md)
 
 *(雷起動盤 — “raikidōban”, the “lightning launch board”.)*
 
@@ -34,9 +34,15 @@ Built for the Huawei Mate XT and other foldables: a native **fold → desktop** 
 
 Long-tap any desktop or item and open **「ジェスチャー」** to see every event-action binding — tap, long-tap, the four swipes, lifecycle hooks — in one themed list, each row showing what it actually launches. View, edit or clear any binding from there; inherited (global-default) actions are marked and coloured distinctly.
 
+## 🧭 Desktop navigation at a glance
+
+The desktop manager shows, under every desktop, what its **swipe left, swipe right, back and home** do — and above them all, the global actions every desktop falls back to. A desktop's own setting is drawn bright, an inherited one dimmed. Tap any of them and it spells out exactly what runs where — which desktops use the global action, which override it and with what — then lets you point it at another desktop in one tap, open the full action editor, or hand it back to the global setting. The manager sits over your **live wallpaper**, not a stale still of it.
+
 ## 🤖 白い熊 自由作業盤 integration
 
 Tight, headless integration with 白い熊's own automation app, **[自由作業盤 (jiyusagyoban)](https://github.com/ShiroiKuma0/shiroikuma-jiyusagyoban)** — the in-house successor to Tasker. Drop a **自由作業盤 task shortcut** straight from the item / action pickers, and have widget names survive crashes and restores through a cross-app re-init handshake (no accessibility hacks needed). Such shortcuts are labelled 「白い熊 自由作業盤: …」 throughout, and their “App info” / “App store” / “Uninstall” entries resolve the app the *task* opens rather than 自由作業盤 itself.
+
+**「貼り付け」 — paste instead of pick.** After 自由作業盤's 「起動作業を作る」 creates launcher tasks, they are already on the clipboard: 「貼り付け」, first in the add dialog and right under 何もしない in the action chooser, turns them into shortcuts — several at once, laid out side by side — with no digging through 自由作業盤's project tree.
 
 When you shut 自由作業盤 down from its own menu, the launcher **notices and says so**: every task shortcut is drawn faded, and tapping one explains 「白い熊 自由作業盤 は停止中」 and opens 自由作業盤 instead of firing into the void — a dead tap that used to be indistinguishable from a working one.
 

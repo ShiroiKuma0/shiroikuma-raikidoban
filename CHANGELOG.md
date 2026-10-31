@@ -11,6 +11,56 @@ Lightning Launcher eXtreme 14.3.
 
 ---
 
+## 白い熊 雷起動盤 14.3.7+014 — 2026-10-31
+
+Two things: the launcher tasks that 白い熊 自由作業盤 creates can now be **pasted** instead of picked,
+and the **desktop manager** shows the real wallpaper and lets every desktop's navigation be seen and
+set in one place.
+
+**Still the release key from `14.3.7+003`**, so it installs over `+008`.
+
+### 「貼り付け」 — paste 自由作業盤 launcher tasks
+
+- 自由作業盤's 「起動作業を作る」 (from its build `+111`) puts the tasks it just created on the
+  clipboard. **「貼り付け」**, the new first item of the add dialog (BUILT-INS → Icon & Text, clipboard
+  icon), adds them as shortcuts — no trip through 「白い熊 自由作業盤 ショートカット」 and the project
+  tree.
+- Each shortcut is **the same as a manual pick**: 自由作業盤 returns it directly for the task name, so
+  icon, label and the “App info” target are all the task's own.
+- **Several tasks** are added one after another, each one cell to the right of the touched spot; the
+  last one is selected for editing.
+- **In the action chooser** 「貼り付け」 sits right under 何もしない (wherever shortcuts are offered).
+  A gesture runs one shortcut, so several pasted tasks are offered as a list to pick from.
+- A task name that no longer exists is reported once, in a black-yellow flash, and leaves nothing
+  half-added behind; a clipboard without a 自由作業盤 task list says
+  「クリップボードに自由作業盤のタスクがありません」. Only a clip labelled as 自由作業盤's task list is
+  ever read, and the clipboard is never cleared.
+
+### Desktop manager: the live wallpaper shows through
+
+- The screen used to paint `WallpaperManager.getDrawable()` as its background — a static image, never
+  the **live wallpaper**. It now uses the same transparent window as the home screen, so whatever
+  wallpaper is set, live included, moves underneath. The desktop pickers that use the same screen
+  benefit too.
+
+### Desktop manager: per-desktop and global navigation
+
+- In edit mode, under every desktop: its **swipe left, swipe right, back and home** action. A desktop's
+  own setting is bright (a target desktop is shown by name); one that falls back to the global action
+  is dimmed and marked 「（全体）」.
+- **Above the desktops**, a row of the same four **global** actions — 「全体のナビゲーション」 — the
+  ones every desktop without its own setting uses.
+- **Tapping any of them explains it in full**: the complete action with its detail (target desktop and
+  position, shortcut, script…); for a global one, which desktops use it and which override it and with
+  what; for a desktop, whether its own action runs or the global one.
+- **And sets it**: 「デスクトップ X へ移動」 for every desktop (the current one ticked), 「その他の動作…」
+  for the full action editor — any action at all — and, on a desktop, 「全体の設定を使う」 to hand it back
+  to the global action. Changes are saved at once.
+- The gesture name is set small and the action gets up to four lines, so long action names stay
+  readable.
+
+---
+
 ## 白い熊 雷起動盤 14.3.7+008 — 2026-10-11
 
 Pulling the **Huawei Multi-Window dock** out from the screen edge and dragging an app into a split
