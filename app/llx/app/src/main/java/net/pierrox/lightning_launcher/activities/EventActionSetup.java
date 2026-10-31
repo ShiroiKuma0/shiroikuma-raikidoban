@@ -26,6 +26,8 @@ package net.pierrox.lightning_launcher.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.widget.Toast;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -63,6 +65,8 @@ import net.pierrox.lightning_launcher.script.Script;
 import net.pierrox.lightning_launcher.util.ActionsOverviewDialog;
 import net.pierrox.lightning_launcher.util.ScriptPickerDialog;
 import net.pierrox.lightning_launcher.util.SetVariableDialog;
+import net.pierrox.lightning_launcher.util.Flash;
+import net.pierrox.lightning_launcher.util.JiyuPaste;
 import net.pierrox.lightning_launcher.util.ThemedShortcutPicker;
 import net.pierrox.lightning_launcher.util.UiDialogStyler;
 import net.pierrox.lightning_launcher_extreme.R;
@@ -87,12 +91,18 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
     private static final int REQUEST_PICK_SHORTCUT2 = 3;
     private static final int REQUEST_PICK_DESKTOP_POSITION_SHORTCUT = 4;
 
+    // Task name of a pending 「貼り付け」 request, to report a silent cancel (unknown name).
+    private String mJiyuPasteName;
+
     // Fork-only synthetic entries in the "Select action" chooser. They are NOT persisted action codes:
     // each resolves to a normal LAUNCH_SHORTCUT (jiyusagyoban's creator directly / a fixed Backup-restore
     // intent), so execution and display reuse the existing shortcut path. Negative to never collide with
     // a real GlobalConfig.* code.
     private static final int PSEUDO_JIYU_SHORTCUT = -1001;
     private static final int PSEUDO_BACKUP_RESTORE = -1002;
+    private static final int PSEUDO_JIYU_PASTE = -1003;
+    private static final Action JIYU_PASTE_ACTION =
+            new Action(PSEUDO_JIYU_PASTE, R.string.ai_jiyu_paste, Action.CAT_LAUNCH_AND_APPS, 0, 0);
     private static final Action JIYU_SHORTCUT_ACTION =
             new Action(PSEUDO_JIYU_SHORTCUT, R.string.an_ls_jiyu, Action.CAT_LAUNCH_AND_APPS, 0, 0);
     private static final Action BACKUP_RESTORE_ACTION =
@@ -357,6 +367,10 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
         // is offered for this event type (so e.g. script handlers, which have no LAUNCH_SHORTCUT, get
         // neither).
         insertActionBefore(adapter, GlobalConfig.LAUNCH_SHORTCUT, JIYU_SHORTCUT_ACTION);
+        // 「貼り付け」 (the 自由作業盤 task on the clipboard) right under "Nothing", only where shortcuts are offered.
+        if (adapter.getPosition(JIYU_SHORTCUT_ACTION) >= 0) {
+            insertActionAfter(adapter, GlobalConfig.NOTHING, JIYU_PASTE_ACTION);
+        }
         insertActionAfter(adapter, GlobalConfig.CUSTOMIZE_LAUNCHER, BACKUP_RESTORE_ACTION);
         list.setAdapter(adapter);
         builder.setView(list);
@@ -402,6 +416,10 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
             mEventActions.add(ea);
             mAdapter.notifyDataSetChanged();
             pickJiyuShortcut(ea, true);
+            return;
+        }
+        if (actionCode == PSEUDO_JIYU_PASTE) {
+            pasteJiyuShortcut();
             return;
         }
         if (actionCode == PSEUDO_BACKUP_RESTORE) {
@@ -454,6 +472,46 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
                 }
             }
         });
+    }
+
+    // 「貼り付け」: bind the 自由作業盤 task named on the clipboard (util/JiyuPaste). A gesture runs one
+    // shortcut, so several pasted names are offered as a list to pick from.
+    private void pasteJiyuShortcut() {
+        final ArrayList<String> names = JiyuPaste.readNames(this);
+        if (names == null) {
+            Flash.show(this, R.string.ai_jiyu_paste_none);
+            return;
+        }
+        if (names.size() == 1) {
+            requestJiyuPaste(names.get(0));
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.ai_jiyu_paste);
+        builder.setItems(names.toArray(new String[0]), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                requestJiyuPaste(names.get(which));
+            }
+        });
+        UiDialogStyler.show(builder);
+    }
+
+    private void requestJiyuPaste(String name) {
+        EventAction ea = new EventAction(GlobalConfig.LAUNCH_SHORTCUT, null);
+        mEventActions.add(ea);
+        mAdapter.notifyDataSetChanged();
+        mEventActionForPick = ea;
+        mEventActionForPickNew = true;
+        mJiyuPasteName = name;
+        try {
+            startActivityForResult(JiyuPaste.createShortcutRequest(name), REQUEST_PICK_SHORTCUT2);
+        } catch (Exception e) {
+            mJiyuPasteName = null;
+            mEventActions.remove(ea);
+            mAdapter.notifyDataSetChanged();
+            Flash.show(this, R.string.ai_jiyu_paste_no_app);
+        }
     }
 
     private void editAction(EventAction ea, boolean forNew) {
@@ -556,6 +614,12 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
                 }
             }
         } else if (requestCode == REQUEST_PICK_ACTIVITY || requestCode == REQUEST_PICK_SHORTCUT2 || requestCode == REQUEST_PICK_DESKTOP_POSITION_SHORTCUT) {
+            String jiyuPasteName = mJiyuPasteName;
+            mJiyuPasteName = null;
+            if (resultCode != RESULT_OK && jiyuPasteName != null) {
+                // jiyusagyoban cancels silently for an unknown task name — say so here
+                Flash.show(this, getString(R.string.ai_jiyu_paste_missing, 0, 1, jiyuPasteName), Toast.LENGTH_LONG);
+            }
             if (resultCode == RESULT_OK) {
                 try {
                     Intent i = requestCode == REQUEST_PICK_ACTIVITY ? data : (Intent) data.getParcelableExtra(Intent.EXTRA_SHORTCUT_INTENT);

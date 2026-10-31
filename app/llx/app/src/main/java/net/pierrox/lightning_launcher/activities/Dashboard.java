@@ -273,6 +273,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     // event-action binding (mNotValidEventAction), not the item's own intent.
     private static final int REQUEST_REPAIR_EA_PICK_APP = 9105;
     private static final int REQUEST_REPAIR_EA_PICK_SHORTCUT = 9106;
+    // 「貼り付け」 in the add dialog: one jiyusagyoban CREATE_SHORTCUT round-trip per pasted task name.
+    private static final int REQUEST_JIYU_PASTE = 9107;
     private static final String BROADCAST_ACTION_DISPLAY_PAGE = LLApp.LL_PKG_NAME + ".ACTION_DISPLAY_PAGE";
     private static final String BROADCAST_ACTION_RELOAD = LLApp.LLX_PKG_NAME + ".ACTION_RELOAD";
     private static final int BUBBLE_MODE_NONE = 0;
@@ -1094,6 +1096,10 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 mNotValidEventAction = null;
                 mNotValidEventActionItem = null;
             }
+            return;
+        }
+        if (requestCode == REQUEST_JIYU_PASTE) {
+            onJiyuPasteResult(resultCode, data);
             return;
         }
         if (requestCode < REQUEST_FROM_CUSTOMIZE_VIEW) {
@@ -2890,6 +2896,9 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                             case AddItemDialog.AI_APP:
                                 selectAppForAdd();
                                 break;
+                            case AddItemDialog.AI_JIYU_PASTE:
+                                pasteJiyuShortcuts();
+                                break;
                             case AddItemDialog.AI_JIYU_SHORTCUT:
                                 selectJiyuShortcutForAdd();
                                 break;
@@ -3665,6 +3674,82 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             }
         }
         selectShortcutForAddOrPick(null);
+    }
+
+    // ---- 「貼り付け」: add the 自由作業盤 launcher tasks named on the clipboard (util/JiyuPaste) ----
+    // Items are placed one cell apart from the touched point; one summary Flash reports names that
+    // were not found.
+
+    private final ArrayList<String> mJiyuPasteQueue = new ArrayList<>();
+    private final ArrayList<String> mJiyuPasteMissing = new ArrayList<>();
+    private String mJiyuPasteCurrent;
+    private int mJiyuPasteTotal;
+    private int mJiyuPasteAdded;
+    private Item mJiyuPasteLastItem;
+
+    private void pasteJiyuShortcuts() {
+        ArrayList<String> names = net.pierrox.lightning_launcher.util.JiyuPaste.readNames(this);
+        if (names == null) {
+            Flash.show(this, R.string.ai_jiyu_paste_none);
+            return;
+        }
+        mJiyuPasteQueue.clear();
+        mJiyuPasteQueue.addAll(names);
+        mJiyuPasteMissing.clear();
+        mJiyuPasteTotal = names.size();
+        mJiyuPasteAdded = 0;
+        mJiyuPasteLastItem = null;
+        requestNextJiyuPaste();
+    }
+
+    private void requestNextJiyuPaste() {
+        if (mJiyuPasteQueue.isEmpty()) {
+            finishJiyuPaste();
+            return;
+        }
+        mJiyuPasteCurrent = mJiyuPasteQueue.remove(0);
+        try {
+            startActivityForResult(net.pierrox.lightning_launcher.util.JiyuPaste.createShortcutRequest(mJiyuPasteCurrent), REQUEST_JIYU_PASTE);
+        } catch (Exception e) {
+            mJiyuPasteQueue.clear();
+            mJiyuPasteCurrent = null;
+            Flash.show(this, R.string.ai_jiyu_paste_no_app);
+        }
+    }
+
+    private void onJiyuPasteResult(int resultCode, Intent data) {
+        if (mJiyuPasteCurrent == null) return;
+        if (resultCode == RESULT_OK && data != null) {
+            ItemLayout il = mScreen.getTargetOrTopmostItemLayout();
+            Page page = il.getPage();
+            float scale = il.getCurrentScale();
+            // step one cell to the right per pasted item so they do not stack on the touched cell
+            // (POSITION_AUTO already picks the next free cell each time)
+            int x = mScreen.getLastTouchedAddX();
+            if (x != Utils.POSITION_AUTO) {
+                x += (int) (mJiyuPasteAdded * page.getCurrentViewCellWidth());
+            }
+            Item newItem = Utils.addAndroidShortcutFromIntent(this, data, page, x, mScreen.getLastTouchedAddY(), scale);
+            mUndoStack.storePageAddItem(newItem);
+            mJiyuPasteAdded++;
+            mJiyuPasteLastItem = newItem;
+        } else {
+            mJiyuPasteMissing.add(mJiyuPasteCurrent);
+        }
+        mJiyuPasteCurrent = null;
+        requestNextJiyuPaste();
+    }
+
+    private void finishJiyuPaste() {
+        if (mJiyuPasteLastItem != null) {
+            editItem(mScreen.getTargetOrTopmostItemLayout(), mJiyuPasteLastItem);
+        }
+        if (!mJiyuPasteMissing.isEmpty()) {
+            Flash.show(this, getString(R.string.ai_jiyu_paste_missing, mJiyuPasteAdded, mJiyuPasteTotal,
+                    android.text.TextUtils.join(", ", mJiyuPasteMissing)), Toast.LENGTH_LONG);
+        }
+        mJiyuPasteMissing.clear();
+        mJiyuPasteLastItem = null;
     }
 
     // From the "app not installed" dialog: repoint the item at a 「白い熊 雷起動盤」 (Lightning) action by

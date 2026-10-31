@@ -76,6 +76,8 @@ public class AddItemDialog extends AlertDialog implements View.OnClickListener, 
     public static final int AI_CUSTOM_VIEW = 18;
     // Fork-only: add a 「白い熊 自由作業盤」 shortcut item straight from jiyusagyoban's own creator.
     public static final int AI_JIYU_SHORTCUT = 19;
+    // Fork-only: add the 自由作業盤 task(s) whose names 「起動作業を作る」 put on the clipboard.
+    public static final int AI_JIYU_PASTE = 20;
     private final AddItemDialogInterface mAddItemDialogInterface;
     private final LayoutInflater mInflater;
 
@@ -159,6 +161,7 @@ public class AddItemDialog extends AlertDialog implements View.OnClickListener, 
         ViewGroup cat;
 
         cat = addDialogAddCategory(builtinsView, R.string.ac_s);
+        addDialogAddItem(cat, context.getString(R.string.ai_jiyu_paste), "$", AI_JIYU_PASTE);
         addDialogAddItem(cat, labels[0], "h", AI_APP);
         addDialogAddItem(cat, context.getString(R.string.an_ls_jiyu), "e", AI_JIYU_SHORTCUT);
         addDialogAddItem(cat, labels[1], "e", AI_SHORTCUT);
