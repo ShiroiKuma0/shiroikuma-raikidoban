@@ -26,7 +26,6 @@ package net.pierrox.lightning_launcher.activities;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -51,7 +50,13 @@ import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.RelativeSizeSpan;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -64,6 +69,10 @@ import net.pierrox.lightning_launcher.API;
 import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.api.ScreenIdentity;
 import net.pierrox.lightning_launcher.configuration.GlobalConfig;
+import net.pierrox.lightning_launcher.configuration.PageConfig;
+import net.pierrox.lightning_launcher.data.Action;
+import net.pierrox.lightning_launcher.data.ActionsDescription;
+import net.pierrox.lightning_launcher.data.EventAction;
 import net.pierrox.lightning_launcher.data.Item;
 import net.pierrox.lightning_launcher.data.LightningIntent;
 import net.pierrox.lightning_launcher.data.Page;
@@ -78,6 +87,9 @@ import net.pierrox.lightning_launcher.views.ItemLayout;
 import net.pierrox.lightning_launcher.views.item.ItemView;
 import net.pierrox.lightning_launcher_extreme.R;
 import net.pierrox.lightning_launcher.util.UiDialogStyler;
+import net.pierrox.lightning_launcher.util.UiChrome;
+import net.pierrox.lightning_launcher.configuration.UiSlot;
+import net.pierrox.lightning_launcher.configuration.UiTheme;
 
 import org.koin.java.KoinJavaComponent;
 
@@ -120,13 +132,9 @@ public class ScreenManager extends ResourceWrapperActivity implements OnClickLis
 
         mDefaultIcon = getResources().getDrawable(R.drawable.icon);
 
-        Window w = getWindow();
-        WallpaperManager wpm = WallpaperManager.getInstance(this);
-        try {
-            w.setBackgroundDrawable(wpm.getDrawable());
-        } catch (Throwable e) {
-            // fails on some devices
-        }
+        // The real (possibly live) wallpaper shows through: the manifest gives this activity the
+        // transparent windowShowWallpaper theme. WallpaperManager.getDrawable() was only ever the
+        // static image, never a live wallpaper.
 
         setContentView(R.layout.screen_manager);
 
@@ -252,6 +260,10 @@ public class ScreenManager extends ResourceWrapperActivity implements OnClickLis
         updateScreenViews();
 
         findViewById(R.id.sm_buttons).setVisibility(mMode == SCREEN_MODE_EDIT ? View.VISIBLE : View.GONE);
+
+        if (mMode == SCREEN_MODE_EDIT) {
+            showGlobalNav();
+        }
     }
 
     protected int getMode() {
@@ -384,6 +396,12 @@ public class ScreenManager extends ResourceWrapperActivity implements OnClickLis
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        if (requestCode == REQUEST_EDIT_NAV_ACTION) {
+            if (resultCode == RESULT_OK && data != null) {
+                applyNavAction(mNavEditPage, mNavEditSlot, EventActionSetup.getEventActionFromIntent(data));
+            }
+            return;
+        }
         if (requestCode == REQUEST_PICK_IMAGE) {
             if (resultCode == RESULT_OK) {
                 FileOutputStream fos = null;
@@ -650,7 +668,275 @@ public class ScreenManager extends ResourceWrapperActivity implements OnClickLis
             } else {
                 iv.setImageBitmap(screen.icon);
             }
+
+            if (mMode == SCREEN_MODE_EDIT) {
+                updateNavChips(screen_view, page);
+            }
         }
+    }
+
+    // ---- Per-desktop navigation gestures (fork) ----
+    // Under each desktop in edit mode: its swipe left / swipe right / back / home action. Setting one
+    // stores a GO_DESKTOP_POSITION (desktop only, no position) on that desktop's own config; "use the
+    // global setting" unsets it so the global action (e.g. the fold-matrix swipes) applies again.
+
+    private static final int[] NAV_CHIP_IDS = new int[]{R.id.screen_nav_swipe_left, R.id.screen_nav_swipe_right, R.id.screen_nav_back, R.id.screen_nav_home};
+    private static final int[] NAV_LABELS = new int[]{R.string.sm_nav_swipe_left, R.string.sm_nav_swipe_right, R.string.sm_nav_back, R.string.sm_nav_home};
+    private ActionsDescription mNavActions;
+
+    private static EventAction getNavAction(PageConfig c, int slot) {
+        switch (slot) {
+            case 0: return c.swipeLeft;
+            case 1: return c.swipeRight;
+            case 2: return c.backKey;
+            default: return c.homeKey;
+        }
+    }
+
+    private static void setNavAction(PageConfig c, int slot, EventAction ea) {
+        switch (slot) {
+            case 0: c.swipeLeft = ea; break;
+            case 1: c.swipeRight = ea; break;
+            case 2: c.backKey = ea; break;
+            default: c.homeKey = ea; break;
+        }
+    }
+
+    private static EventAction getGlobalNavAction(GlobalConfig gc, int slot) {
+        switch (slot) {
+            case 0: return gc.swipeLeft;
+            case 1: return gc.swipeRight;
+            case 2: return gc.backKey;
+            default: return gc.homeKey;
+        }
+    }
+
+    /** The desktop a GO_DESKTOP_POSITION action jumps to, else Page.NONE. */
+    private static int getNavTargetPage(EventAction ea) {
+        if (ea == null || ea.action != GlobalConfig.GO_DESKTOP_POSITION || ea.data == null) {
+            return Page.NONE;
+        }
+        try {
+            return Intent.parseUri(ea.data, 0).getIntExtra(LightningIntent.INTENT_EXTRA_DESKTOP, Page.NONE);
+        } catch (Exception e) {
+            return Page.NONE;
+        }
+    }
+
+    private String getScreenLabel(int page) {
+        for (Screen screen : mScreens) {
+            if (screen.page == page) {
+                return screen.label != null ? screen.label : String.valueOf(page + 1);
+            }
+        }
+        return String.valueOf(page + 1);
+    }
+
+    private String describeNavAction(EventAction ea) {
+        if (ea == null || ea.action == GlobalConfig.UNSET) {
+            return getString(R.string.sm_nav_unset);
+        }
+        int target = getNavTargetPage(ea);
+        if (target != Page.NONE) {
+            return getScreenLabel(target);
+        }
+        if (mNavActions == null) {
+            mNavActions = new ActionsDescription(this, Action.FLAG_TYPE_DESKTOP, false);
+        }
+        try {
+            return mNavActions.getActionName(ea.action);
+        } catch (Exception e) {
+            return getString(R.string.sm_nav_unset);
+        }
+    }
+
+    private static final int[] GLOBAL_NAV_CHIP_IDS = new int[]{R.id.sm_global_nav_swipe_left, R.id.sm_global_nav_swipe_right, R.id.sm_global_nav_back, R.id.sm_global_nav_home};
+
+    // Read-only row above the desktops: the global actions an unset desktop gesture falls back to.
+    private void showGlobalNav() {
+        findViewById(R.id.sm_global_nav).setVisibility(View.VISIBLE);
+        TextView title = findViewById(R.id.sm_global_nav_title);
+        title.setText(R.string.sm_nav_global_title);
+        title.setTextColor(UiTheme.color(UiSlot.BUTTON_TEXT));
+        title.setShadowLayer(6, 0, 0, 0xff000000); // legible over a busy (live) wallpaper
+        GlobalConfig gc = mLightningEngine.getGlobalConfig();
+        for (int i = 0; i < GLOBAL_NAV_CHIP_IDS.length; i++) {
+            TextView chip = findViewById(GLOBAL_NAV_CHIP_IDS[i]);
+            UiChrome.applyButton(chip);
+            chip.setPadding(chip.getPaddingLeft() / 2, chip.getPaddingTop() / 2, chip.getPaddingRight() / 2, chip.getPaddingBottom() / 2);
+            chip.setText(navChipText(NAV_LABELS[i], describeNavAction(getGlobalNavAction(gc, i))));
+            final int slot = i;
+            chip.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openNavSlot(Page.NONE, slot);
+                }
+            });
+        }
+    }
+
+    // Small gesture name over the (full) action, so a long action name gets the room.
+    private CharSequence navChipText(int labelRes, String value) {
+        SpannableStringBuilder sb = new SpannableStringBuilder(getString(labelRes));
+        sb.setSpan(new RelativeSizeSpan(0.7f), 0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sb.append("\n").append(value);
+        return sb;
+    }
+
+    private void updateNavChips(View screen_view, int page) {
+        PageConfig c = mLightningEngine.getOrLoadPage(page).config;
+        GlobalConfig gc = mLightningEngine.getGlobalConfig();
+        for (int i = 0; i < NAV_CHIP_IDS.length; i++) {
+            TextView chip = screen_view.findViewById(NAV_CHIP_IDS[i]);
+            EventAction own = getNavAction(c, i);
+            boolean inherited = own == null || own.action == GlobalConfig.UNSET;
+            String value = inherited
+                    ? describeNavAction(getGlobalNavAction(gc, i)) + " " + getString(R.string.sm_nav_global)
+                    : describeNavAction(own);
+            chip.setText(navChipText(NAV_LABELS[i], value));
+            // the desktop's own setting is bright; an inherited global one is dimmed
+            chip.setAlpha(inherited ? 0.55f : 1f);
+        }
+    }
+
+    private static final int REQUEST_EDIT_NAV_ACTION = 3;
+    private int mNavEditPage = Page.NONE;
+    private int mNavEditSlot;
+
+    /** Full name of an action plus its detail (target desktop and position, shortcut, script…). */
+    private String describeNavActionFull(EventAction ea) {
+        if (ea == null || ea.action == GlobalConfig.UNSET) {
+            return getString(R.string.sm_nav_unset);
+        }
+        if (mNavActions == null) {
+            mNavActions = new ActionsDescription(this, Action.FLAG_TYPE_DESKTOP, false);
+        }
+        String name;
+        try {
+            name = mNavActions.getActionName(ea.action);
+        } catch (Exception e) {
+            name = String.valueOf(ea.action);
+        }
+        String detail = null;
+        try {
+            detail = ea.describe(mLightningEngine);
+        } catch (Exception e) {
+            // pass
+        }
+        return detail == null ? name : name + ": " + detail;
+    }
+
+    // Tap on a navigation button: the full description of what that gesture does and where, then the
+    // choices — a desktop to jump to, the full action editor, or (per desktop) back to the global one.
+    // page == Page.NONE means the global action.
+    private void openNavSlot(final int page, final int slot) {
+        final boolean global = page == Page.NONE;
+        GlobalConfig gc = mLightningEngine.getGlobalConfig();
+        final EventAction globalEa = getGlobalNavAction(gc, slot);
+        final EventAction own = global ? globalEa : getNavAction(mLightningEngine.getOrLoadPage(page).config, slot);
+        boolean ownUnset = own == null || own.action == GlobalConfig.UNSET;
+
+        StringBuilder info = new StringBuilder();
+        if (global) {
+            info.append(getString(R.string.sm_nav_info_global, describeNavActionFull(globalEa)));
+            StringBuilder using = new StringBuilder();
+            StringBuilder overriding = new StringBuilder();
+            for (Screen screen : mScreens) {
+                EventAction e = getNavAction(mLightningEngine.getOrLoadPage(screen.page).config, slot);
+                if (e == null || e.action == GlobalConfig.UNSET) {
+                    if (using.length() > 0) using.append(", ");
+                    using.append(getScreenLabel(screen.page));
+                } else {
+                    if (overriding.length() > 0) overriding.append(", ");
+                    overriding.append(getScreenLabel(screen.page)).append(" → ").append(describeNavAction(e));
+                }
+            }
+            info.append("\n\n").append(getString(R.string.sm_nav_info_used_by, using.length() > 0 ? using : getString(R.string.sm_nav_unset)));
+            info.append("\n\n").append(getString(R.string.sm_nav_info_overridden_by, overriding.length() > 0 ? overriding : getString(R.string.sm_nav_unset)));
+        } else if (ownUnset) {
+            info.append(getString(R.string.sm_nav_info_inherits, describeNavActionFull(globalEa)));
+        } else {
+            info.append(getString(R.string.sm_nav_info_own, describeNavActionFull(own)));
+            info.append("\n\n").append(getString(R.string.sm_nav_info_global_unused, describeNavActionFull(globalEa)));
+        }
+
+        // choices: [use global] + desktops + full editor
+        final int n = mScreens.size();
+        final int offset = global ? 0 : 1;
+        String[] names = new String[offset + n + 1];
+        if (!global) {
+            names[0] = getString(R.string.sm_nav_inherit);
+        }
+        int target = getNavTargetPage(own);
+        int checked = !global && ownUnset ? 0 : -1;
+        for (int i = 0; i < n; i++) {
+            int p = mScreens.get(i).page;
+            names[offset + i] = getString(R.string.sm_nav_go_to, getScreenLabel(p));
+            if (p == target && !(ownUnset && !global)) {
+                checked = offset + i;
+            }
+        }
+        names[offset + n] = getString(R.string.sm_nav_other_action);
+
+        float d = getResources().getDisplayMetrics().density;
+        TextView infoView = new TextView(this);
+        infoView.setText(info);
+        infoView.setTextSize(15);
+        int pad = Math.round(20 * d);
+        infoView.setPadding(pad, Math.round(8 * d), pad, Math.round(12 * d));
+        // the description scrolls with the choices as the list's (non-selectable) header
+        final ListView list = new ListView(this);
+        list.addHeaderView(infoView, null, false);
+        list.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        list.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_single_choice, names));
+        if (checked >= 0) {
+            list.setItemChecked(checked + 1, true);
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(NAV_LABELS[slot]) + " — " + (global ? getString(R.string.sm_nav_scope_global) : getScreenLabel(page)));
+        builder.setView(list);
+        builder.setNegativeButton(android.R.string.cancel, null);
+        final AlertDialog dialog = UiDialogStyler.show(builder);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int which = position - list.getHeaderViewsCount();
+                dialog.dismiss();
+                if (which == offset + n) {
+                    mNavEditPage = page;
+                    mNavEditSlot = slot;
+                    EventAction start = own == null ? EventAction.UNSET() : own;
+                    EventActionSetup.startActivityForResult(ScreenManager.this, start, false, Action.FLAG_TYPE_DESKTOP, false, REQUEST_EDIT_NAV_ACTION);
+                } else if (which < offset) {
+                    applyNavAction(page, slot, EventAction.UNSET());
+                } else {
+                    Intent go = new Intent(ScreenManager.this, Dashboard.class);
+                    go.putExtra(LightningIntent.INTENT_EXTRA_DESKTOP, mScreens.get(which - offset).page);
+                    applyNavAction(page, slot, new EventAction(GlobalConfig.GO_DESKTOP_POSITION, go.toUri(0)));
+                }
+            }
+        });
+    }
+
+    private void applyNavAction(int page, int slot, EventAction ea) {
+        if (page == Page.NONE) {
+            GlobalConfig gc = mLightningEngine.getGlobalConfig();
+            switch (slot) {
+                case 0: gc.swipeLeft = ea; break;
+                case 1: gc.swipeRight = ea; break;
+                case 2: gc.backKey = ea; break;
+                default: gc.homeKey = ea; break;
+            }
+            mLightningEngine.notifyGlobalConfigChanged();
+        } else {
+            Page p = mLightningEngine.getOrLoadPage(page);
+            setNavAction(p.config, slot, ea);
+            p.setModified();
+        }
+        mLightningEngine.saveData();
+        showGlobalNav();
+        updateScreenViews();
     }
 
     private void updateScreenShortcuts(Screen screen, boolean update_icon, boolean update_label, String old_label) {
@@ -734,6 +1020,22 @@ public class ScreenManager extends ResourceWrapperActivity implements OnClickLis
 
         ImageView preview = screen_view.findViewById(R.id.screen_preview);
         preview.setImageDrawable(new PageDrawable(page));
+
+        if (mMode == SCREEN_MODE_EDIT) {
+            screen_view.findViewById(R.id.screen_nav).setVisibility(View.VISIBLE);
+            for (int i = 0; i < NAV_CHIP_IDS.length; i++) {
+                final int slot = i;
+                TextView chip = screen_view.findViewById(NAV_CHIP_IDS[i]);
+                UiChrome.applyButton(chip);
+                chip.setPadding(chip.getPaddingLeft() / 2, chip.getPaddingTop() / 2, chip.getPaddingRight() / 2, chip.getPaddingBottom() / 2);
+                chip.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        openNavSlot(page, slot);
+                    }
+                });
+            }
+        }
 
         mScreenContainer.addView(screen_view, pos);
     }

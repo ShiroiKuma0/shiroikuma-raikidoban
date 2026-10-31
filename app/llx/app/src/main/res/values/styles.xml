@@ -37,6 +37,18 @@
 		<item name="android:background">@drawable/ab_btn_bg</item>
 	</style>
 
+    <!-- ScreenManager per-desktop navigation chip; colours/border are painted by UiChrome.applyButton. -->
+    <style name="sm_nav_chip">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">3dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:maxLines">4</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
     <style name="ip_button">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">1</item>
