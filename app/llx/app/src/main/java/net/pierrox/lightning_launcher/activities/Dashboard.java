@@ -5717,6 +5717,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             }
             addBubbleItem(R.id.mi_dmc_c, text_res_id);
             addBubbleItem(R.id.mi_dmc_r, R.string.lightning);
+            addBubbleItem(R.id.mi_llui, R.string.llui_title);
             addBubbleItem(R.id.mi_android_settings, R.string.menu_settings);
         } else if (mode == BUBBLE_MODE_ITEMS) {
             addBubbleItem(R.id.mi_h, R.string.mi_h);
