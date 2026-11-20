@@ -11,6 +11,100 @@ Lightning Launcher eXtreme 14.3.
 
 ---
 
+## 白い熊 雷起動盤 14.3.7+015 — 2026-11-20
+
+The whole app now wears the settled black-yellow shapes — **pills, outlined switches and icons
+coloured by what a row does** — and the backup screen can **prune** old backups.
+
+**Still the release key from `14.3.7+003`**, so it installs over `+014`. Not yet checked on the device.
+
+### Prune old backups
+
+- A fourth button on the backup screen, **“Prune old backups”** (「古いバックアップを削除」), deletes
+  every backup in the backup directory **except the newest one**.
+- Only full backups count: a template (an `.lla` archive with a manifest) and any other file in the
+  directory are never touched, so the newest backup stays even when a template is newer.
+- Nothing is deleted before a confirmation that gives the number to delete and names the backup that
+  is kept; a flash then reports how many were deleted.
+
+### Buttons
+
+- Every button with a text label is an **outlined pill, never filled**: 3 dp and bold for the main
+  action of its block (Backup, OK in the colour picker and the cropper, Export, Restart now),
+  1.25 dp for every other, and red when it deletes (Prune, Delete script).
+- Covered: the backup screen, fold matrix, image cropper and picker, script editor, colour picker,
+  the Export / Import panel, the desktop picker's OK, the live-wallpaper placeholder and the buttons
+  inside dialogs' own layouts.
+- The 「ボタン」 group's border-width and corner sliders now only **override** the pill: they read
+  “pill” until moved, and a long-press on the row gives the pill back.
+- Left as they are, on purpose: icon-glyph tool buttons, the translucent yellow edit bars, the
+  bubble's glyph strip and the geometry box.
+
+### Dialogs
+
+- The button bar of **every** dialog is pills — the positive button thick and bold, the others
+  regular.
+- Twelve dialogs that delete, reset or revoke show a **red** confirm pill: remove widget, clear
+  gesture, reset page, delete desktop, delete archive, prune backups, delete script, delete style,
+  delete font, delete file (both forms) and regenerate token.
+- Lists of **actions** are full-width icon pills, with a › on rows that open something and red on
+  rows that delete: the backup long-press list, the fold-matrix cell menu, “app not installed” and
+  the 自由作業盤 paste chooser. Lists of pure choices (language, weight, fonts) stay plain.
+- The colour picker has the bordered panel every other dialog already had.
+
+### Switches
+
+- An on/off setting is the **outlined switch**: a 2 dp round outline with a solid dot, right and
+  accent when on, left and an opaque dim yellow when off — never filled, never a white ring.
+- Covered: the UI page, every checkbox preference in Customize and the item editor, the script
+  editor's options, the search and apply-template options and every “don't show again”.
+- Selection marks stay checkboxes: the export categories, the desktop selection and the “custom”
+  mark on Customize rows.
+
+### Menus
+
+- Every row of every bubble menu — the Lightning menu, item menus in and out of edit mode, the
+  drawer menus, script and plugin rows — is a **full-width pill with its icon inside**, a › when it
+  opens a submenu or a screen, and red for Delete and Uninstall.
+- The icon is **coloured by what the row does**: green runs / launches / adds, blue edits, cyan is
+  about an item or app, orange copies / moves / exports, magenta locks / hides / stops, red deletes,
+  the accent views and configures.
+- The ⋮ overflow of Lightning Settings and Customize follows the same look.
+- A menu **no longer scrolls while the screen has room**: opened from an item low on the screen it
+  slides up by what is missing instead.
+- The rules under the menu title and the glyph strip are the clear 1 dp darker-accent divider.
+
+### Lists
+
+- Row icons, coloured by role, on: the “Select action” chooser (by category), the Gestures overview
+  (its ✕ is red), the Lightning Settings root, every Customize and item-editor row (by kind: colour,
+  number, choice, switch, text, gesture, binding, or a row that opens something), the backup
+  archives, the style and shortcut lists and the move-to picker.
+
+### 「白い熊 雷起動盤 UI」 page
+
+- A thick **Lightning settings ›** pill at the top opens the launcher's own settings.
+- A **chip index** under it: one small chip per section. A tap unfolds the section and scrolls to
+  it; a long-press drags the chip, the chips reorder live under the finger and the sections follow
+  on drop.
+- **Every section folds** (› folded, ⌄ open) and starts folded. Section order and fold state are
+  remembered and travel in the export.
+- A new **Maintenance** section holds **Reset section order**.
+- Action rows are pills that hug their label, with the explanation beneath in dim gold: Export /
+  Import…, Copy token, Regenerate (red). Switch rows have a bold label, a dim-gold description and
+  a thin dim-gold rule down their left edge. Every row has an icon; rows are only as tall as their
+  content.
+- New settable colours: in Foundation **Explanations (dim gold)**, **Switch, off** and **Delete /
+  destructive**; in a new **Icon colours** section the five icon roles. The red of a missing backup
+  directory now follows the delete colour instead of a fixed value.
+
+### Packaging
+
+- `shiroikuma-raikidoban_14.3.7+015_arm64-v8a.apk`, versionCode `3370015`, arm64-v8a, signed with the
+  fork's release key.
+
+---
+
 ## 白い熊 雷起動盤 14.3.7+014 — 2026-10-31
 
 Two things: the launcher tasks that 白い熊 自由作業盤 creates can now be **pasted** instead of picked,

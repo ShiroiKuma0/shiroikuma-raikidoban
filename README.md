@@ -10,7 +10,7 @@ A fork of [Lightning Launcher](https://github.com/pierrehebert/LightningLauncher
 
 Installs **side-by-side** with the original Lightning Launcher (package `shiroikuma.raikidoban`).
 
-**📥 Latest release: [`14.3.7+014`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases) · [changelog »](CHANGELOG.md)
+**📥 Latest release: [`14.3.7+015`](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-raikidoban/releases) · [changelog »](CHANGELOG.md)
 
 *(雷起動盤 — “raikidōban”, the “lightning launch board”.)*
 
@@ -25,6 +25,10 @@ A single appearance screen at the top of Lightning Settings recolours and re-fon
 ## ⚡ Black-and-yellow, everywhere
 
 Every visible element follows the theme — including toasts and progress dialogs, re-routed through a custom `Flash` helper so nothing ever pops up white-on-grey. **Every dialog** wears the yellow frame, confirmations and pickers alike: a single styler is the only way this launcher shows one, so nothing can slip out unthemed. And **not one line of text is left in the platform's white**: any text no code paints by hand — the rows of a chooser, an input field, a spinner's dropdown — is caught and repainted, without ever disturbing an icon font or a font preview. The launcher is **permanently in its dark palette** — it never follows the phone's light mode, and never shows stock's white-and-orange chrome, right from the first launch on a fresh install. Even the launcher icon and the in-editor toolbar were restyled to match.
+
+## 💊 Pills, outlined switches, icons that mean something
+
+Nothing is ever filled. Every button is an **outlined pill** — thick and bold for the one thing a block is for, thin for the rest, red when it deletes. Every on/off setting is an **outlined switch** with a solid dot. Every menu row is a full-width pill with its icon, and the icon's **colour says what the row does**: green runs, blue edits, orange moves and exports, magenta locks and hides, red deletes. A menu slides to fit the screen before it ever scrolls. The appearance page itself is a folding accordion with a draggable chip index.
 
 ## 📐 Fold-aware desktop matrix (for the tri-fold)
 
