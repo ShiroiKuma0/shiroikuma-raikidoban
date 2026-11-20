@@ -11,6 +11,23 @@ Lightning Launcher eXtreme 14.3.
 
 ---
 
+## 白い熊 雷起動盤 14.3.7+016 — 2026-11-20
+
+The settings bubble gains a row that opens the **「白い熊 雷起動盤 UI」** page directly.
+
+**Still the release key from `14.3.7+003`**, so it installs over `+015`.
+
+### Menus
+
+- The settings bubble — the one behind the sliders glyph, with the desktop's (or folder's, or app
+  drawer's) settings, 「白い熊 雷起動盤」 and Android's settings — has a fourth row,
+  **「白い熊 雷起動盤 UI」**, between the launcher's own settings and Android's. It opens the UI
+  appearance page in one tap; before, that page was reachable only from the Lightning menu or from
+  the top of the launcher's settings.
+- The row is a full-width pill with the same palette icon as its twin in the Lightning menu.
+
+---
+
 ## 白い熊 雷起動盤 14.3.7+015 — 2026-11-20
 
 The whole app now wears the settled black-yellow shapes — **pills, outlined switches and icons
