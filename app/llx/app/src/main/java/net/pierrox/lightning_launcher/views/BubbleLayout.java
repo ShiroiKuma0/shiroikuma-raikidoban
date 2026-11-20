@@ -141,21 +141,33 @@ public class BubbleLayout extends AbsoluteLayout {
             a_bottom = a_top + ah;
         }
 
-        // Keep the panel fully within the visible area [0, h]. When the menu is taller than the room on
-        // its side, clamp it to the screen and let the inner ScrollView scroll — it must never be drawn
-        // off-screen.
-        if (b_top < 0) b_top = 0;
-        if (b_bottom > h) b_bottom = h;
+        // A menu never scrolls while the screen has room. The side of the item it opens on may be too
+        // short for it (a long menu from an item low on the screen): slide it along the screen by what
+        // is missing, so it can use the whole height before it has to scroll. It then lies over the
+        // item, so the pointer arrow — which would sit inside the panel — is not drawn.
+        boolean slid = false;
+        if (b_top < 0) {
+            b_bottom = Math.min(h, b_bottom - b_top);
+            b_top = 0;
+            slid = true;
+        }
+        if (b_bottom > h) {
+            b_top = Math.max(0, b_top - (b_bottom - h));
+            b_bottom = h;
+            slid = true;
+        }
 
-        // Force the bubble (a ScrollView) to EXACTLY the on-screen slot height. Otherwise it is measured
-        // at its full content height (which still fits within h), computes a zero scroll range, and the
-        // part below the clamp is silently clipped and unreachable. Sizing its viewport below its content
-        // is what makes it actually scroll (and reveals its scrollbar).
+        // Only a menu taller than the whole screen scrolls. Force the bubble (a ScrollView) to EXACTLY
+        // the on-screen slot height then: measured at its full content height it computes a zero scroll
+        // range, and the part below the clamp is silently clipped and unreachable.
         final int slot = b_bottom - b_top;
         if (slot > 0 && slot < bh) {
             bubble.measure(
                     View.MeasureSpec.makeMeasureSpec(bw, View.MeasureSpec.EXACTLY),
                     View.MeasureSpec.makeMeasureSpec(slot, View.MeasureSpec.EXACTLY));
+        }
+        if (slid) {
+            a_left = a_top = a_right = a_bottom = -1;
         }
 
         bubble.layout(b_left, b_top, b_right, b_bottom);

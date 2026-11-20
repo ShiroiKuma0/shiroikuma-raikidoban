@@ -397,6 +397,12 @@ public class ScriptEditor extends ResourceWrapperActivity implements View.OnClic
         btn.setOnClickListener(this);
         btn.setTypeface(LLApp.get().getIconsTypeface());
 
+        // The black-yellow shapes for this screen's own layout: its on/off options become outlined
+        // switches and its text buttons pills (the icon-font tool buttons are left as they are). Delete
+        // takes the red.
+        net.pierrox.lightning_launcher.util.UiPills.styleTree(findViewById(android.R.id.content));
+        net.pierrox.lightning_launcher.util.UiChrome.applyDestructiveButton((android.widget.TextView) findViewById(R.id.sc_delete));
+
         if (sAutoCompleteTokens == null) {
             buildAutoCompleteTokens();
         }
@@ -803,7 +809,7 @@ public class ScriptEditor extends ResourceWrapperActivity implements View.OnClic
                         });
                 builder.setNegativeButton(android.R.string.cancel, null);
                 builder.setCancelable(false);
-                return UiDialogStyler.styleOnShow(builder.create());
+                return UiDialogStyler.styleOnShow(UiDialogStyler.destructive(builder.create()));
 
             case DIALOG_CHECK_RESULT:
                 builder = new AlertDialog.Builder(this);

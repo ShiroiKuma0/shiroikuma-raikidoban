@@ -1287,6 +1287,26 @@ Oprávnění:
     <string name="llui_statusbar_bg">Stavový řádek</string>
     <string name="llui_group_buttons">Tlačítka</string>
     <string name="llui_group_geometry">Box geometrie</string>
+    <!-- 白い熊: the black-yellow roll-out — roles, icon colours, the folding UI page -->
+    <string name="llui_group_icons">Barvy ikon</string>
+    <string name="llui_note">Vysvětlivky (tlumená zlatá)</string>
+    <string name="llui_switch_off">Přepínač, vypnuto</string>
+    <string name="llui_delete">Smazání / nevratné akce</string>
+    <string name="llui_icon_connect">Spustit, otevřít aplikaci, přidat</string>
+    <string name="llui_icon_message">Upravit, přejmenovat, psát</string>
+    <string name="llui_icon_contact">Položky, aplikace, widgety</string>
+    <string name="llui_icon_share">Kopírovat, přesunout, exportovat</string>
+    <string name="llui_icon_block">Zamknout, skrýt, zastavit</string>
+    <string name="llui_group_maint">Údržba</string>
+    <string name="llui_reset_order">Obnovit pořadí sekcí</string>
+    <string name="llui_reset_order_desc">Vrátí sekce této stránky do původního pořadí.</string>
+    <string name="llui_reset_order_done">Pořadí sekcí obnoveno.</string>
+    <string name="llui_app_settings">Nastavení Lightning</string>
+    <string name="llui_app_settings_desc">Plochy, seznam aplikací, gesta a vše ostatní, co launcher umí.</string>
+    <string name="llui_auto_pill">pilulka</string>
+    <string name="rkb_auto_token_copy">Kopírovat token</string>
+    <string name="rkb_auto_token_copy_desc">Zkopíruje celý token do schránky.</string>
+    <string name="rkb_auto_regenerate_desc">Vytvoří nový token. Kopie vložené jinde přestanou fungovat.</string>
     <string name="llui_button_bg">Pozadí tlačítka</string>
     <string name="llui_button_text">Text tlačítka</string>
     <string name="llui_button_border">Ohraničení tlačítka</string>
@@ -1310,7 +1330,7 @@ Oprávnění:
     <string name="llui_geom_zorder_icon">Barva ikony vrstev</string>
     <string name="llui_geom_zorder_size">Velikost tlačítka vrstev</string>
     <string name="llui_geom_auto">Automaticky</string>
-    <string name="llui_reset_hint">Podržením barvy ji resetujete.</string>
+    <string name="llui_reset_hint">Podržením barvy nebo posuvníku je resetujete.</string>
     <string name="theme_font">Písmo</string>
     <string name="theme_weight">Tloušťka</string>
     <string name="theme_size">Velikost</string>

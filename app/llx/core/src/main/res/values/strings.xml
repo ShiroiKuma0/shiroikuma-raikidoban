@@ -1175,6 +1175,26 @@
     <string name="llui_group_toolbars">Toolbars &amp; bars</string>
     <string name="llui_group_buttons">Buttons</string>
     <string name="llui_group_geometry">Geometry box</string>
+    <!-- 白い熊: the black-yellow roll-out — roles, icon colours, the folding UI page -->
+    <string name="llui_group_icons">Icon colours</string>
+    <string name="llui_note">Explanations (dim gold)</string>
+    <string name="llui_switch_off">Switch, off</string>
+    <string name="llui_delete">Delete / destructive</string>
+    <string name="llui_icon_connect">Run, launch, add</string>
+    <string name="llui_icon_message">Edit, rename, write</string>
+    <string name="llui_icon_contact">Items, apps, widgets</string>
+    <string name="llui_icon_share">Copy, move, export</string>
+    <string name="llui_icon_block">Lock, hide, stop</string>
+    <string name="llui_group_maint">Maintenance</string>
+    <string name="llui_reset_order">Reset section order</string>
+    <string name="llui_reset_order_desc">Put the sections of this page back in their original order.</string>
+    <string name="llui_reset_order_done">Section order reset.</string>
+    <string name="llui_app_settings">Lightning settings</string>
+    <string name="llui_app_settings_desc">Desktops, app drawer, gestures and everything else the launcher does.</string>
+    <string name="llui_auto_pill">pill</string>
+    <string name="rkb_auto_token_copy">Copy token</string>
+    <string name="rkb_auto_token_copy_desc">Copy the full token to the clipboard.</string>
+    <string name="rkb_auto_regenerate_desc">Make a new token. Copies pasted elsewhere stop working.</string>
     <string name="llui_background">Background</string>
     <string name="llui_text">Text &amp; default font</string>
     <string name="llui_accent">Accent</string>
@@ -1219,7 +1239,7 @@
     <string name="llui_toolbar_text">Toolbar title</string>
     <string name="llui_toolbar_icon">Toolbar icons</string>
     <string name="llui_statusbar_bg">Status bar</string>
-    <string name="llui_reset_hint">Long-press a colour to reset it.</string>
+    <string name="llui_reset_hint">Long-press a colour or a slider to reset it.</string>
     <string name="theme_font">Font</string>
     <string name="theme_weight">Weight</string>
     <string name="theme_size">Size</string>

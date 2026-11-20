@@ -284,6 +284,7 @@ public class ImagePicker extends ResourceWrapperActivity implements AdapterView.
         Button up = findViewById(R.id.path_up);
         up.setText(R.string.file_picker_activity_up);
         up.setOnClickListener(this);
+        net.pierrox.lightning_launcher.util.UiChrome.applyButton(up);
 
         mNoIconTextView = findViewById(R.id.no_icon);
         mNoIconTextView.setText(R.string.ip_e);

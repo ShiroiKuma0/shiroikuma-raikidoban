@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 白い熊: marks a view UiPills has already styled, so a later tree walk leaves it alone -->
+    <item name="llui_styled" type="id"/>
+</resources>

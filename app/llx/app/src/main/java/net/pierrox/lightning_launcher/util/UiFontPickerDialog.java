@@ -64,12 +64,13 @@ public final class UiFontPickerDialog {
             holder.addView(row);
         }
 
-        TextView add = new TextView(activity);
-        add.setText(R.string.theme_add_font);
-        add.setTextColor(accent);
-        add.setTextSize(18);
-        add.setGravity(Gravity.START);
-        add.setPadding(padH, padV, padH, padV);
+        // "Add font…" is the one action in this list of choices: an outlined pill with its icon and a ›.
+        View add = UiPills.iconPill(activity, activity.getString(R.string.theme_add_font),
+                UiIcons.drawable(activity, UiIcons.Icon.ADD, UiIcons.Does.CONNECT), accent, false, true, false);
+        android.widget.LinearLayout.LayoutParams addLp = new android.widget.LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        addLp.setMargins(padH, padV, padH, padV);
+        add.setLayoutParams(addLp);
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

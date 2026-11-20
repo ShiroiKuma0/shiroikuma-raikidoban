@@ -62,6 +62,26 @@
     <string name="llui_statusbar_bg">ステータスバー</string>
     <string name="llui_group_buttons">ボタン</string>
     <string name="llui_group_geometry">座標ボックス</string>
+    <!-- 白い熊: the black-yellow roll-out — roles, icon colours, the folding UI page -->
+    <string name="llui_group_icons">アイコンの色</string>
+    <string name="llui_note">説明文（暗い金色）</string>
+    <string name="llui_switch_off">スイッチ（オフ）</string>
+    <string name="llui_delete">削除・破壊的操作</string>
+    <string name="llui_icon_connect">実行・起動・追加</string>
+    <string name="llui_icon_message">編集・名前変更・入力</string>
+    <string name="llui_icon_contact">アイテム・アプリ・ウィジェット</string>
+    <string name="llui_icon_share">コピー・移動・書き出し</string>
+    <string name="llui_icon_block">ロック・非表示・停止</string>
+    <string name="llui_group_maint">メンテナンス</string>
+    <string name="llui_reset_order">セクションの順序をリセット</string>
+    <string name="llui_reset_order_desc">このページのセクションを元の順序に戻します。</string>
+    <string name="llui_reset_order_done">セクションの順序をリセットしました。</string>
+    <string name="llui_app_settings">Lightning の設定</string>
+    <string name="llui_app_settings_desc">デスクトップ、アプリドロワー、ジェスチャーなど、ランチャーのその他すべての設定。</string>
+    <string name="llui_auto_pill">ピル</string>
+    <string name="rkb_auto_token_copy">トークンをコピー</string>
+    <string name="rkb_auto_token_copy_desc">トークン全体をクリップボードにコピーします。</string>
+    <string name="rkb_auto_regenerate_desc">新しいトークンを作成します。貼り付け済みのコピーは使えなくなります。</string>
     <string name="llui_button_bg">ボタン背景</string>
     <string name="llui_button_text">ボタン文字</string>
     <string name="llui_button_border">ボタンの枠線</string>
@@ -85,7 +105,7 @@
     <string name="llui_geom_zorder_icon">レイヤーアイコンの色</string>
     <string name="llui_geom_zorder_size">レイヤーボタンのサイズ</string>
     <string name="llui_geom_auto">自動</string>
-    <string name="llui_reset_hint">色を長押しでリセット。</string>
+    <string name="llui_reset_hint">色またはスライダーを長押しでリセット。</string>
     <string name="theme_font">フォント</string>
     <string name="theme_weight">太さ</string>
     <string name="theme_size">サイズ</string>
@@ -611,6 +631,13 @@
     <string name="br_rc">このバックアップを復元しますか？</string>
     <string name="br_d">削除</string>
     <string name="br_dc">このバックアップを削除しますか？</string>
+    <!-- 白い熊: prune — delete every backup in the backup directory except the newest one -->
+    <string name="br_prune">古いバックアップを削除</string>
+    <string name="br_prune_c">古いバックアップを削除しますか？</string>
+    <string name="br_prune_m">削除: %1$d 件\n残す: %2$s</string>
+    <string name="br_prune_none">削除する古いバックアップはありません。</string>
+    <string name="br_prune_p">古いバックアップを削除中…</string>
+    <string name="br_prune_done">削除したバックアップ: %1$d / %2$d</string>
     <string name="br_a">動作を選択</string>
     <string name="br_s">送信</string>
     <string name="dt_gml_t">Gmailラベル</string>
@@ -631,13 +658,6 @@
     <string name="np_d">ロングタップで使用方法（英語）を表示</string>
     <string name="np_r">背景画像</string>
     <string name="ev_op">縦画面に切り替え</string>
-    <!-- 白い熊: prune — delete every backup in the backup directory except the newest one -->
-    <string name="br_prune">古いバックアップを削除</string>
-    <string name="br_prune_c">古いバックアップを削除しますか？</string>
-    <string name="br_prune_m">削除: %1$d 件\n残す: %2$s</string>
-    <string name="br_prune_none">削除する古いバックアップはありません。</string>
-    <string name="br_prune_p">古いバックアップを削除中…</string>
-    <string name="br_prune_done">削除したバックアップ: %1$d / %2$d</string>
     <string name="ev_ol">横画面に切り替え</string>
     <string name="an_gdp">指定されたデスクトップ・位置を表示</string>
     <string name="cof_t">他のフォルダを閉じる</string>

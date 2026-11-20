@@ -45,7 +45,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
-import android.widget.Switch;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -65,6 +65,10 @@ import net.pierrox.lightning_launcher.util.ExportImportPanel;
 import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.GeometryBoxStyler;
 import net.pierrox.lightning_launcher.util.UiFontPickerDialog;
+import net.pierrox.lightning_launcher.util.UiIcons;
+import net.pierrox.lightning_launcher.util.UiPageState;
+import net.pierrox.lightning_launcher.util.UiPills;
+import net.pierrox.lightning_launcher.util.UiSectionIndex;
 import net.pierrox.lightning_launcher_extreme.R;
 
 import java.util.ArrayList;
@@ -89,6 +93,14 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
     private LinearLayout mRoot;
     private Toolbar mToolbar;
     private LinearLayout mHolder;
+    private ScrollView mScroll;
+    /** Where the row builders append: the folding body of the section being built. */
+    private LinearLayout mBody;
+
+    // The folding accordion: every top-level section by its stable key.
+    private final Map<String, View> mSectionWrappers = new HashMap<>();
+    private final Map<String, View> mSectionBodies = new HashMap<>();
+    private final Map<String, TextView> mSectionChevrons = new HashMap<>();
 
     private final Map<UiSlot, View> mSwatches = new HashMap<>();
     private final Map<UiSlot, TextSlotViews> mTextSlots = new HashMap<>();
@@ -112,8 +124,10 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
     private final ActivityResultLauncher<String[]> mPickImportFile =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), this::onImportFilePicked);
 
-    /** Shown wherever a backup destination is missing — the one thing on this page that is not yellow. */
-    private static final int WARN_COLOR = 0xFFFF5252;
+    /** A missing backup destination is shown in the delete / warning red — a settable role like every other colour. */
+    private static int warnColor() {
+        return UiTheme.color(UiSlot.DELETE);
+    }
 
     private static final class TextSlotViews {
         TextView fontValue, weightValue, sizeValue, sample;
@@ -136,12 +150,14 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         mRoot.addView(mToolbar);
 
         ScrollView scroll = new ScrollView(this);
+        mScroll = scroll;
         scroll.setLayoutParams(new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
         mHolder = new LinearLayout(this);
         mHolder.setOrientation(LinearLayout.VERTICAL);
         int pad = dp(8);
         mHolder.setPadding(pad, pad, pad, dp(32));
+        mBody = mHolder;
         scroll.addView(mHolder);
         mRoot.addView(scroll);
 
@@ -190,81 +206,249 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
 
     // --- row building ---
 
+    /**
+     * The page is a folding accordion with a chip index on top (the 白い熊 house rule for every UI
+     * page): the link to the launcher's own settings, then one small chip per section — tap to unfold
+     * and jump, long-press to drag the sections into another order — then the sections, every one
+     * folded until opened. Order and fold state live in the "llui" preferences, so they travel in the
+     * export.
+     */
     private void buildRows() {
         mHolder.removeAllViews();
         mSwatches.clear();
         mTextSlots.clear();
         mGeometryPreviews.clear();
+        mSectionWrappers.clear();
+        mSectionBodies.clear();
+        mSectionChevrons.clear();
 
-        addExportImportSection();
-        addLanguageSection();
+        // The launcher's own settings: the first, thick pill. Not a section — it stays pinned here.
+        mBody = mHolder;
+        addPillRow(getString(R.string.llui_app_settings), getString(R.string.llui_app_settings_desc),
+                UiIcons.Icon.GEAR, UiIcons.Does.VIEW, true, true, false, 0,
+                v -> startActivity(new Intent(this, net.pierrox.lightning_launcher.feature.settings.RootSettings.class)));
 
-        for (UiGroup group : UiGroup.values()) {
-            addSection(group);
-            if (group == UiGroup.GEOMETRY) {
-                // Bespoke layout: a live preview, per-region sub-headers, and dp size sliders.
-                addGeometrySection();
-                continue;
-            }
-            List<UiSlot> slots = UiSlot.forGroup(group);
-            for (UiSlot slot : slots) {
-                if (slot.isBorder()) {
-                    // Border slots = colour + width slider + corner-roundness slider.
-                    addBorderSlot(slot, mStepPx);
-                    addCornerRow(slot, mStepPx);
-                } else if (slot.hasFont) {
-                    addTextSlot(slot, mStepPx);
-                } else {
-                    addColorRow(slot, mStepPx);
-                }
-            }
+        // The registry: key → label + what fills the section.
+        final List<String> keys = new ArrayList<>();
+        final Map<String, String> labels = new HashMap<>();
+        final Map<String, Runnable> content = new HashMap<>();
+        reg(keys, labels, content, "eim", getString(R.string.rkb_ui_section_eim), this::fillExportImportSection);
+        reg(keys, labels, content, "lang", getString(R.string.llui_language), this::fillLanguageSection);
+        for (final UiGroup group : UiGroup.values()) {
+            reg(keys, labels, content, group.name().toLowerCase(java.util.Locale.ROOT), getString(group.labelRes),
+                    () -> fillGroupSection(group));
         }
+        reg(keys, labels, content, "maint", getString(R.string.llui_group_maint), this::fillMaintenanceSection);
 
-        TextView hint = makeLabel(getString(R.string.llui_reset_hint), UiTheme.color(UiSlot.TEXT));
-        hint.setTextSize(12);
-        hint.setPadding(dp(8), dp(16), dp(8), dp(8));
-        mHolder.addView(hint);
+        List<String> order = UiPageState.order(keys);
+
+        // The chip index.
+        List<UiSectionIndex.Item> items = new ArrayList<>();
+        for (String k : order) {
+            items.add(new UiSectionIndex.Item(k, labels.get(k)));
+        }
+        View index = UiSectionIndex.build(this, items, UiTheme.color(UiSlot.ACCENT), new UiSectionIndex.Listener() {
+            @Override
+            public void onJump(String key) {
+                jumpToSection(key);
+            }
+
+            @Override
+            public void onReordered(List<String> newOrder) {
+                UiPageState.setOrder(newOrder);
+                buildRows();
+            }
+        });
+        LinearLayout indexWrap = new LinearLayout(this);
+        indexWrap.setPadding(dp(8), dp(6), dp(8), dp(2));
+        indexWrap.addView(index, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        mHolder.addView(indexWrap);
+
+        for (String k : order) {
+            openSection(k, labels.get(k));
+            content.get(k).run();
+        }
+        mBody = mHolder;
     }
 
-    private void addSection(UiGroup group) {
-        addSection(getString(group.labelRes));
+    private static void reg(List<String> keys, Map<String, String> labels, Map<String, Runnable> content,
+                            String key, String label, Runnable fill) {
+        keys.add(key);
+        labels.put(key, label);
+        content.put(key, fill);
+    }
+
+    private void fillGroupSection(UiGroup group) {
+        if (group == UiGroup.GEOMETRY) {
+            // Bespoke layout: a live preview, per-region sub-headers, and dp size sliders.
+            addGeometrySection();
+            return;
+        }
+        for (UiSlot slot : UiSlot.forGroup(group)) {
+            if (slot.isBorder()) {
+                // Border slots = colour + width slider + corner-roundness slider.
+                addBorderSlot(slot, mStepPx);
+                addCornerRow(slot, mStepPx);
+            } else if (slot.hasFont) {
+                addTextSlot(slot, mStepPx);
+            } else {
+                addColorRow(slot, mStepPx);
+            }
+        }
+    }
+
+    /** Maintenance: put the sections back in their original order; how to reset a single value. */
+    private void fillMaintenanceSection() {
+        addPillRow(getString(R.string.llui_reset_order), getString(R.string.llui_reset_order_desc),
+                UiIcons.Icon.RESET, UiIcons.Does.VIEW, false, false, false, mStepPx, v -> {
+                    UiPageState.resetOrder();
+                    buildRows();
+                    Flash.show(this, R.string.llui_reset_order_done);
+                });
+        addNote(getString(R.string.llui_reset_hint), mStepPx);
     }
 
     /**
-     * A section heading in the 白い熊 house style (the kxkb settings page): 20 sp bold accent title with
-     * an underline exactly as wide as the TEXT — never a full-width rule — and sections separated from
-     * one another by a thin, subdued full-width spacer.
+     * Start a top-level section: the 1 px darker-accent divider (kept whether the section is folded or
+     * open), the heading — 20 sp bold accent, underlined exactly as wide as its text, with › when
+     * folded and ⌄ when open — and the folding body the row builders then fill.
      */
-    private void addSection(String labelText) {
-        if (mHolder.getChildCount() > 0) {
-            addSectionSpacer();
-        }
+    private void openSection(final String key, String labelText) {
         int accent = UiTheme.color(UiSlot.ACCENT);
 
-        LinearLayout box = new LinearLayout(this);
-        box.setOrientation(LinearLayout.VERTICAL);
-        box.setPadding(dp(8), dp(16), dp(8), dp(4));
+        LinearLayout wrapper = new LinearLayout(this);
+        wrapper.setOrientation(LinearLayout.VERTICAL);
+        wrapper.setPadding(0, dp(10), 0, dp(2));
 
+        View line = new View(this);
+        line.setBackgroundColor(UiPills.divider());
+        wrapper.addView(line, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
+
+        LinearLayout header = new LinearLayout(this);
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        header.setPadding(dp(8), dp(8), dp(8), dp(2));
+
+        LinearLayout labelCol = new LinearLayout(this);
+        labelCol.setOrientation(LinearLayout.VERTICAL);
         TextView label = makeLabel(labelText, accent);
         label.setTextSize(20);
         label.setTypeface(label.getTypeface(), Typeface.BOLD);
         label.setMaxLines(1);
-        box.addView(label);
-        box.addView(underline(label, dp(2), accent));
+        labelCol.addView(label);
+        labelCol.addView(underline(label, Math.max(1, dp(2.5f)), accent));
+        header.addView(labelCol, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
-        mHolder.addView(box);
+        TextView chevron = new TextView(this);
+        chevron.setTextSize(22);
+        chevron.setTextColor(accent);
+        chevron.setIncludeFontPadding(false);
+        chevron.setPadding(dp(10), 0, dp(4), 0);
+        header.addView(chevron);
+        header.setOnClickListener(v -> setSectionOpen(key, !UiPageState.isOpen(key)));
+        wrapper.addView(header);
+
+        LinearLayout inner = new LinearLayout(this);
+        inner.setOrientation(LinearLayout.VERTICAL);
+        wrapper.addView(inner);
+
+        boolean open = UiPageState.isOpen(key);
+        inner.setVisibility(open ? View.VISIBLE : View.GONE);
+        chevron.setText(open ? "\u2304" : "\u203A");
+
+        mHolder.addView(wrapper);
+        mSectionWrappers.put(key, wrapper);
+        mSectionBodies.put(key, inner);
+        mSectionChevrons.put(key, chevron);
+        mBody = inner;
     }
 
-    /** Thin neutral full-width hairline between one section and the next (the kxkb page rhythm). */
-    private void addSectionSpacer() {
-        View line = new View(this);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, Math.max(1, dp(1)));
-        lp.topMargin = dp(18);
-        line.setLayoutParams(lp);
-        line.setBackgroundColor(UiTheme.color(UiSlot.TEXT));
-        line.setAlpha(0.35f);
-        mHolder.addView(line);
+    private void setSectionOpen(String key, boolean open) {
+        UiPageState.setOpen(key, open);
+        View inner = mSectionBodies.get(key);
+        TextView chevron = mSectionChevrons.get(key);
+        if (inner != null) {
+            inner.setVisibility(open ? View.VISIBLE : View.GONE);
+        }
+        if (chevron != null) {
+            chevron.setText(open ? "\u2304" : "\u203A");
+        }
+    }
+
+    /** A chip was tapped: unfold its section and scroll to it. */
+    private void jumpToSection(String key) {
+        final View wrapper = mSectionWrappers.get(key);
+        if (wrapper == null) {
+            return;
+        }
+        setSectionOpen(key, true);
+        mHolder.post(() -> mScroll.smoothScrollTo(0, wrapper.getTop()));
+    }
+
+    // --- the row kinds of the black-yellow settings page ---
+
+    /** A 20 dp icon at the start of a row, coloured by what the row does. */
+    private void addRowIcon(LinearLayout row, UiIcons.Icon icon, UiIcons.Does does) {
+        View v = new View(this);
+        v.setBackground(UiIcons.drawable(this, icon, does));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(20), dp(20));
+        lp.gravity = Gravity.CENTER_VERTICAL;
+        lp.setMarginEnd(dp(10));
+        row.addView(v, 0, lp);
+    }
+
+    /**
+     * An action / navigation row: an outlined pill that hugs its label, the icon inside it, and the
+     * explanation beneath in dim gold, aligned with the pill's content. Only the pill is the touch
+     * target.
+     *
+     * @param main        the main action of its section: 3 dp frame, bold
+     * @param opens       it opens a screen, picker or panel: a › at the right end of the pill
+     * @param destructive it deletes or revokes something: frame, icon and label in the delete red
+     */
+    private void addPillRow(String title, @Nullable String description, UiIcons.Icon icon, UiIcons.Does does,
+                            boolean main, boolean opens, boolean destructive, int indent,
+                            View.OnClickListener onClick) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.VERTICAL);
+        row.setPadding(indent + dp(8), dp(3), dp(14), dp(3));
+
+        int color = destructive ? UiTheme.color(UiSlot.DELETE) : UiTheme.color(UiSlot.ACCENT);
+        LinearLayout pill = UiPills.iconPill(this, title, UiIcons.drawable(this, icon,
+                destructive ? UiIcons.Does.DELETE : does), color, main, opens, false);
+        pill.setPadding(dp(16), dp(9), dp(16), dp(9));
+        pill.setOnClickListener(onClick);
+        row.addView(pill, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        if (description != null) {
+            TextView desc = makeLabel(description, UiTheme.color(UiSlot.NOTE));
+            desc.setTextSize(13);
+            desc.setPadding(dp(16), dp(2), 0, 0);
+            row.addView(desc);
+        }
+        mBody.addView(row);
+    }
+
+    /** A loose note that belongs to no single row: dim gold, no rule. */
+    private TextView addNote(CharSequence text, int indent) {
+        TextView note = makeLabel(text, UiTheme.color(UiSlot.NOTE));
+        note.setTextSize(12);
+        note.setPadding(indent + dp(8), dp(6), dp(14), dp(2));
+        mBody.addView(note);
+        return note;
+    }
+
+    /** The thin dim-gold bar down the left edge of an explained row. */
+    private void addLeftRule(LinearLayout row) {
+        View rule = new View(this);
+        rule.setBackgroundColor(UiTheme.color(UiSlot.NOTE));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(2), ViewGroup.LayoutParams.MATCH_PARENT);
+        lp.setMarginEnd(dp(10));
+        row.addView(rule, 0, lp);
+        row.setPadding(Math.max(0, row.getPaddingLeft() - dp(12)), row.getPaddingTop(),
+                row.getPaddingRight(), row.getPaddingBottom());
     }
 
     /** An underline measured to the label's text width, so it never stretches to the whole row. */
@@ -338,10 +522,10 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
 
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
-        box.setPadding(indent + dp(8), dp(12), dp(8), dp(2));
+        box.setPadding(indent + dp(8), dp(10), dp(8), dp(2));
         box.addView(label);
         box.addView(underline(label, Math.max(1, dp(1.5f)), accent));
-        mHolder.addView(box);
+        mBody.addView(box);
     }
 
     // Fixed preview width for regions whose buttons use layout weights (tiles, z-order row) so they have
@@ -386,7 +570,7 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
 
         scroll.addView(gb);
         mGeometryPreviews.add(p);
-        mHolder.addView(scroll);
+        mBody.addView(scroll);
     }
 
     private void setRegionVisible(View root, int id, boolean visible) {
@@ -421,6 +605,7 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         LinearLayout row = makeRowContainer(indent);
         TextView label = makeLabel(title, textColor);
         row.addView(label);
+        addRowIcon(row, UiIcons.Icon.SIZE, UiIcons.Does.VIEW);
         final SeekBar seek = new SeekBar(this);
         LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
         slp.leftMargin = dp(8);
@@ -458,7 +643,7 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
             seek.setProgress(Math.max(0, Math.min(maxDp, defaultDp)));
             return true;
         });
-        mHolder.addView(row);
+        mBody.addView(row);
     }
 
     private String sizeValueLabel(int dp, boolean autoAtZero) {
@@ -472,10 +657,10 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
     // Export / Import window, the backup directory, and — directly below those, never as a section of
     // its own — the 保存復元 automation switch + token, because that is a backup feature too. ---
 
-    private void addExportImportSection() {
-        addSection(getString(R.string.rkb_ui_section_eim));
-        addTwoLineRow(getString(R.string.rkb_eim_entry), getString(R.string.rkb_eim_entry_desc),
-                UiTheme.color(UiSlot.TEXT), mStepPx, v -> openExportImport());
+    private void fillExportImportSection() {
+        // The one panel of this section: its main pill.
+        addPillRow(getString(R.string.rkb_eim_entry), getString(R.string.rkb_eim_entry_desc),
+                UiIcons.Icon.EXPORT, UiIcons.Does.SHARE, true, true, false, mStepPx, v -> openExportImport());
         addDirRow();
         addLastExportRow();
         addAutomationRows();
@@ -500,11 +685,11 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
                 warn = false;
             }
         }
-        TextView line = makeLabel(msg, warn ? WARN_COLOR : UiTheme.color(UiSlot.TEXT));
+        TextView line = addNote(msg, mStepPx);
         line.setTextSize(13);
-        line.setAlpha(warn ? 1f : 0.8f);
-        line.setPadding(mStepPx + dp(8), 0, dp(14), dp(10));
-        mHolder.addView(line);
+        if (warn) {
+            line.setTextColor(warnColor());
+        }
     }
 
     /**
@@ -520,8 +705,8 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
                 : remembered != null ? remembered + "\n" + getString(R.string.rkb_eim_dir_regrant)
                 : getString(R.string.rkb_eim_dir_unset);
         addTwoLineRow(getString(R.string.rkb_eim_dir), value,
-                label != null ? UiTheme.color(UiSlot.TEXT) : WARN_COLOR,
-                mStepPx, v -> mPickExportDir.launch(RkbExport.exportDirUri(this)));
+                label != null ? UiTheme.color(UiSlot.NOTE) : warnColor(),
+                mStepPx, UiIcons.Icon.DIRECTORY, v -> mPickExportDir.launch(RkbExport.exportDirUri(this)));
     }
 
     private void openExportImport() {
@@ -592,36 +777,38 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         }
     }
 
-    /** Tap = copy the full token; "Regenerate" on the right = a fresh secret (revokes pasted copies). */
+    /**
+     * The token (abbreviated, monospace) and its two actions as pills: Copy, and Regenerate — a fresh
+     * secret that revokes every pasted copy, so it wears the delete red.
+     */
     private void addTokenRow() {
-        int textColor = UiTheme.color(UiSlot.TEXT);
         LinearLayout row = makeRowContainer(mStepPx);
-
         LinearLayout labels = new LinearLayout(this);
         labels.setOrientation(LinearLayout.VERTICAL);
         labels.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        labels.addView(makeLabel(getString(R.string.rkb_auto_token), textColor));
-        TextView value = makeLabel(AutomationAuth.abbreviate(AutomationAuth.token(this)), textColor);
+        TextView title = makeLabel(getString(R.string.rkb_auto_token), UiTheme.color(UiSlot.TEXT));
+        title.setTypeface(title.getTypeface(), Typeface.BOLD);
+        labels.addView(title);
+        TextView value = makeLabel(AutomationAuth.abbreviate(AutomationAuth.token(this)), UiTheme.color(UiSlot.NOTE));
         value.setTypeface(Typeface.MONOSPACE);
         value.setTextSize(13);
-        value.setAlpha(0.7f);
-        value.setPadding(0, dp(3), dp(8), 0);
         labels.addView(value);
         row.addView(labels);
+        addRowIcon(row, UiIcons.Icon.LOCK, UiIcons.Does.VIEW);
+        addLeftRule(row);
+        mBody.addView(row);
 
-        TextView regenerate = makeLabel(getString(R.string.rkb_auto_regenerate), UiTheme.color(UiSlot.ACCENT));
-        regenerate.setPadding(dp(12), dp(8), dp(4), dp(8));
-        regenerate.setOnClickListener(v -> confirmRegenerateToken());
-        row.addView(regenerate);
-
-        row.setOnClickListener(v -> {
-            ClipboardManager cb = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            if (cb != null) {
-                cb.setPrimaryClip(ClipData.newPlainText("automation_token", AutomationAuth.token(this)));
-            }
-            Flash.show(this, R.string.rkb_auto_token_copied);
-        });
-        mHolder.addView(row);
+        addPillRow(getString(R.string.rkb_auto_token_copy), getString(R.string.rkb_auto_token_copy_desc),
+                UiIcons.Icon.COPY, UiIcons.Does.SHARE, false, false, false, mStepPx, v -> {
+                    ClipboardManager cb = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    if (cb != null) {
+                        cb.setPrimaryClip(ClipData.newPlainText("automation_token", AutomationAuth.token(this)));
+                    }
+                    Flash.show(this, R.string.rkb_auto_token_copied);
+                });
+        addPillRow(getString(R.string.rkb_auto_regenerate), getString(R.string.rkb_auto_regenerate_desc),
+                UiIcons.Icon.RESET, UiIcons.Does.DELETE, false, false, true, mStepPx,
+                v -> confirmRegenerateToken());
     }
 
     private void confirmRegenerateToken() {
@@ -635,28 +822,31 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
+        // it revokes every copy pasted elsewhere: the red pill
+        net.pierrox.lightning_launcher.util.UiDialogStyler.destructive(dialog);
         dialog.show();
         net.pierrox.lightning_launcher.util.UiDialogStyler.style(dialog);
     }
 
     // --- generic rows shared by the section above ---
 
-    /** A title over a smaller value/description line; the whole row is the tap target. */
+    /** A control row: a title over its current value; a tap opens the picker for it. */
     private LinearLayout addTwoLineRow(String title, CharSequence value, int valueColor, int indent,
-                                       View.OnClickListener onClick) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.VERTICAL);
-        int pad = dp(10);
-        row.setPadding(indent + dp(8), pad, dp(14), pad);
-        row.addView(makeLabel(title, UiTheme.color(UiSlot.TEXT)));
+                                       UiIcons.Icon icon, View.OnClickListener onClick) {
+        LinearLayout row = makeRowContainer(indent);
+        LinearLayout labels = new LinearLayout(this);
+        labels.setOrientation(LinearLayout.VERTICAL);
+        labels.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        labels.addView(makeLabel(title, UiTheme.color(UiSlot.TEXT)));
         TextView valueView = makeLabel(value, valueColor);
         valueView.setTextSize(13);
-        valueView.setPadding(0, dp(3), 0, 0);
-        row.addView(valueView);
+        labels.addView(valueView);
+        row.addView(labels);
+        addRowIcon(row, icon, UiIcons.Does.VIEW);
         if (onClick != null) {
             row.setOnClickListener(onClick);
         }
-        mHolder.addView(row);
+        mBody.addView(row);
         return row;
     }
 
@@ -664,42 +854,44 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         void onToggle(boolean checked);
     }
 
-    /** A title + description on the left, a themed switch on the right. */
+    /**
+     * An explained switch row: bold label, dim-gold description, the thin dim-gold rule down its left
+     * edge, and the outlined switch at the right — a round outline with a solid dot, never filled.
+     */
     private void addSwitchRow(String title, String description, boolean checked, int indent,
                               final OnToggle onToggle) {
-        int textColor = UiTheme.color(UiSlot.TEXT);
-        int accent = UiTheme.color(UiSlot.ACCENT);
         LinearLayout row = makeRowContainer(indent);
 
         LinearLayout labels = new LinearLayout(this);
         labels.setOrientation(LinearLayout.VERTICAL);
         labels.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        labels.addView(makeLabel(title, textColor));
-        TextView desc = makeLabel(description, textColor);
+        TextView titleView = makeLabel(title, UiTheme.color(UiSlot.TEXT));
+        titleView.setTypeface(titleView.getTypeface(), Typeface.BOLD);
+        labels.addView(titleView);
+        TextView desc = makeLabel(description, UiTheme.color(UiSlot.NOTE));
         desc.setTextSize(13);
-        desc.setAlpha(0.7f);
-        desc.setPadding(0, dp(3), dp(8), 0);
+        desc.setPadding(0, 0, dp(8), 0);
         labels.addView(desc);
         row.addView(labels);
 
-        final Switch toggle = new Switch(this);
+        final CheckBox toggle = new CheckBox(this);
         toggle.setChecked(checked);
-        toggle.setThumbTintList(android.content.res.ColorStateList.valueOf(accent));
-        toggle.setTrackTintList(android.content.res.ColorStateList.valueOf(textColor));
+        UiPills.applySwitch(toggle, false);
         toggle.setOnCheckedChangeListener((button, isChecked) -> onToggle.onToggle(isChecked));
         row.addView(toggle);
 
+        addRowIcon(row, UiIcons.Icon.TOGGLE, UiIcons.Does.VIEW);
+        addLeftRule(row);
         row.setOnClickListener(v -> toggle.toggle());
-        mHolder.addView(row);
+        mBody.addView(row);
     }
 
     // --- language (in-app, independent of the system locale) ---
 
     private static final String[] LANG_TAGS = {"", "en", "ja", "cs", "ru"};
 
-    private void addLanguageSection() {
-        addSection(getString(R.string.llui_language));
-        TextView value = addValueRow(getString(R.string.llui_language), mStepPx, v -> openLanguagePicker());
+    private void fillLanguageSection() {
+        TextView value = addValueRow(getString(R.string.llui_language), mStepPx, UiIcons.Icon.GLOBE, v -> openLanguagePicker());
         value.setText(currentLanguageLabel());
     }
 
@@ -799,8 +991,8 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        int pad = dp(10);
-        row.setPadding(indent + dp(8), pad, dp(14), pad);
+        // every row is only as tall as its content: no minimum height, 2 dp above and below
+        row.setPadding(indent + dp(8), dp(2), dp(14), dp(2));
         return row;
     }
 
@@ -814,13 +1006,14 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         View swatch = makeSwatch(slot);
         row.addView(swatch);
         mSwatches.put(slot, swatch);
+        addRowIcon(row, UiIcons.Icon.PALETTE, UiIcons.Does.VIEW);
 
         row.setOnClickListener(v -> openColorPicker(slot));
         row.setOnLongClickListener(v -> {
             resetColor(slot);
             return true;
         });
-        mHolder.addView(row);
+        mBody.addView(row);
     }
 
     // A border slot = a colour row (the line/stroke colour) plus a width SeekBar (0 = no border).
@@ -833,15 +1026,25 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         LinearLayout widthRow = makeRowContainer(sub);
         TextView widthLabel = makeLabel(getString(R.string.theme_border_width), textColor);
         widthRow.addView(widthLabel);
+        addRowIcon(widthRow, UiIcons.Icon.SLIDERS, UiIcons.Does.VIEW);
         final SeekBar seek = new SeekBar(this);
         LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
         slp.leftMargin = dp(8);
         slp.rightMargin = dp(8);
         seek.setLayoutParams(slp);
         seek.setMax(UiConfig.MAX_BORDER_WIDTH_DP);
-        seek.setProgress(Math.max(0, Math.min(UiConfig.MAX_BORDER_WIDTH_DP, UiTheme.borderWidthDp(slot))));
+        // A push button is a pill by rule (3 dp main / 1.25 dp others); its sliders only override that.
+        // Until one is moved they read "pill". A long-press on the row gives the pill back.
+        final boolean pillWidth = slot == UiSlot.BUTTON_BORDER && !UiConfig.get().hasBorderWidth(slot.key);
+        seek.setProgress(pillWidth ? 1 : Math.max(0, Math.min(UiConfig.MAX_BORDER_WIDTH_DP, UiTheme.borderWidthDp(slot))));
         widthRow.addView(seek);
-        final TextView widthValue = makeLabel(borderLabel(UiTheme.borderWidthDp(slot)), textColor);
+        final TextView widthValue = makeLabel(pillWidth ? getString(R.string.llui_auto_pill)
+                : borderLabel(UiTheme.borderWidthDp(slot)), textColor);
+        widthRow.setOnLongClickListener(v -> {
+            UiConfig.get().clearBorderWidth(slot.key);
+            buildRows();
+            return true;
+        });
         widthValue.setMinWidth(dp(56));
         widthValue.setGravity(Gravity.END);
         widthRow.addView(widthValue);
@@ -861,7 +1064,7 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
-        mHolder.addView(widthRow);
+        mBody.addView(widthRow);
     }
 
     private String borderLabel(int dp) {
@@ -876,15 +1079,24 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         LinearLayout row = makeRowContainer(sub);
         TextView label = makeLabel(getString(R.string.theme_corner), textColor);
         row.addView(label);
+        addRowIcon(row, UiIcons.Icon.FRAME, UiIcons.Does.VIEW);
         final SeekBar seek = new SeekBar(this);
         LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
         slp.leftMargin = dp(8);
         slp.rightMargin = dp(8);
         seek.setLayoutParams(slp);
         seek.setMax(UiConfig.MAX_CORNER_RADIUS_DP);
-        seek.setProgress(Math.max(0, Math.min(UiConfig.MAX_CORNER_RADIUS_DP, UiTheme.cornerRadiusDp(slot))));
+        final boolean pillCorner = slot == UiSlot.BUTTON_BORDER && !UiConfig.get().hasCornerRadius(slot.key);
+        seek.setProgress(pillCorner ? UiConfig.MAX_CORNER_RADIUS_DP
+                : Math.max(0, Math.min(UiConfig.MAX_CORNER_RADIUS_DP, UiTheme.cornerRadiusDp(slot))));
         row.addView(seek);
-        final TextView value = makeLabel(getString(R.string.theme_border_width_value, UiTheme.cornerRadiusDp(slot)), textColor);
+        final TextView value = makeLabel(pillCorner ? getString(R.string.llui_auto_pill)
+                : getString(R.string.theme_border_width_value, UiTheme.cornerRadiusDp(slot)), textColor);
+        row.setOnLongClickListener(v -> {
+            UiConfig.get().clearCornerRadius(slot.key);
+            buildRows();
+            return true;
+        });
         value.setMinWidth(dp(56));
         value.setGravity(Gravity.END);
         row.addView(value);
@@ -904,7 +1116,7 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
-        mHolder.addView(row);
+        mBody.addView(row);
     }
 
     private void addTextSlot(final UiSlot slot, int indent) {
@@ -918,25 +1130,27 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         colorRow.addView(label);
         View swatch = makeSwatch(slot);
         colorRow.addView(swatch);
+        addRowIcon(colorRow, UiIcons.Icon.PALETTE, UiIcons.Does.VIEW);
         colorRow.setOnClickListener(v -> openColorPicker(slot));
         colorRow.setOnLongClickListener(v -> {
             resetColor(slot);
             return true;
         });
-        mHolder.addView(colorRow);
+        mBody.addView(colorRow);
         views.swatch = swatch;
 
         int sub = indent + mStepPx;
 
         // font row
-        views.fontValue = addValueRow(getString(R.string.theme_font), sub, v -> openFontPicker(slot));
+        views.fontValue = addValueRow(getString(R.string.theme_font), sub, UiIcons.Icon.TEXT, v -> openFontPicker(slot));
         // weight row
-        views.weightValue = addValueRow(getString(R.string.theme_weight), sub, v -> openWeightPicker(slot));
+        views.weightValue = addValueRow(getString(R.string.theme_weight), sub, UiIcons.Icon.LAYERS, v -> openWeightPicker(slot));
 
         // size row
         LinearLayout sizeRow = makeRowContainer(sub);
         TextView sizeLabel = makeLabel(getString(R.string.theme_size), textColor);
         sizeRow.addView(sizeLabel);
+        addRowIcon(sizeRow, UiIcons.Icon.SIZE, UiIcons.Does.VIEW);
         final SeekBar seek = new SeekBar(this);
         LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
         slp.leftMargin = dp(8);
@@ -968,29 +1182,30 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
-        mHolder.addView(sizeRow);
+        mBody.addView(sizeRow);
 
         // live sample
         TextView sample = new TextView(this);
-        sample.setPadding(sub + dp(8), dp(4), dp(14), dp(10));
+        sample.setPadding(sub + dp(8) + dp(30), dp(2), dp(14), dp(6));
         sample.setLayoutParams(new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         views.sample = sample;
-        mHolder.addView(sample);
+        mBody.addView(sample);
 
         mTextSlots.put(slot, views);
         refreshTextSlot(slot);
     }
 
-    private TextView addValueRow(String title, int indent, View.OnClickListener onClick) {
+    private TextView addValueRow(String title, int indent, UiIcons.Icon icon, View.OnClickListener onClick) {
         LinearLayout row = makeRowContainer(indent);
         TextView titleView = makeLabel(title, UiTheme.color(UiSlot.TEXT));
         titleView.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         row.addView(titleView);
+        addRowIcon(row, icon, UiIcons.Does.VIEW);
         TextView value = makeLabel("", UiTheme.color(UiSlot.TEXT));
         row.addView(value);
         row.setOnClickListener(onClick);
-        mHolder.addView(row);
+        mBody.addView(row);
         return value;
     }
 
@@ -1067,6 +1282,12 @@ public class UiSettingsActivity extends ResourceWrapperActivity {
         if (slot.isFoundation) {
             // a foundation colour cascades into the chrome + every inheriting slot/preview
             recreate();
+            return;
+        }
+        if (slot.parentKey == null) {
+            // a role of its own (dim gold, switch off, delete red, an icon colour): the page itself
+            // wears it, so redraw the rows
+            buildRows();
             return;
         }
         View swatch = mSwatches.get(slot);

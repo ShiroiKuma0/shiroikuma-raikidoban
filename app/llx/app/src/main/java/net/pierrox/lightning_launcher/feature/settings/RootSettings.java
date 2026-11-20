@@ -75,6 +75,7 @@ public class RootSettings extends ResourceWrapperActivity {
         inflater.inflate(R.menu.root_settings, menu);
         menu.findItem(R.id.h).setTitle(getString(R.string.sc_help));
         net.pierrox.lightning_launcher.util.UiChrome.tintMenu(menu);
+        net.pierrox.lightning_launcher.util.MenuPills.decorate(this, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

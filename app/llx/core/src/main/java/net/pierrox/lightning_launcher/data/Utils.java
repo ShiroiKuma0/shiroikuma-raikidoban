@@ -2164,6 +2164,9 @@ public class Utils {
                 TextView label = v.findViewById(android.R.id.text1);
                 label.setText(folders_name.get(position));
                 UiTheme.applyTo(label, UiSlot.DIALOG_TEXT);
+                net.pierrox.lightning_launcher.util.UiIcons.onRow(label,
+                        net.pierrox.lightning_launcher.util.UiIcons.Icon.DIRECTORY,
+                        net.pierrox.lightning_launcher.util.UiIcons.Does.CONTACT);
                 return v;
             }
         };

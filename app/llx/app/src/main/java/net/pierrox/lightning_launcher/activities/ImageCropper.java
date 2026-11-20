@@ -95,6 +95,8 @@ public class ImageCropper extends ResourceWrapperActivity implements View.OnClic
 
         findViewById(R.id.ok).setOnClickListener(this);
         findViewById(R.id.cancel).setOnClickListener(this);
+        net.pierrox.lightning_launcher.util.UiChrome.applyMainButton((android.widget.TextView) findViewById(R.id.ok));
+        net.pierrox.lightning_launcher.util.UiChrome.applyButton((android.widget.TextView) findViewById(R.id.cancel));
     }
 
     @Override

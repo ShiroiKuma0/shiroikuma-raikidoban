@@ -143,6 +143,9 @@ import net.pierrox.lightning_launcher.data.LightningIntent;
 import net.pierrox.lightning_launcher.util.ActionsOverviewDialog;
 import net.pierrox.lightning_launcher.util.BackupFolder;
 import net.pierrox.lightning_launcher.util.Flash;
+import net.pierrox.lightning_launcher.util.UiPills;
+import net.pierrox.lightning_launcher.util.UiIcons;
+import net.pierrox.lightning_launcher.util.MenuPills;
 import net.pierrox.lightning_launcher.util.GeometryBoxStyler;
 import net.pierrox.lightning_launcher.util.ScriptPickerDialog;
 import net.pierrox.lightning_launcher.util.UiDialogStyler;
@@ -2779,17 +2782,32 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                         labels.add(getString(R.string.aurora_store));
                         kinds.add(4);
                     }
-                    // Yellow-on-black list (the default simple_list_item renders white): colour each row
-                    // with DIALOG_TEXT.
-                    ArrayAdapter<CharSequence> notInstalledAdapter = new ArrayAdapter<CharSequence>(
-                            this, android.R.layout.simple_list_item_1, android.R.id.text1, labels) {
-                        @Override
-                        public View getView(int position, View convertView, ViewGroup parent) {
-                            View v = super.getView(position, convertView, parent);
-                            UiTheme.applyTo((TextView) v.findViewById(android.R.id.text1), UiSlot.DIALOG_TEXT);
-                            return v;
+                    // Each choice is a full-width icon pill, its icon coloured by what the row does.
+                    final java.util.ArrayList<UiDialogStyler.Action> notInstalledRows = new java.util.ArrayList<>();
+                    for (int k = 0; k < labels.size(); k++) {
+                        UiIcons.Icon rowIcon;
+                        UiIcons.Does rowDoes;
+                        switch (kinds.get(k)) {
+                            case 0:
+                                rowIcon = UiIcons.Icon.APP;
+                                rowDoes = UiIcons.Does.CONTACT;
+                                break;
+                            case 1:
+                                rowIcon = UiIcons.Icon.LINK;
+                                rowDoes = UiIcons.Does.CONNECT;
+                                break;
+                            case 3:
+                                rowIcon = UiIcons.Icon.PLAY;
+                                rowDoes = UiIcons.Does.CONNECT;
+                                break;
+                            default:
+                                rowIcon = UiIcons.Icon.STORE;
+                                rowDoes = UiIcons.Does.SHARE;
+                                break;
                         }
-                    };
+                        notInstalledRows.add(new UiDialogStyler.Action(labels.get(k), rowIcon, rowDoes, true));
+                    }
+                    android.widget.ListAdapter notInstalledAdapter = UiDialogStyler.actionAdapter(this, notInstalledRows);
                     builder = new AlertDialog.Builder(this);
                     builder.setTitle(R.string.app_not_valid);
                     builder.setAdapter(notInstalledAdapter, new DialogInterface.OnClickListener() {
@@ -3035,7 +3053,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                     }
                 }
             });
-            UiDialogStyler.show(builder);
+            UiDialogStyler.showDestructive(builder);
         }
     }
 
@@ -4087,7 +4105,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     }
 
     private void onActionsClearSlot(final ActionsOverviewDialog.Slot slot) {
-        UiDialogStyler.show(new AlertDialog.Builder(this)
+        UiDialogStyler.showDestructive(new AlertDialog.Builder(this)
                 .setTitle(R.string.acd_clear_title)
                 .setMessage(getString(R.string.acd_clear_warn, getString(slot.titleRes)))
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -4858,7 +4876,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 b.setTag(script);
                 b.setText(script.name);
                 b.setOnClickListener(this);
-                styleBubbleItemText(b);
+                MenuPills.row(b, UiIcons.Icon.CODE, UiIcons.Does.CONNECT, false);
                 mBubbleContent.addView(b);
             }
 
@@ -4889,8 +4907,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         }
         ((TextView) view.findViewById(android.R.id.text1)).setText(label);
         view.findViewById(android.R.id.text2).setVisibility(View.GONE);
-        Drawable background = getDrawable(R.drawable.bubble_item_bg);
-        view.setBackground(background);
+        MenuPills.frameRow(view);
+        UiTheme.applyTo((TextView) view.findViewById(android.R.id.text1), UiSlot.MENU_TEXT);
 
         if (mAppShortcutClickListener == null) {
             mAppShortcutClickListener = new OnClickListener() {
@@ -5249,7 +5267,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         b.setId(id);
         b.setText(title);
         b.setOnClickListener(this);
-        styleBubbleItemText(b);
+        MenuPills.row(b, id);
         mBubbleContent.addView(b);
         return b;
     }
@@ -5258,7 +5276,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         Button b = (Button) getLayoutInflater().inflate(R.layout.bubble_item, null);
         b.setText(title);
         b.setOnClickListener(listener);
-        styleBubbleItemText(b);
+        // a row a script added to the menu
+        MenuPills.row(b, UiIcons.Icon.CODE, UiIcons.Does.CONNECT, false);
         mBubbleContent.addView(b);
         return b;
     }
@@ -5267,12 +5286,6 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
     protected boolean themeSystemBars() {
         // The home / app drawer shows wallpaper to the screen edges; keep its own system-bar handling.
         return false;
-    }
-
-    // 「白い熊 雷起動盤 UI」: a dynamic menu item's text colour + font + size (MENU_TEXT slot).
-    private void styleBubbleItemText(TextView b) {
-        b.setTextColor(UiTheme.color(UiSlot.MENU_TEXT));
-        UiTheme.applyFont(b, UiSlot.MENU_TEXT);
     }
 
     // 「白い熊 雷起動盤 UI」: the bubble chrome — title, icon buttons, and the menu panel + border (and,
@@ -5295,6 +5308,15 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             View v = mBubble.findViewById(id);
             if (v instanceof TextView) {
                 ((TextView) v).setTextColor(menuText);
+            }
+        }
+
+        // The rules under the title and under the icon strip: the clear 1 dp darker-accent divider.
+        int[] dividerIds = {R.id.bbl_div_title, R.id.bbl_div_btns};
+        for (int id : dividerIds) {
+            View v = mBubble.findViewById(id);
+            if (v != null) {
+                v.setBackgroundColor(UiPills.divider());
             }
         }
 
@@ -5346,11 +5368,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
                 tintDrawable(((ImageView) c).getDrawable(), bg);
             }
         }
-        if (mBubbleContent != null) {
-            for (int i = 0; i < mBubbleContent.getChildCount(); i++) {
-                tintDrawable(mBubbleContent.getChildAt(i).getBackground(), bg);
-            }
-        }
+        // The rows are unfilled pills: the panel's MENU_BG shows through them, nothing to tint.
     }
 
     private void tintDrawable(Drawable d, int color) {
@@ -5377,6 +5395,10 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         UiTheme.applyTo(body, UiSlot.MENU_TEXT);
         UiTheme.applyTo(dsa, UiSlot.MENU_TEXT);
         dsa.setTag(Integer.valueOf(hint));
+        // "Don't show again" is an on/off setting: the outlined switch, not a tick box. The hint cell
+        // itself is a note, not an action — no frame, the panel shows through.
+        UiPills.applySwitch((CheckBox) dsa, true);
+        v.setBackground(null);
         v.setOnClickListener(this);
         mBubbleContent.addView(v);
     }
@@ -5409,7 +5431,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             btn.setText(label);
             btn.setTag(intent);
             btn.setOnClickListener(this);
-            styleBubbleItemText(btn);
+            // a row a plugin contributes
+            MenuPills.row(btn, UiIcons.Icon.SPARK, UiIcons.Does.CONNECT, false);
             mBubbleContent.addView(btn);
         }
     }

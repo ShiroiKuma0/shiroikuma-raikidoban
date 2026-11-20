@@ -65,7 +65,10 @@ public class ExportImportPanel {
         void onChainFinished();
     }
 
-    private static final int WARN_COLOR = 0xFFFF5252;
+    /** A missing backup destination is shown in the delete / warning red — a settable role like every other colour. */
+    private static int warnColor() {
+        return UiTheme.color(UiSlot.DELETE);
+    }
 
     private final Activity mActivity;
     private final Host mHost;
@@ -181,11 +184,11 @@ public class ExportImportPanel {
         String shown = label != null ? label
                 : remembered != null ? remembered
                 : mActivity.getString(R.string.rkb_eim_dir_unset);
-        box.addView(text(shown, 15, label != null ? UiTheme.color(UiSlot.DIALOG_TEXT) : WARN_COLOR, true));
+        box.addView(text(shown, 15, label != null ? UiTheme.color(UiSlot.DIALOG_TEXT) : warnColor(), true));
         if (remembered != null) {
             // Restored from a backup: the folder is known, only the grant is gone. Say which of the
             // two is missing, because the fix is one tap in a picker that already opens there.
-            TextView hint = text(mActivity.getString(R.string.rkb_eim_dir_regrant), 12, WARN_COLOR, false);
+            TextView hint = text(mActivity.getString(R.string.rkb_eim_dir_regrant), 12, warnColor(), false);
             hint.setPadding(0, dp(2), 0, 0);
             box.addView(hint);
         }
@@ -258,7 +261,7 @@ public class ExportImportPanel {
                 warn = false;
             }
         }
-        TextView tv = text(msg, 14, warn ? WARN_COLOR : UiTheme.color(UiSlot.DIALOG_TEXT), false);
+        TextView tv = text(msg, 14, warn ? warnColor() : UiTheme.color(UiSlot.DIALOG_TEXT), false);
         tv.setAlpha(warn ? 1f : 0.8f);
         tv.setPadding(dp(2), 0, 0, dp(8));
         return tv;
@@ -315,7 +318,7 @@ public class ExportImportPanel {
         Button importButton = pill(mActivity.getString(R.string.rkb_eim_import), v -> onImportClicked());
         ((LinearLayout.LayoutParams) importButton.getLayoutParams()).rightMargin = dp(8);
         row.addView(importButton);
-        row.addView(pill(mActivity.getString(R.string.rkb_eim_export), v -> onExportClicked()));
+        row.addView(pill(mActivity.getString(R.string.rkb_eim_export), true, v -> onExportClicked()));
         return row;
     }
 
@@ -464,7 +467,7 @@ public class ExportImportPanel {
         });
         ((LinearLayout.LayoutParams) later.getLayoutParams()).rightMargin = dp(10);
         buttons.addView(later);
-        buttons.addView(pill(mActivity.getString(R.string.rkb_eim_restart_now), v -> restartApp()));
+        buttons.addView(pill(mActivity.getString(R.string.rkb_eim_restart_now), true, v -> restartApp()));
         box.addView(buttons);
         dialog.show();
         transparentWindow(dialog);
@@ -521,7 +524,7 @@ public class ExportImportPanel {
         buttons.setOrientation(LinearLayout.HORIZONTAL);
         buttons.setGravity(Gravity.END);
         buttons.setPadding(0, dp(16), 0, 0);
-        buttons.addView(pill(mActivity.getString(android.R.string.ok), v -> {
+        buttons.addView(pill(mActivity.getString(android.R.string.ok), true, v -> {
             dialog.dismiss();
             if (closeChain) {
                 dismiss();
@@ -617,20 +620,20 @@ public class ExportImportPanel {
         return v;
     }
 
-    /** An ArcaneChat-style round pill: panel fill, thin accent stroke, accent text, accent ripple. */
+    /** A regular outlined pill (1.25 dp, normal weight) in the dialog-button colour. */
     private Button pill(String label, View.OnClickListener onClick) {
+        return pill(label, false, onClick);
+    }
+
+    /** {@code main}: the one action the block is for — the thick (3 dp), bold pill. Never filled. */
+    private Button pill(String label, boolean main, View.OnClickListener onClick) {
         Button b = new Button(mActivity);
         b.setText(label);
-        b.setAllCaps(false);
         int accent = UiTheme.color(UiSlot.DIALOG_BUTTON);
-        b.setTextColor(accent);
-        UiTheme.applyFont(b, UiSlot.DIALOG_BUTTON);
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(UiTheme.color(UiSlot.DIALOG_BG));
-        bg.setStroke(Math.max(1, Math.round(1.5f * mDensity)), accent);
-        bg.setCornerRadius(dp(50));
-        b.setBackground(new RippleDrawable(
-                ColorStateList.valueOf((accent & 0x00FFFFFF) | 0x33000000), bg, null));
+        b.setBackground(UiPills.background(mActivity, accent, main));
+        b.setTextColor(UiPills.states(accent));
+        b.setTypeface(UiTheme.typeface(UiSlot.DIALOG_BUTTON, main ? Typeface.BOLD : Typeface.NORMAL));
+        b.setAllCaps(false);
         b.setStateListAnimator(null);
         b.setMinWidth(0);
         b.setMinimumWidth(0);

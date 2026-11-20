@@ -248,6 +248,7 @@ public class ScreenManager extends ResourceWrapperActivity implements OnClickLis
             Button ok = findViewById(R.id.sm_ok);
             ok.setOnClickListener(this);
             ok.setVisibility(View.VISIBLE);
+            UiChrome.applyMainButton(ok);
         }
 
         mScreenContainer.removeAllViews();
@@ -386,7 +387,7 @@ public class ScreenManager extends ResourceWrapperActivity implements OnClickLis
                     }
                 });
                 builder.setNegativeButton(android.R.string.cancel, null);
-                return UiDialogStyler.styleOnShow(builder.create());
+                return UiDialogStyler.styleOnShow(UiDialogStyler.destructive(builder.create()));
         }
 
         return null;
@@ -763,7 +764,8 @@ public class ScreenManager extends ResourceWrapperActivity implements OnClickLis
         for (int i = 0; i < GLOBAL_NAV_CHIP_IDS.length; i++) {
             TextView chip = findViewById(GLOBAL_NAV_CHIP_IDS[i]);
             UiChrome.applyButton(chip);
-            chip.setPadding(chip.getPaddingLeft() / 2, chip.getPaddingTop() / 2, chip.getPaddingRight() / 2, chip.getPaddingBottom() / 2);
+            // a small pill; enough side padding that two lines of text clear its round ends
+                chip.setPadding(chip.getPaddingLeft() * 3 / 4, chip.getPaddingTop() / 2, chip.getPaddingRight() * 3 / 4, chip.getPaddingBottom() / 2);
             chip.setText(navChipText(NAV_LABELS[i], describeNavAction(getGlobalNavAction(gc, i))));
             final int slot = i;
             chip.setOnClickListener(new OnClickListener() {
@@ -1027,7 +1029,8 @@ public class ScreenManager extends ResourceWrapperActivity implements OnClickLis
                 final int slot = i;
                 TextView chip = screen_view.findViewById(NAV_CHIP_IDS[i]);
                 UiChrome.applyButton(chip);
-                chip.setPadding(chip.getPaddingLeft() / 2, chip.getPaddingTop() / 2, chip.getPaddingRight() / 2, chip.getPaddingBottom() / 2);
+                // a small pill; enough side padding that two lines of text clear its round ends
+                chip.setPadding(chip.getPaddingLeft() * 3 / 4, chip.getPaddingTop() / 2, chip.getPaddingRight() * 3 / 4, chip.getPaddingBottom() / 2);
                 chip.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {

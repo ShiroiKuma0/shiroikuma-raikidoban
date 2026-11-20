@@ -360,9 +360,11 @@ public class LLPreferenceListView extends ListView implements OnItemClickListene
                             mLayoutInflater.inflate(mPrefListWidgetLayout, widget_frame);
                         }
                     } else if (p instanceof LLPreferenceCheckBox) {
+                        // an on/off setting: the outlined switch, never a tick box
                         CheckBox widget = new CheckBox(getContext());
                         widget.setFocusable(false);
                         widget.setClickable(false);
+                        net.pierrox.lightning_launcher.util.UiPills.applySwitch(widget, false);
                         widget_frame.addView(widget);
                     } else if (p instanceof LLPreferenceColor) {
                         View v = new ColorPickerPanelView(getContext());
@@ -434,7 +436,14 @@ public class LLPreferenceListView extends ListView implements OnItemClickListene
                 if (is_category) {
                 } else if (p instanceof LLPreferenceCheckBox) {
                     CheckBox widget = (CheckBox) widget_frame.getChildAt(0);
+                    boolean recycled = widget.getTag() != p;
+                    widget.setTag(p);
                     widget.setChecked(((LLPreferenceCheckBox) p).isChecked());
+                    if (recycled) {
+                        // a row reused for another setting shows its state at once; only a real toggle
+                        // lets the dot travel
+                        widget.jumpDrawablesToCurrentState();
+                    }
                 } else if (p instanceof LLPreferenceColor) {
 //					View color_preview = widget_frame.findViewById(R.id.color_preview);
 //					color_preview.setBackgroundColor(((LLPreferenceColor)p).getColor());
@@ -463,6 +472,36 @@ public class LLPreferenceListView extends ListView implements OnItemClickListene
             TextView titleView = convertView.findViewById(android.R.id.title);
             if (titleView != null) {
                 UiTheme.applyTo(titleView, is_category ? UiSlot.PREF_CATEGORY : UiSlot.PREF_TITLE);
+                if (!is_category) {
+                    // Every row carries the icon of its kind, told from the preference type: a colour, a
+                    // number, a choice, a switch, a text, a gesture, a binding — or a row that opens
+                    // something. Coloured by what the row does.
+                    net.pierrox.lightning_launcher.util.UiIcons.Icon icon;
+                    net.pierrox.lightning_launcher.util.UiIcons.Does does = net.pierrox.lightning_launcher.util.UiIcons.Does.VIEW;
+                    if (p instanceof LLPreferenceColor) {
+                        icon = net.pierrox.lightning_launcher.util.UiIcons.Icon.PALETTE;
+                    } else if (p instanceof LLPreferenceSlider) {
+                        icon = net.pierrox.lightning_launcher.util.UiIcons.Icon.SLIDERS;
+                    } else if (p instanceof LLPreferenceCheckBox) {
+                        icon = net.pierrox.lightning_launcher.util.UiIcons.Icon.TOGGLE;
+                    } else if (p instanceof LLPreferenceList) {
+                        icon = net.pierrox.lightning_launcher.util.UiIcons.Icon.LIST;
+                    } else if (p instanceof LLPreferenceText) {
+                        icon = net.pierrox.lightning_launcher.util.UiIcons.Icon.TEXT;
+                        does = net.pierrox.lightning_launcher.util.UiIcons.Does.MESSAGE;
+                    } else if (p instanceof LLPreferenceEventAction) {
+                        icon = net.pierrox.lightning_launcher.util.UiIcons.Icon.POINTER;
+                        does = net.pierrox.lightning_launcher.util.UiIcons.Does.CONNECT;
+                    } else if (p instanceof LLPreferenceBinding) {
+                        icon = net.pierrox.lightning_launcher.util.UiIcons.Icon.LINK;
+                        does = net.pierrox.lightning_launcher.util.UiIcons.Does.SHARE;
+                    } else if (p instanceof LLPreferenceBox) {
+                        icon = net.pierrox.lightning_launcher.util.UiIcons.Icon.FRAME;
+                    } else {
+                        icon = net.pierrox.lightning_launcher.util.UiIcons.Icon.RIGHT;
+                    }
+                    net.pierrox.lightning_launcher.util.UiIcons.onRow(titleView, icon, does);
+                }
             }
             if (!is_category) {
                 TextView summaryView = convertView.findViewById(android.R.id.summary);

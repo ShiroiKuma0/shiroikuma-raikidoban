@@ -36,8 +36,9 @@
                         style="@style/bbl_ttl"
                         tools:text="Test" />
                     <View
+                        android:id="@+id/bbl_div_title"
                         android:layout_width="match_parent"
-                        android:layout_height="1px"
+                        android:layout_height="1dp"
                         android:background="@color/color_primary"/>
                 </LinearLayout>
 
@@ -73,8 +74,9 @@
                             style="@style/bubble_item_icon"/>
                     </LinearLayout>
                     <View
+                        android:id="@+id/bbl_div_btns"
                         android:layout_width="match_parent"
-                        android:layout_height="1px"
+                        android:layout_height="1dp"
                         android:background="@color/color_primary"/>
                 </LinearLayout>
             </LinearLayout>

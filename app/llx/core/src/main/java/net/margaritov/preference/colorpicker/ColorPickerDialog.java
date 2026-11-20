@@ -145,38 +145,17 @@ public class ColorPickerDialog
         Button ok = layout.findViewById(R.id.ok_button);
         cancel.setOnClickListener(this);
         ok.setOnClickListener(this);
-        styleButton(cancel);
-        styleButton(ok);
+        // OK is what the dialog is for: the thick, bold pill. Cancel is a regular one.
+        net.pierrox.lightning_launcher.util.UiPills.button(cancel, false, false);
+        net.pierrox.lightning_launcher.util.UiPills.button(ok, true, false);
+        // the bordered DIALOG_BG panel every other dialog has
+        net.pierrox.lightning_launcher.util.UiDialogStyler.stylePanel(this);
 
         mColorPicker.setOnColorChangedListener(this);
         mColorPicker.setColor(color, true);
         setOnCancelListener(this);
 
         buildRecentColors();
-    }
-
-    // Style a Cancel / OK button with the BUTTONS slots (BUTTON_BG fill, BUTTON_BORDER stroke + corner
-    // radius, BUTTON_TEXT colour + font) — black bg / yellow text + border by default, all configurable
-    // under the 「白い熊 雷起動盤 UI」 Buttons section. Mirrors UiChrome.applyButton, which lives in the
-    // app module and so is not reachable from this core class.
-    private void styleButton(Button button) {
-        if (button == null) {
-            return;
-        }
-        float d = button.getResources().getDisplayMetrics().density;
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(UiTheme.color(UiSlot.BUTTON_BG));
-        bg.setCornerRadius(UiTheme.cornerRadiusDp(UiSlot.BUTTON_BORDER) * d);
-        int width = UiTheme.borderWidthDp(UiSlot.BUTTON_BORDER);
-        if (width > 0) {
-            bg.setStroke(Math.round(width * d), UiTheme.color(UiSlot.BUTTON_BORDER));
-        }
-        button.setBackground(bg);
-        button.setTextColor(UiTheme.color(UiSlot.BUTTON_TEXT));
-        UiTheme.applyFont(button, UiSlot.BUTTON_TEXT);
-        int padH = Math.round(16 * d);
-        int padV = Math.round(10 * d);
-        button.setPadding(padH, padV, padH, padV);
     }
 
     // A row of round one-tap swatches for recently-picked colours (see UiConfig). Tapping one selects

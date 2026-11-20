@@ -177,6 +177,21 @@ public final class UiConfig {
         mPrefs.edit().remove(SIZE_PREFIX + key).apply();
     }
 
+    // --- plain strings (the UI page's section order and fold state, see UiPageState). Kept as strings
+    // rather than string sets: the export writes this whole file, and its dump skips string sets. ---
+
+    public String getString(String key) {
+        return mPrefs.getString(key, null);
+    }
+
+    public void setString(String key, String value) {
+        if (value == null) {
+            mPrefs.edit().remove(key).commit();
+        } else {
+            mPrefs.edit().putString(key, value).commit();
+        }
+    }
+
     // --- recently picked colours (a small shared MRU list powering the colour picker's one-tap swatches) ---
 
     private static final String PREF_RECENT_COLORS = "recent_colors";

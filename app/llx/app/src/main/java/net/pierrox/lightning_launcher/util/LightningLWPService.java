@@ -113,6 +113,7 @@ public class LightningLWPService extends WallpaperService {
 
             mNoDesktopView = mContentView.findViewById(R.id.empty);
             mNoDesktopView.setText(R.string.sd);
+            net.pierrox.lightning_launcher.util.UiPills.button(mNoDesktopView, false, false);
             mNoDesktopView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

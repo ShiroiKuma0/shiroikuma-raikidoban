@@ -18,6 +18,21 @@ public enum UiSlot {
     BACKGROUND("llui_background", UiGroup.FOUNDATION, R.string.llui_background, true, false, null, 0xFF000000),
     TEXT("llui_text", UiGroup.FOUNDATION, R.string.llui_text, true, true, null, 0xFFFFFF00),
     ACCENT("llui_accent", UiGroup.FOUNDATION, R.string.llui_accent, true, false, null, 0xFFFFFF00),
+    // Roles of the black-yellow look that are not a cascade root: each keeps its own literal default
+    // (parent = none), like DIALOG_INHERITED. NOTE is the dim gold of explanations and of the left rule
+    // beside an explained row; SWITCH_OFF the opaque dim yellow of a switch that is off (never an alpha
+    // fade — that reads as disabled); DELETE the red a destructive pill lends to frame, icon and label.
+    NOTE("llui_note", UiGroup.FOUNDATION, R.string.llui_note, false, false, null, 0xFFC8C800),
+    SWITCH_OFF("llui_switch_off", UiGroup.FOUNDATION, R.string.llui_switch_off, false, false, null, 0xFF8C8C00),
+    DELETE("llui_delete", UiGroup.FOUNDATION, R.string.llui_delete, false, false, null, 0xFFFF0000),
+
+    // --- Icon roles: an icon is coloured by what its row DOES (a menu is read by colour before it is
+    // read by word). A row that merely views / opens / configures takes the accent, so it has no slot. ---
+    ICON_CONNECT("llui_icon_connect", UiGroup.ICONS, R.string.llui_icon_connect, false, false, null, 0xFF00FF00),
+    ICON_MESSAGE("llui_icon_message", UiGroup.ICONS, R.string.llui_icon_message, false, false, null, 0xFF4D94FF),
+    ICON_CONTACT("llui_icon_contact", UiGroup.ICONS, R.string.llui_icon_contact, false, false, null, 0xFF00FFFF),
+    ICON_SHARE("llui_icon_share", UiGroup.ICONS, R.string.llui_icon_share, false, false, null, 0xFFFF8000),
+    ICON_BLOCK("llui_icon_block", UiGroup.ICONS, R.string.llui_icon_block, false, false, null, 0xFFFF00FF),
 
     // --- Launcher menus (bubble) ---
     MENU_TEXT("llui_menu_text", UiGroup.MENUS, R.string.llui_menu_text, false, true, "llui_text", 0),

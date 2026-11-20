@@ -488,7 +488,12 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.ai_jiyu_paste);
-        builder.setItems(names.toArray(new String[0]), new DialogInterface.OnClickListener() {
+        ArrayList<UiDialogStyler.Action> pasteRows = new ArrayList<>();
+        for (String name : names) {
+            pasteRows.add(new UiDialogStyler.Action(name, net.pierrox.lightning_launcher.util.UiIcons.Icon.LINK,
+                    net.pierrox.lightning_launcher.util.UiIcons.Does.CONNECT, false));
+        }
+        builder.setAdapter(UiDialogStyler.actionAdapter(this, pasteRows), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 requestJiyuPaste(names.get(which));
@@ -700,6 +705,44 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
                 convertView.findViewById(android.R.id.summary).setVisibility(View.GONE);
                 View icon = convertView.findViewById(android.R.id.icon);
                 if (icon != null) icon.setVisibility(View.GONE);
+                // every action carries the icon of its category, coloured by what that kind of action does
+                net.pierrox.lightning_launcher.util.UiIcons.Icon rowIcon;
+                net.pierrox.lightning_launcher.util.UiIcons.Does rowDoes;
+                switch (action.category) {
+                    case Action.CAT_LAUNCH_AND_APPS:
+                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.PLAY;
+                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.CONNECT;
+                        break;
+                    case Action.CAT_NAVIGATION:
+                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.DESKTOP;
+                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.VIEW;
+                        break;
+                    case Action.CAT_MENU_STATUS_BAR:
+                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.LIST;
+                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.VIEW;
+                        break;
+                    case Action.CAT_FOLDERS:
+                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.DIRECTORY;
+                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.CONTACT;
+                        break;
+                    case Action.CAT_EDITION:
+                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.EDIT;
+                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.MESSAGE;
+                        break;
+                    case Action.CAT_EXTERNAL:
+                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.DEVICE;
+                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.SHARE;
+                        break;
+                    case Action.CAT_ADVANCED:
+                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.CODE;
+                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.CONNECT;
+                        break;
+                    default:
+                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.BLOCK;
+                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.BLOCK;
+                        break;
+                }
+                net.pierrox.lightning_launcher.util.UiIcons.onRow(title_view, rowIcon, rowDoes);
             }
 
             return convertView;

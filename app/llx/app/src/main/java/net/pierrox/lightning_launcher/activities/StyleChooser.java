@@ -123,7 +123,7 @@ public class StyleChooser extends ResourceWrapperListActivity implements OnItemL
 				}
 			});
 			builder.setNegativeButton(android.R.string.cancel, null);
-			return UiDialogStyler.styleOnShow(builder.create());
+			return UiDialogStyler.styleOnShow(UiDialogStyler.destructive(builder.create()));
 		}
 		
 		return super.onCreateDialog(id);
@@ -278,7 +278,18 @@ public class StyleChooser extends ResourceWrapperListActivity implements OnItemL
             }
         });
 		
-		ArrayAdapter<StyleEntry> adapter=new ArrayAdapter<StyleEntry>(this, android.R.layout.simple_list_item_1, mStyles);
+		ArrayAdapter<StyleEntry> adapter=new ArrayAdapter<StyleEntry>(this, android.R.layout.simple_list_item_1, mStyles) {
+			@Override
+			public View getView(int position, View convertView, android.view.ViewGroup parent) {
+				View v = super.getView(position, convertView, parent);
+				if (v instanceof android.widget.TextView) {
+					net.pierrox.lightning_launcher.util.UiIcons.onRow((android.widget.TextView) v,
+							net.pierrox.lightning_launcher.util.UiIcons.Icon.PALETTE,
+							net.pierrox.lightning_launcher.util.UiIcons.Does.VIEW);
+				}
+				return v;
+			}
+		};
 		setListAdapter(adapter);
 		// simple_list_item_1 has no colour of its own: paint the rows instead of leaving them white.
 		UiTheme.paintUnstyledText(getListView(), UiSlot.PREF_TITLE);

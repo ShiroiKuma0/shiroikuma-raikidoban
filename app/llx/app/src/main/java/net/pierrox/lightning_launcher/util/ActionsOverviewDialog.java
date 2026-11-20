@@ -509,6 +509,7 @@ public class ActionsOverviewDialog {
             TextView value = convertView.findViewById(R.id.value);
             label.setText(slot.titleRes);
             value.setText(valueText(slot));
+            UiIcons.onRow(label, UiIcons.Icon.POINTER, UiIcons.Does.VIEW);
             net.pierrox.lightning_launcher.configuration.UiTheme.applyTo(label,
                     net.pierrox.lightning_launcher.configuration.UiSlot.DIALOG_TEXT);
 
@@ -524,8 +525,9 @@ public class ActionsOverviewDialog {
             value.setAlpha(inherited ? 1f : 0.7f);
 
             TextView delete = convertView.findViewById(R.id.delete);
+            // the X clears the binding: it takes the delete red
             delete.setTextColor(net.pierrox.lightning_launcher.configuration.UiTheme.color(
-                    net.pierrox.lightning_launcher.configuration.UiSlot.DIALOG_TEXT));
+                    net.pierrox.lightning_launcher.configuration.UiSlot.DELETE));
             delete.setVisibility(inherited ? View.GONE : View.VISIBLE);
             delete.setOnClickListener(inherited ? null : new View.OnClickListener() {
                 @Override

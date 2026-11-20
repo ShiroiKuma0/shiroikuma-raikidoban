@@ -1,6 +1,16 @@
 package net.pierrox.lightning_launcher.util;
 
+import android.graphics.drawable.ColorDrawable;
+import android.widget.FrameLayout;
+import android.widget.ListView;
+import android.widget.BaseAdapter;
+import android.widget.ListAdapter;
 import android.app.AlertDialog;
+import java.util.WeakHashMap;
+import java.util.List;
+import android.widget.ScrollView;
+import android.widget.LinearLayout;
+import android.view.ViewGroup;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -57,9 +67,21 @@ public final class UiDialogStyler {
             UiTheme.applyFont(message, UiSlot.DIALOG_TEXT);
         }
 
-        styleButton(dialog.findViewById(android.R.id.button1), buttonColor);
-        styleButton(dialog.findViewById(android.R.id.button2), buttonColor);
-        styleButton(dialog.findViewById(android.R.id.button3), buttonColor);
+        // The button bar: every button is a pill. The positive one is the main pill (3 dp, bold) and
+        // takes the delete red on a dialog marked destructive; the others are regular pills.
+        boolean destructive;
+        synchronized (sDestructive) {
+            destructive = sDestructive.containsKey(dialog);
+        }
+        UiPills.dialogButton((Button) dialog.findViewById(android.R.id.button1), true,
+                destructive ? UiTheme.color(UiSlot.DELETE) : buttonColor);
+        UiPills.dialogButton((Button) dialog.findViewById(android.R.id.button2), false, buttonColor);
+        UiPills.dialogButton((Button) dialog.findViewById(android.R.id.button3), false, buttonColor);
+
+        // The dialog's own layout: checkboxes become the outlined switch, text buttons pills.
+        if (w != null) {
+            UiPills.styleTree(w.getDecorView());
+        }
 
         stylePanel(dialog);
     }
@@ -83,6 +105,153 @@ public final class UiDialogStyler {
                 }
             });
         }
+        return dialog;
+    }
+
+    // Dialogs that delete, remove or reset something: their positive button is a red pill.
+    private static final WeakHashMap<Dialog, Boolean> sDestructive = new WeakHashMap<>();
+
+    /**
+     * Mark a dialog whose positive button deletes, removes or resets something, so that button is drawn
+     * as a red pill. Call it before the dialog is shown; returns the dialog for chaining, e.g.
+     * {@code return UiDialogStyler.styleOnShow(UiDialogStyler.destructive(builder.create()));}.
+     */
+    public static <T extends Dialog> T destructive(T dialog) {
+        if (dialog != null) {
+            synchronized (sDestructive) {
+                sDestructive.put(dialog, Boolean.TRUE);
+            }
+        }
+        return dialog;
+    }
+
+    /**
+     * The rows of an action list as an adapter, for a dialog that has to stay a {@code setAdapter} /
+     * {@code setItems} list (its click and cancel handling is the builder's): every row is the same
+     * full-width icon pill {@link #actions} draws. Use it as
+     * {@code builder.setAdapter(UiDialogStyler.actionAdapter(context, rows), listener)}.
+     */
+    public static ListAdapter actionAdapter(final Context context, final List<Action> rows) {
+        return new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return rows.size();
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return rows.get(position);
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                if (parent instanceof ListView) {
+                    // the pill carries the press ripple; no rectangular highlight, no hairlines
+                    ListView list = (ListView) parent;
+                    list.setSelector(new ColorDrawable(0));
+                    list.setDivider(null);
+                }
+                Action row = rows.get(position);
+                FrameLayout cell = new FrameLayout(context);
+                cell.setPadding(UiPills.dp(context, 8), UiPills.dp(context, 3), UiPills.dp(context, 8), UiPills.dp(context, 3));
+                LinearLayout pill = pill(context, row);
+                pill.setClickable(false);
+                pill.setFocusable(false);
+                pill.setDuplicateParentStateEnabled(true);
+                cell.addView(pill, new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                return cell;
+            }
+        };
+    }
+
+    private static LinearLayout pill(Context context, Action row) {
+        boolean deletes = row.does == UiIcons.Does.DELETE;
+        int color = deletes ? UiTheme.color(UiSlot.DELETE) : UiTheme.color(UiSlot.DIALOG_BUTTON);
+        Drawable icon = row.ownIcon != null ? row.ownIcon
+                : UiIcons.drawable(context, row.icon == null ? UiIcons.Icon.LIST : row.icon, row.does);
+        return UiPills.iconPill(context, row.label, icon, color, false, row.opens, true);
+    }
+
+    /** {@link #show(AlertDialog.Builder)} for a dialog that deletes: the positive button is red. */
+    public static AlertDialog showDestructive(AlertDialog.Builder builder) {
+        AlertDialog dialog = styleOnShow(destructive(builder.create()));
+        dialog.show();
+        return dialog;
+    }
+
+    /** One row of {@link #actions}: an action with its icon, coloured by what it does. */
+    public static final class Action {
+        final CharSequence label;
+        final UiIcons.Icon icon;
+        final UiIcons.Does does;
+        final boolean opens;
+        final Drawable ownIcon;
+
+        /** @param opens the row opens a screen, dialog or picker — it gets a › */
+        public Action(CharSequence label, UiIcons.Icon icon, UiIcons.Does does, boolean opens) {
+            this(label, icon, does, opens, null);
+        }
+
+        /** A row that brings its own icon (an app's), shown as it is. */
+        public Action(CharSequence label, Drawable ownIcon, boolean opens) {
+            this(label, null, UiIcons.Does.VIEW, opens, ownIcon);
+        }
+
+        private Action(CharSequence label, UiIcons.Icon icon, UiIcons.Does does, boolean opens, Drawable ownIcon) {
+            this.label = label;
+            this.icon = icon;
+            this.does = does;
+            this.opens = opens;
+            this.ownIcon = ownIcon;
+        }
+    }
+
+    public interface OnAction {
+        void onAction(int which);
+    }
+
+    /**
+     * The themed replacement for {@code builder.setItems(...)} on a list of ACTIONS: every row is a
+     * full-width outlined pill with its icon, a › when it opens something, and red when it deletes. (A
+     * list of pure choices — a language, a font weight — stays a plain list.) Shows the dialog with a
+     * Cancel button and returns it.
+     */
+    public static AlertDialog actions(Context context, CharSequence title, List<Action> rows, final OnAction onPick) {
+        LinearLayout column = new LinearLayout(context);
+        column.setOrientation(LinearLayout.VERTICAL);
+        column.setPadding(UiPills.dp(context, 8), UiPills.dp(context, 6), UiPills.dp(context, 8), UiPills.dp(context, 2));
+        ScrollView scroll = new ScrollView(context);
+        scroll.addView(column);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        if (title != null) {
+            builder.setTitle(title);
+        }
+        builder.setView(scroll);
+        builder.setNegativeButton(android.R.string.cancel, null);
+        final AlertDialog dialog = styleOnShow(builder.create());
+
+        for (int i = 0; i < rows.size(); i++) {
+            final int which = i;
+            Action row = rows.get(i);
+            LinearLayout pill = pill(context, row);
+            pill.setOnClickListener(v -> {
+                dialog.dismiss();
+                onPick.onAction(which);
+            });
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.topMargin = UiPills.dp(context, 3);
+            lp.bottomMargin = UiPills.dp(context, 3);
+            column.addView(pill, lp);
+        }
+        dialog.show();
         return dialog;
     }
 
@@ -129,13 +298,6 @@ public final class UiDialogStyler {
             panel.setStroke(Math.round(borderDp * d), UiTheme.color(UiSlot.DIALOG_BORDER));
         }
         return panel;
-    }
-
-    private static void styleButton(Button button, int color) {
-        if (button != null) {
-            button.setTextColor(color);
-            UiTheme.applyFont(button, UiSlot.DIALOG_BUTTON);
-        }
     }
 
     // The title view has no public id: the framework layout calls it "android:id/alertTitle", AppCompat's

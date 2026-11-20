@@ -271,7 +271,7 @@ public class FileAndDirectoryPickerDialog extends AlertDialog implements DialogI
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);
-        UiDialogStyler.show(builder);
+        UiDialogStyler.showDestructive(builder);
     }
 
     private void showDeleteFontDialog(final File file) {
@@ -289,7 +289,7 @@ public class FileAndDirectoryPickerDialog extends AlertDialog implements DialogI
             }
         });
         builder.setNegativeButton(android.R.string.ok, null);
-        UiDialogStyler.show(builder);
+        UiDialogStyler.showDestructive(builder);
     }
 
     private boolean matchExtension(String name) {

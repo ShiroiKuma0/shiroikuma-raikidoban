@@ -2323,7 +2323,7 @@ public class CustomizeItemView extends MyViewPager implements LLPreferenceListVi
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);
-        UiDialogStyler.show(builder);
+        UiDialogStyler.showDestructive(builder);
     }
 
     private void buildFontsList() {

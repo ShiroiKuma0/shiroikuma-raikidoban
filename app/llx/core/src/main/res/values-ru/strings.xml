@@ -1267,6 +1267,26 @@ Support the developer and help making 白い熊 雷起動盤 the best launcher e
     <string name="llui_statusbar_bg">Строка состояния</string>
     <string name="llui_group_buttons">Кнопки</string>
     <string name="llui_group_geometry">Блок геометрии</string>
+    <!-- 白い熊: the black-yellow roll-out — roles, icon colours, the folding UI page -->
+    <string name="llui_group_icons">Цвета значков</string>
+    <string name="llui_note">Пояснения (тусклое золото)</string>
+    <string name="llui_switch_off">Переключатель, выкл.</string>
+    <string name="llui_delete">Удаление / необратимые действия</string>
+    <string name="llui_icon_connect">Запустить, открыть, добавить</string>
+    <string name="llui_icon_message">Изменить, переименовать, ввести</string>
+    <string name="llui_icon_contact">Элементы, приложения, виджеты</string>
+    <string name="llui_icon_share">Копировать, переместить, экспортировать</string>
+    <string name="llui_icon_block">Заблокировать, скрыть, остановить</string>
+    <string name="llui_group_maint">Обслуживание</string>
+    <string name="llui_reset_order">Сбросить порядок разделов</string>
+    <string name="llui_reset_order_desc">Возвращает разделы этой страницы в исходный порядок.</string>
+    <string name="llui_reset_order_done">Порядок разделов сброшен.</string>
+    <string name="llui_app_settings">Настройки Lightning</string>
+    <string name="llui_app_settings_desc">Рабочие столы, список приложений, жесты и всё остальное, что умеет лаунчер.</string>
+    <string name="llui_auto_pill">пилюля</string>
+    <string name="rkb_auto_token_copy">Копировать токен</string>
+    <string name="rkb_auto_token_copy_desc">Копирует весь токен в буфер обмена.</string>
+    <string name="rkb_auto_regenerate_desc">Создаёт новый токен. Вставленные ранее копии перестанут работать.</string>
     <string name="llui_button_bg">Фон кнопки</string>
     <string name="llui_button_text">Текст кнопки</string>
     <string name="llui_button_border">Рамка кнопки</string>
@@ -1290,7 +1310,7 @@ Support the developer and help making 白い熊 雷起動盤 the best launcher e
     <string name="llui_geom_zorder_icon">Цвет значка слоёв</string>
     <string name="llui_geom_zorder_size">Размер кнопки слоёв</string>
     <string name="llui_geom_auto">Авто</string>
-    <string name="llui_reset_hint">Удерживайте цвет, чтобы сбросить его.</string>
+    <string name="llui_reset_hint">Удерживайте цвет или ползунок, чтобы сбросить его.</string>
     <string name="theme_font">Шрифт</string>
     <string name="theme_weight">Насыщенность</string>
     <string name="theme_size">Размер</string>

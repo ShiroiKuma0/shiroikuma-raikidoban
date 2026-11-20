@@ -137,7 +137,24 @@ public class Shortcuts extends ResourceWrapperListActivity {
                     getString(R.string.backup_restore_t)                    // 29
             };
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mItems);
+            // every row opens a settings page; the last one is the backup screen
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mItems) {
+                @Override
+                public View getView(int position, View convertView, android.view.ViewGroup parent) {
+                    View v = super.getView(position, convertView, parent);
+                    if (v instanceof android.widget.TextView) {
+                        boolean backup = position == mItems.length - 1;
+                        boolean sub = mItems[position].startsWith(INDENT);
+                        net.pierrox.lightning_launcher.util.UiIcons.onRow((android.widget.TextView) v,
+                                backup ? net.pierrox.lightning_launcher.util.UiIcons.Icon.ARCHIVE
+                                        : sub ? net.pierrox.lightning_launcher.util.UiIcons.Icon.SLIDERS
+                                        : net.pierrox.lightning_launcher.util.UiIcons.Icon.GEAR,
+                                backup ? net.pierrox.lightning_launcher.util.UiIcons.Does.SHARE
+                                        : net.pierrox.lightning_launcher.util.UiIcons.Does.VIEW);
+                    }
+                    return v;
+                }
+            };
             setListAdapter(adapter);
             // simple_list_item_1 has no colour of its own: paint the rows instead of leaving them white.
             UiTheme.paintUnstyledText(getListView(), UiSlot.PREF_TITLE);

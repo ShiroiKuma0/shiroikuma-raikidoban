@@ -709,6 +709,7 @@ public class Customize extends ResourceWrapperActivity implements
         menu.findItem(R.id.rs).setTitle(getString(R.string.menu_customize));
         menu.findItem(R.id.h).setTitle(getString(R.string.sc_help));
         net.pierrox.lightning_launcher.util.UiChrome.tintMenu(menu);
+        net.pierrox.lightning_launcher.util.MenuPills.decorate(this, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -1214,7 +1215,7 @@ public class Customize extends ResourceWrapperActivity implements
                             }
                         });
                 builder.setNegativeButton(android.R.string.cancel, null);
-                return UiDialogStyler.styleOnShow(builder.create());
+                return UiDialogStyler.styleOnShow(UiDialogStyler.destructive(builder.create()));
 
             case DIALOG_CONFIRM_RELAYOUT:
                 builder = new AlertDialog.Builder(this);

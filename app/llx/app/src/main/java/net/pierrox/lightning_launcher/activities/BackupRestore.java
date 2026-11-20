@@ -24,6 +24,7 @@ SOFTWARE.
 
 package net.pierrox.lightning_launcher.activities;
 
+import net.pierrox.lightning_launcher.util.UiIcons;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -168,16 +169,18 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
     // 「白い熊 雷起動盤 UI」: paint the three top buttons with the BUTTONS slots (black bg + yellow border
     // by default) instead of the platform's grey button background.
     private void styleButtons() {
-        net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.backup));
+        // Backup is what this screen is for: the thick, bold pill. Prune deletes: the red one.
+        net.pierrox.lightning_launcher.util.UiChrome.applyMainButton((Button) findViewById(R.id.backup));
         net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.export));
         net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.import_));
-        net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.prune));
+        net.pierrox.lightning_launcher.util.UiChrome.applyDestructiveButton((Button) findViewById(R.id.prune));
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, MENU_PICK_FOLDER, 0, R.string.backup_folder_select)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        net.pierrox.lightning_launcher.util.MenuPills.decorate(this, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -266,7 +269,16 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 names[i] = mArchives.get(i).getName();
             }
             // each archive with its icon: a full backup is exported state, coloured as such
-            mListView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, names));
+            mListView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, names) {
+                @Override
+                public View getView(int position, View convertView, android.view.ViewGroup parent) {
+                    View v = super.getView(position, convertView, parent);
+                    if (v instanceof TextView) {
+                        UiIcons.onRow((TextView) v, UiIcons.Icon.ARCHIVE, UiIcons.Does.SHARE);
+                    }
+                    return v;
+                }
+            });
             mEmptyView.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
         }
@@ -365,7 +377,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                     }
                 });
                 builder.setNegativeButton(android.R.string.cancel, null);
-                UiDialogStyler.show(builder);
+                UiDialogStyler.showDestructive(builder);
             }
         }.execute((Void) null);
     }
@@ -518,7 +530,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                         }
                     });
                     builder.setNegativeButton(android.R.string.cancel, null);
-                    return withChrome(builder.create());
+                    return withChrome(UiDialogStyler.destructive(builder.create()));
                 }
                 break;
 
@@ -526,7 +538,13 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 if (mSelected != null) {
                     builder = new AlertDialog.Builder(this);
                     builder.setTitle(R.string.br_a);
-                    builder.setItems(new String[]{getString(R.string.br_ob), getString(R.string.br_ot), getString(R.string.br_r), getString(R.string.br_s), getString(R.string.br_d)}, new DialogInterface.OnClickListener() {
+                    ArrayList<UiDialogStyler.Action> actions = new ArrayList<>();
+                    actions.add(new UiDialogStyler.Action(getString(R.string.br_ob), UiIcons.Icon.ARCHIVE, UiIcons.Does.SHARE, false));
+                    actions.add(new UiDialogStyler.Action(getString(R.string.br_ot), UiIcons.Icon.LAYERS, UiIcons.Does.SHARE, true));
+                    actions.add(new UiDialogStyler.Action(getString(R.string.br_r), UiIcons.Icon.EDIT, UiIcons.Does.MESSAGE, true));
+                    actions.add(new UiDialogStyler.Action(getString(R.string.br_s), UiIcons.Icon.SHARE, UiIcons.Does.SHARE, true));
+                    actions.add(new UiDialogStyler.Action(getString(R.string.br_d), UiIcons.Icon.DELETE, UiIcons.Does.DELETE, true));
+                    builder.setAdapter(UiDialogStyler.actionAdapter(this, actions), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             if (mSelected == null) {

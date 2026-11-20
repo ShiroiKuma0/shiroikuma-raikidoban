@@ -24,6 +24,7 @@ SOFTWARE.
 
 package net.pierrox.lightning_launcher.activities;
 
+import net.pierrox.lightning_launcher.util.UiIcons;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.DialogInterface;
@@ -247,6 +248,7 @@ public class FoldMatrixActivity extends ResourceWrapperActivity
         LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         blp.topMargin = dp(16);
         rebuild.setLayoutParams(blp);
+        net.pierrox.lightning_launcher.util.UiChrome.applyButton(rebuild);
         mRoot.addView(rebuild);
     }
 
@@ -351,7 +353,9 @@ public class FoldMatrixActivity extends ResourceWrapperActivity
         final Holder h = (Holder) tag;
         UiDialogStyler.show(new AlertDialog.Builder(this)
                 .setTitle(desktopName(h.pageId))
-                .setItems(new CharSequence[]{getString(R.string.fm_set_home), getString(R.string.fm_remove)},
+                .setAdapter(UiDialogStyler.actionAdapter(this, java.util.Arrays.asList(
+                                new UiDialogStyler.Action(getString(R.string.fm_set_home), UiIcons.Icon.HOME, UiIcons.Does.VIEW, false),
+                                new UiDialogStyler.Action(getString(R.string.fm_remove), UiIcons.Icon.DELETE, UiIcons.Does.DELETE, false))),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface d, int which) {
