@@ -737,6 +737,13 @@
 <string name="br_d">Delete</string>
 <string name="br_s">Send</string>
 <string name="br_dc">Delete this archive ?</string>
+    <!-- 白い熊: prune — delete every backup in the backup directory except the newest one -->
+    <string name="br_prune">Prune old backups</string>
+    <string name="br_prune_c">Delete old backups?</string>
+    <string name="br_prune_m">To delete: %1$d\nKept: %2$s</string>
+    <string name="br_prune_none">No old backups to delete.</string>
+    <string name="br_prune_p">Deleting old backups…</string>
+    <string name="br_prune_done">Deleted backups: %1$d / %2$d</string>
 <string name="br_rc">Restore this archive ?</string>
 <string name="dt_gml_t">Gmail label</string>
 

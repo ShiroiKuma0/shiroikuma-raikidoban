@@ -484,6 +484,13 @@
     <string name="br_rc">Восстановить этот архив?</string>
     <string name="br_d">Удалить</string>
     <string name="br_dc">Удалить этот архив?</string>
+    <!-- 白い熊: prune — delete every backup in the backup directory except the newest one -->
+    <string name="br_prune">Удалить старые копии</string>
+    <string name="br_prune_c">Удалить старые резервные копии?</string>
+    <string name="br_prune_m">К удалению: %1$d\nОстанется: %2$s</string>
+    <string name="br_prune_none">Старых резервных копий нет.</string>
+    <string name="br_prune_p">Удаление старых резервных копий…</string>
+    <string name="br_prune_done">Удалено резервных копий: %1$d / %2$d</string>
     <string name="br_a">Выберите действие</string>
     <string name="br_s">Отправить</string>
     <string name="dt_gml_t">Ярлык Gmail</string>

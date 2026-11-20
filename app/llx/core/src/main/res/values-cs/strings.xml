@@ -487,6 +487,13 @@ Klepnutím můžeš vybrat jiný"</string>
     <string name="br_rc">Opravdu chceš tuto zálohu obnovit?</string>
     <string name="br_d">Smazat</string>
     <string name="br_dc">Opravdu chceš tuto zálohu smazat?</string>
+    <!-- 白い熊: prune — delete every backup in the backup directory except the newest one -->
+    <string name="br_prune">Smazat staré zálohy</string>
+    <string name="br_prune_c">Smazat staré zálohy?</string>
+    <string name="br_prune_m">Ke smazání: %1$d\nZůstane: %2$s</string>
+    <string name="br_prune_none">Žádné staré zálohy ke smazání.</string>
+    <string name="br_prune_p">Mažou se staré zálohy…</string>
+    <string name="br_prune_done">Smazané zálohy: %1$d / %2$d</string>
     <string name="br_a">Zvol akci</string>
     <string name="br_s">Odeslat</string>
     <string name="dt_gml_t">Gmail štítek</string>

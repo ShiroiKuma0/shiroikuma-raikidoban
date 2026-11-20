@@ -145,6 +145,10 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         export.setOnClickListener(this);
         export.setOnLongClickListener(this);
 
+        Button prune = findViewById(R.id.prune);
+        prune.setText(R.string.br_prune);
+        prune.setOnClickListener(this);
+
         mListView = findViewById(R.id.archives);
         mListView.setOnItemClickListener(this);
         mListView.setOnItemLongClickListener(this);
@@ -167,6 +171,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.backup));
         net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.export));
         net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.import_));
+        net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.prune));
     }
 
     @Override
@@ -260,6 +265,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
             for (int i = 0; i < names.length; i++) {
                 names[i] = mArchives.get(i).getName();
             }
+            // each archive with its icon: a full backup is exported state, coloured as such
             mListView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, names));
             mEmptyView.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
@@ -280,7 +286,122 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
             case R.id.export:
                 exportArchive(MODE_TEMPLATE);
                 break;
+
+            case R.id.prune:
+                pruneOldBackups();
+                break;
         }
+    }
+
+    /**
+     * Prune: delete every backup in the backup directory except the newest one. Only full backups
+     * count — a template (an archive with a manifest) and any file that is not an ".lla" archive are
+     * never touched, so the newest backup is kept even when a template is newer. Nothing is deleted
+     * before the confirmation, which names the count and the backup that stays.
+     */
+    @SuppressLint("StaticFieldLeak")
+    private void pruneOldBackups() {
+        if (mArchiveDir == null) {
+            pickFolder(PENDING_NONE);
+            return;
+        }
+        // mArchives is sorted newest first, so the first backup found is the one to keep
+        final ArrayList<DocumentFile> candidates = new ArrayList<>(mArchives);
+        new AsyncTask<Void, Void, ArrayList<DocumentFile>>() {
+            private AlertDialog mDialog;
+
+            @Override
+            protected void onPreExecute() {
+                mDialog = ThemedProgressDialog.show(BackupRestore.this, getString(R.string.br_prune_p));
+            }
+
+            @Override
+            protected ArrayList<DocumentFile> doInBackground(Void... voids) {
+                ArrayList<DocumentFile> backups = new ArrayList<>();
+                for (DocumentFile f : candidates) {
+                    String name = f.getName();
+                    if (name == null || !name.toLowerCase().endsWith(".lla")) {
+                        continue;
+                    }
+                    InputStream is = null;
+                    try {
+                        is = getContentResolver().openInputStream(f.getUri());
+                        if (is == null || BackupRestoreTool.readManifest(is) != null) {
+                            // unreadable, or a template
+                            continue;
+                        }
+                    } catch (Exception e) {
+                        // cannot tell what it is: leave it alone
+                        continue;
+                    } finally {
+                        if (is != null) try {
+                            is.close();
+                        } catch (IOException e) {
+                        }
+                    }
+                    backups.add(f);
+                }
+                return backups;
+            }
+
+            @Override
+            protected void onPostExecute(final ArrayList<DocumentFile> backups) {
+                mDialog.dismiss();
+                if (isFinishing()) {
+                    return;
+                }
+                if (backups.size() < 2) {
+                    Flash.show(BackupRestore.this, getString(R.string.br_prune_none));
+                    return;
+                }
+                final DocumentFile kept = backups.remove(0);
+                AlertDialog.Builder builder = new AlertDialog.Builder(BackupRestore.this);
+                builder.setTitle(R.string.br_prune_c);
+                builder.setMessage(getString(R.string.br_prune_m, backups.size(), kept.getName()));
+                builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        deleteBackups(backups);
+                    }
+                });
+                builder.setNegativeButton(android.R.string.cancel, null);
+                UiDialogStyler.show(builder);
+            }
+        }.execute((Void) null);
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void deleteBackups(final ArrayList<DocumentFile> backups) {
+        new AsyncTask<Void, Void, Integer>() {
+            private AlertDialog mDialog;
+
+            @Override
+            protected void onPreExecute() {
+                mDialog = ThemedProgressDialog.show(BackupRestore.this, getString(R.string.br_prune_p));
+            }
+
+            @Override
+            protected Integer doInBackground(Void... voids) {
+                int deleted = 0;
+                for (DocumentFile f : backups) {
+                    try {
+                        if (f.delete()) {
+                            deleted++;
+                        }
+                    } catch (Exception e) {
+                        // counted as not deleted
+                    }
+                }
+                return deleted;
+            }
+
+            @Override
+            protected void onPostExecute(Integer deleted) {
+                mDialog.dismiss();
+                Flash.show(BackupRestore.this, getString(R.string.br_prune_done, deleted, backups.size()), Toast.LENGTH_LONG);
+                loadArchivesList();
+            }
+        }.execute((Void) null);
     }
 
     @Override
