@@ -1,64 +1,159 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- 白い熊: no colour here — everything is painted in code from the UI roles (BackupRestore.decorate). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/br_outside"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp">
+
+<LinearLayout
+    android:id="@+id/br_panel"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal"
-    android:padding="20dp">
+    android:clickable="true"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="10dp">
 
-	<LinearLayout
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
-		<Button
-			android:id="@+id/backup"
-			android:layout_width="0dp"
-			android:layout_weight="0.5"
-			android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/br_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:maxLines="1"/>
 
-		<Button
-	        android:id="@+id/export"
-	        android:layout_width="0dp"
-	        android:layout_weight="0.5"
-	        android:layout_height="match_parent"/>
-	    
-	</LinearLayout>
+        <View
+            android:id="@+id/br_title_line"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"/>
+    </LinearLayout>
 
-	<LinearLayout
+    <FrameLayout
+        android:id="@+id/br_actions"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp">
 
-		<Button
-			android:id="@+id/import_"
-			android:layout_width="0dp"
-			android:layout_weight="0.5"
-			android:layout_height="match_parent"/>
+        <Button
+            android:id="@+id/backup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
-		<Button
-			android:id="@+id/prune"
-			android:layout_width="0dp"
-			android:layout_weight="0.5"
-			android:layout_height="match_parent"/>
+        <Button
+            android:id="@+id/export"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
-	</LinearLayout>
+        <Button
+            android:id="@+id/import_"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
-	<View
-		android:layout_width="match_parent"
-		android:layout_height="1px"
-		android:background="@android:drawable/divider_horizontal_bright"/>
+        <Button
+            android:id="@+id/prune"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </FrameLayout>
 
-    <ListView
-        android:id="@+id/archives"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="12dp">
 
-    <TextView
-        android:id="@+id/empty"
+        <View
+            android:id="@+id/br_hint_rule"
+            android:layout_width="2dp"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:id="@+id/br_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:textSize="13sp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/br_list_head"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="bottom"
+        android:paddingTop="10dp"
+        android:paddingBottom="4dp">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/br_list_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="17sp"
+                android:maxLines="1"/>
+
+            <View
+                android:id="@+id/br_list_title_line"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/br_list_count"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:typeface="monospace"
+            android:textSize="13sp"/>
+    </LinearLayout>
+
+    <!-- the boxed list: the only part that scrolls -->
+    <FrameLayout
+        android:id="@+id/br_box"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="4dp"
+        android:padding="3dp">
+
+        <ListView
+            android:id="@+id/archives"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:clipToPadding="false"/>
+
+        <TextView
+            android:id="@+id/empty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:gravity="center"/>
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/br_close"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:gravity="center"/>
-
+        android:layout_gravity="end"
+        android:layout_marginTop="10dp"/>
 
 </LinearLayout>
+</FrameLayout>

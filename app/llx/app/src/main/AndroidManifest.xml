@@ -162,6 +162,7 @@
         <activity
             android:name="net.pierrox.lightning_launcher.activities.BackupRestore"
             android:excludeFromRecents="true"
+            android:theme="@style/AppPanel"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="true">
 

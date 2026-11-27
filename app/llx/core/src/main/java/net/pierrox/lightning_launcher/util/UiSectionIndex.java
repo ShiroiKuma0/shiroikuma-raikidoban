@@ -113,10 +113,10 @@ public final class UiSectionIndex {
     }
 
     /** A wrapping row layout: children flow left to right and wrap to the next line. */
-    static final class Flow extends ViewGroup {
+    public static final class Flow extends ViewGroup {
         private final int gap;
 
-        Flow(Context context, int gap) {
+        public Flow(Context context, int gap) {
             super(context);
             this.gap = gap;
         }

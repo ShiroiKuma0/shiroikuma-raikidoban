@@ -68,7 +68,9 @@ import net.pierrox.lightning_launcher.util.SetVariableDialog;
 import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.JiyuPaste;
 import net.pierrox.lightning_launcher.util.ThemedShortcutPicker;
+import net.pierrox.lightning_launcher.util.ActionChooser;
 import net.pierrox.lightning_launcher.util.UiDialogStyler;
+import net.pierrox.lightning_launcher.util.UiIcons;
 import net.pierrox.lightning_launcher_extreme.R;
 
 import org.json.JSONException;
@@ -360,48 +362,50 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
     private void addAction() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.br_a);
-        ListView list = new ListView(this);
-        final ActionsAdapter adapter = new ActionsAdapter(this, mActions);
+        ArrayList<Action> actions = new ArrayList<>();
+        for (Action action : mActions.getActions()) {
+            if (action.action != GlobalConfig.UNSET) {
+                actions.add(action);
+            }
+        }
         // Fork extras: a direct "白い熊 自由作業盤 shortcut" just above the generic "Launch a shortcut", and a
         // "Backup / restore" launcher command in the Edition group. Only added when their anchor action
         // is offered for this event type (so e.g. script handlers, which have no LAUNCH_SHORTCUT, get
         // neither).
-        insertActionBefore(adapter, GlobalConfig.LAUNCH_SHORTCUT, JIYU_SHORTCUT_ACTION);
+        insertAction(actions, GlobalConfig.LAUNCH_SHORTCUT, JIYU_SHORTCUT_ACTION, 0);
         // 「貼り付け」 (the 自由作業盤 task on the clipboard) right under "Nothing", only where shortcuts are offered.
-        if (adapter.getPosition(JIYU_SHORTCUT_ACTION) >= 0) {
-            insertActionAfter(adapter, GlobalConfig.NOTHING, JIYU_PASTE_ACTION);
+        if (actions.contains(JIYU_SHORTCUT_ACTION)) {
+            insertAction(actions, GlobalConfig.NOTHING, JIYU_PASTE_ACTION, 1);
         }
-        insertActionAfter(adapter, GlobalConfig.CUSTOMIZE_LAUNCHER, BACKUP_RESTORE_ACTION);
-        list.setAdapter(adapter);
-        builder.setView(list);
-        final AlertDialog dialog = builder.create();
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        insertAction(actions, GlobalConfig.CUSTOMIZE_LAUNCHER, BACKUP_RESTORE_ACTION, 1);
+
+        java.util.HashMap<Integer, Object[]> extra = new java.util.HashMap<>();
+        extra.put(PSEUDO_JIYU_SHORTCUT, new Object[]{UiIcons.Icon.SPARK, UiIcons.Does.CONNECT});
+        extra.put(PSEUDO_JIYU_PASTE, new Object[]{UiIcons.Icon.COPY, UiIcons.Does.SHARE});
+        extra.put(PSEUDO_BACKUP_RESTORE, new Object[]{UiIcons.Icon.ARCHIVE, UiIcons.Does.SHARE});
+
+        final AlertDialog[] dialog = new AlertDialog[1];
+        // 白い熊: folding groups under a chip index (ActionChooser), not one long flat list
+        builder.setView(ActionChooser.build(this, actions, extra, new ActionChooser.Listener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Action action = adapter.getItem(i);
-                dialog.dismiss();
+            public void onChosen(Action action) {
+                dialog[0].dismiss();
                 onActionChosen(action.action);
             }
-        });
-        dialog.show();
-        UiDialogStyler.style(dialog);
+        }));
+        builder.setNegativeButton(android.R.string.cancel, null);
+        dialog[0] = builder.create();
+        dialog[0].show();
+        UiDialogStyler.style(dialog[0]);
     }
 
-    // Insert a synthetic entry immediately before / after the row whose action code is {@code anchor}.
-    // No-op when the anchor is absent (so the extra never appears where its base action is unavailable).
-    private static void insertActionBefore(ActionsAdapter adapter, int anchor, Action toInsert) {
-        for (int i = 0; i < adapter.getCount(); i++) {
-            if (adapter.getItem(i).action == anchor) {
-                adapter.insert(toInsert, i);
-                return;
-            }
-        }
-    }
-
-    private static void insertActionAfter(ActionsAdapter adapter, int anchor, Action toInsert) {
-        for (int i = 0; i < adapter.getCount(); i++) {
-            if (adapter.getItem(i).action == anchor) {
-                adapter.insert(toInsert, i + 1);
+    // Insert a synthetic entry immediately before (offset 0) / after (offset 1) the row whose action code
+    // is {@code anchor}. No-op when the anchor is absent (so the extra never appears where its base
+    // action is unavailable).
+    private static void insertAction(ArrayList<Action> actions, int anchor, Action toInsert, int offset) {
+        for (int i = 0; i < actions.size(); i++) {
+            if (actions.get(i).action == anchor) {
+                actions.add(i + offset, toInsert);
                 return;
             }
         }
@@ -648,104 +652,6 @@ public class EventActionSetup extends ResourceWrapperActivity implements Adapter
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
-
-    private static class ActionsAdapter extends ArrayAdapter<Action> {
-
-        private final LayoutInflater mInflater;
-        private final int mPrefLayout;
-        private final int mPrefCategoryLayout;
-
-        public ActionsAdapter(Context context, ActionsDescription actionsDescription) {
-            super(context, 0, filterActions(actionsDescription));
-
-
-            mInflater = LayoutInflater.from(context);
-            mPrefLayout = new Preference(context).getLayoutResource();
-            mPrefCategoryLayout = new PreferenceCategory(context).getLayoutResource();
-        }
-
-        private static ArrayList<Action> filterActions(ActionsDescription actionsDescription) {
-            ArrayList<Action> actions = actionsDescription.getActions();
-            ArrayList<Action> filteredActions = new ArrayList<>(actions.size());
-
-            for (Action action : actions) {
-                if (action.action != GlobalConfig.UNSET) {
-                    filteredActions.add(action);
-                }
-            }
-
-            return filteredActions;
-        }
-
-        @Override
-        public int getViewTypeCount() {
-            return 2;
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            return getItem(position).action == GlobalConfig.CATEGORY ? 0 : 1;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            Action action = getItem(position);
-            boolean isCategory = action.action == GlobalConfig.CATEGORY;
-            if (convertView == null) {
-                convertView = mInflater.inflate(isCategory ? mPrefCategoryLayout : mPrefLayout, parent, false);
-            }
-
-            TextView title_view = convertView.findViewById(android.R.id.title);
-            title_view.setText(action.label);
-            if (!isCategory) {
-                title_view.setSingleLine(false);
-                title_view.setMaxLines(2);
-                convertView.findViewById(android.R.id.summary).setVisibility(View.GONE);
-                View icon = convertView.findViewById(android.R.id.icon);
-                if (icon != null) icon.setVisibility(View.GONE);
-                // every action carries the icon of its category, coloured by what that kind of action does
-                net.pierrox.lightning_launcher.util.UiIcons.Icon rowIcon;
-                net.pierrox.lightning_launcher.util.UiIcons.Does rowDoes;
-                switch (action.category) {
-                    case Action.CAT_LAUNCH_AND_APPS:
-                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.PLAY;
-                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.CONNECT;
-                        break;
-                    case Action.CAT_NAVIGATION:
-                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.DESKTOP;
-                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.VIEW;
-                        break;
-                    case Action.CAT_MENU_STATUS_BAR:
-                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.LIST;
-                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.VIEW;
-                        break;
-                    case Action.CAT_FOLDERS:
-                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.DIRECTORY;
-                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.CONTACT;
-                        break;
-                    case Action.CAT_EDITION:
-                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.EDIT;
-                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.MESSAGE;
-                        break;
-                    case Action.CAT_EXTERNAL:
-                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.DEVICE;
-                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.SHARE;
-                        break;
-                    case Action.CAT_ADVANCED:
-                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.CODE;
-                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.CONNECT;
-                        break;
-                    default:
-                        rowIcon = net.pierrox.lightning_launcher.util.UiIcons.Icon.BLOCK;
-                        rowDoes = net.pierrox.lightning_launcher.util.UiIcons.Does.BLOCK;
-                        break;
-                }
-                net.pierrox.lightning_launcher.util.UiIcons.onRow(title_view, rowIcon, rowDoes);
-            }
-
-            return convertView;
         }
     }
 

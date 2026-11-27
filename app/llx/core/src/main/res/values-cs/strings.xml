@@ -982,7 +982,7 @@ bude sloužit jako živá tapeta"</string>
     <string name="ad_b">Zabudované</string>
     <string name="ad_p">Ze zásuvných modulů</string>
     <string name="ev_m">Okno nabídky</string>
-    <string name="an_i_as">Show app shortcuts - přeložit</string>
+    <string name="an_i_as">Zobrazit zástupce aplikace</string>
     <string name="as_no_s">No app shortcut for this item - přeložit</string>
     <string name="as_no_hp_t">No app shortcut permission - přeložit</string>
     <string name="as_no_hp_m">"In order to access app shortcuts, 白い熊 雷起動盤 needs to be the default launcher, otherwise it has no app shortcut permission. 
@@ -1418,4 +1418,12 @@ Oprávnění:
     <string name="rkb_auto_notif_export">Zapisuji data…</string>
     <string name="rkb_auto_notif_import">Obnovuji data…</string>
     <string name="rkb_auto_notif_spooling">Načítám zálohu…</string>
+    <!-- 白い熊: the backup screen's heading, explanation and list heading -->
+    <string name="br_title">Zálohování a obnovení</string>
+    <string name="br_hint">„Zálohovat“ uloží všechna současná nastavení. Klepnutím na řádek zálohu obnovíte, dlouhým stiskem zobrazíte další možnosti.</string>
+    <string name="br_list">Uložené zálohy</string>
+    <string name="br_count">%1$d</string>
+    <string name="br_newest">nejnovější</string>
+    <string name="import_t">Načíst externí soubor</string>
+    <string name="br_close">Zavřít</string>
 </resources>

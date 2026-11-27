@@ -12,6 +12,15 @@
         <item name="colorAccent">@color/color_accent</item>
     </style>
 
+    <!-- 白い熊: a screen shown as an almost-screen-size dialog (the backup screen): the launcher stays
+         visible, dimmed, around the framed panel the activity draws itself. -->
+    <style name="AppPanel" parent="AppLight">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.6</item>
+    </style>
+
     <style name="AppDarkNoActionBarWallpaper" parent="AppDark">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>

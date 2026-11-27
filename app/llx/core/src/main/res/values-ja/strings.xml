@@ -1200,4 +1200,21 @@ Mar. 23, 2015 : add translations"</string>
     <string name="rkb_auto_notif_export">データを書き出しています…</string>
     <string name="rkb_auto_notif_import">データを戻しています…</string>
     <string name="rkb_auto_notif_spooling">バックアップを読み込んでいます…</string>
+    <!-- 白い熊: the groups of the "Select an action" chooser -->
+    <string name="acd_l">起動とアプリ</string>
+    <string name="acd_n">ナビゲーション</string>
+    <string name="acd_m">メニューとステータスバー</string>
+    <string name="acd_f">フォルダ</string>
+    <string name="acd_ed">編集</string>
+    <string name="acd_ex">外部</string>
+    <string name="acd_a">詳細</string>
+    <string name="an_i_as">アプリのショートカットを表示</string>
+    <!-- 白い熊: the backup screen's heading, explanation and list heading -->
+    <string name="br_title">バックアップと復元</string>
+    <string name="br_hint">「バックアップ」は現在の設定をすべて保存します。行をタップすると復元、長押しでその他の操作ができます。</string>
+    <string name="br_list">保存済みのバックアップ</string>
+    <string name="br_count">%1$d 件</string>
+    <string name="br_newest">最新</string>
+    <string name="import_t">外部ファイルを読み込む</string>
+    <string name="br_close">閉じる</string>
 </resources>

@@ -962,7 +962,7 @@ for your live wallpaper"</string>
     <string name="ad_b">Built-ins</string>
     <string name="ad_p">Plugins</string>
     <string name="ev_m">Menu</string>
-    <string name="an_i_as">Show app shortcuts</string>
+    <string name="an_i_as">Показать ярлыки приложения</string>
     <string name="as_no_s">No app shortcut for this item</string>
     <string name="as_no_hp_t">No app shortcut permission</string>
     <string name="as_no_hp_m">"In order to access app shortcuts, 白い熊 雷起動盤 needs to be the default launcher, otherwise it has no app shortcut permission.
@@ -1398,4 +1398,20 @@ Support the developer and help making 白い熊 雷起動盤 the best launcher e
     <string name="rkb_auto_notif_export">Запись данных…</string>
     <string name="rkb_auto_notif_import">Восстановление данных…</string>
     <string name="rkb_auto_notif_spooling">Чтение резервной копии…</string>
+    <!-- 白い熊: the groups of the "Select an action" chooser -->
+    <string name="acd_l">Запуск и приложения</string>
+    <string name="acd_n">Навигация</string>
+    <string name="acd_m">Меню и строка состояния</string>
+    <string name="acd_f">Папки</string>
+    <string name="acd_ed">Редактирование</string>
+    <string name="acd_ex">Внешнее</string>
+    <string name="acd_a">Дополнительно</string>
+    <!-- 白い熊: the backup screen's heading, explanation and list heading -->
+    <string name="br_title">Резервные копии и восстановление</string>
+    <string name="br_hint">«Резервное копирование» сохраняет все текущие настройки. Нажмите на строку, чтобы восстановить копию; долгое нажатие — другие действия.</string>
+    <string name="br_list">Сохранённые копии</string>
+    <string name="br_count">%1$d</string>
+    <string name="br_newest">новейшая</string>
+    <string name="import_t">Загрузить внешний файл</string>
+    <string name="br_close">Закрыть</string>
 </resources>

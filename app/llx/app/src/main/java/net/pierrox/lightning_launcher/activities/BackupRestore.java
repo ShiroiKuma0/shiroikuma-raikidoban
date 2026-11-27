@@ -25,6 +25,8 @@ SOFTWARE.
 package net.pierrox.lightning_launcher.activities;
 
 import net.pierrox.lightning_launcher.util.UiIcons;
+import net.pierrox.lightning_launcher.util.UiPills;
+import net.pierrox.lightning_launcher.util.UiSectionIndex;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -36,6 +38,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.util.TypedValue;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -162,6 +166,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         UiTheme.applyTo(mEmptyView, UiSlot.PREF_TITLE);
 
         styleButtons();
+        decorate();
 
         loadArchivesList();
     }
@@ -174,6 +179,168 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.export));
         net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.import_));
         net.pierrox.lightning_launcher.util.UiChrome.applyDestructiveButton((Button) findViewById(R.id.prune));
+        // Regular pills: the page's text font at 15 sp, not the Buttons font and size of the UI page
+        // (白い熊, 2026-11-27) — only the main one is bold. Done HERE because onResume styles the buttons
+        // again: set anywhere else, the Buttons font came straight back.
+        int[] ids = {R.id.backup, R.id.export, R.id.import_, R.id.prune};
+        for (int i = 0; i < ids.length; i++) {
+            Button b = findViewById(ids[i]);
+            int style = i == 0 ? Typeface.BOLD : Typeface.NORMAL;
+            b.setTypeface(UiTheme.typeface(UiSlot.TEXT, style), style);
+            b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        }
+    }
+
+    /**
+     * 白い熊: the look of the screen — a heading, the four actions as pills that hug their label (icon
+     * inside, coloured by what the action does) in a wrapping row, the explanation with its left rule,
+     * and the heading of the list. Colours come from the UI roles; the layout carries none.
+     */
+    private void decorate() {
+        int accent = UiTheme.color(UiSlot.ACCENT);
+        int note = UiTheme.color(UiSlot.NOTE);
+        float density = getResources().getDisplayMetrics().density;
+
+        TextView title = findViewById(R.id.br_title);
+        title.setText(R.string.br_title);
+        title.setTextColor(accent);
+        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        title.setTypeface(UiTheme.typeface(UiSlot.PREF_TITLE, Typeface.BOLD), Typeface.BOLD);
+        title.setCompoundDrawablesRelative(
+                UiIcons.drawable(this, UiIcons.Icon.ARCHIVE, UiIcons.color(UiIcons.Does.SHARE), 22f), null, null, null);
+        title.setCompoundDrawablePadding(Math.round(8 * density));
+        findViewById(R.id.br_title_line).setBackgroundColor(accent);
+
+        FrameLayout host = findViewById(R.id.br_actions);
+        UiSectionIndex.Flow flow = new UiSectionIndex.Flow(this, Math.round(8 * density));
+        int[] ids = {R.id.backup, R.id.export, R.id.import_, R.id.prune};
+        UiIcons.Icon[] icons = {UiIcons.Icon.EXPORT, UiIcons.Icon.STORE, UiIcons.Icon.IMPORT, UiIcons.Icon.DELETE};
+        UiIcons.Does[] does = {UiIcons.Does.SHARE, UiIcons.Does.SHARE, UiIcons.Does.CONNECT, UiIcons.Does.DELETE};
+        boolean[] opens = {false, true, true, false};
+        for (int i = 0; i < ids.length; i++) {
+            Button b = findViewById(ids[i]);
+            host.removeView(b);
+            b.setMaxLines(2);
+            if (opens[i]) {
+                b.setText(b.getText() + "  \u203A");
+            }
+            b.setCompoundDrawablesRelative(
+                    UiIcons.drawable(this, icons[i], UiIcons.color(does[i]), 20f), null, null, null);
+            b.setCompoundDrawablePadding(Math.round(8 * density));
+            flow.addView(b, new android.view.ViewGroup.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+        }
+        host.addView(flow);
+
+        TextView hint = findViewById(R.id.br_hint);
+        hint.setText(R.string.br_hint);
+        hint.setTextColor(note);
+        findViewById(R.id.br_hint_rule).setBackgroundColor(note);
+
+        // The screen is a dialog: a framed panel almost as large as the screen over the dimmed
+        // launcher, with the list of backups in a framed box of its own — the only part that scrolls.
+        android.graphics.drawable.Drawable panel = net.pierrox.lightning_launcher.util.UiDialogStyler.panelBackground(this);
+        if (panel == null) {
+            panel = UiPills.background(this, UiTheme.color(UiSlot.DIALOG_BG), 0f,
+                    UiTheme.cornerRadiusDp(UiSlot.DIALOG_BORDER), UiTheme.color(UiSlot.DIALOG_BG));
+        }
+        findViewById(R.id.br_panel).setBackground(panel);
+        findViewById(R.id.br_outside).setOnClickListener(v -> onBackPressed());
+        findViewById(R.id.br_box).setBackground(UiPills.background(this, UiTheme.color(UiSlot.DIALOG_BORDER),
+                UiPills.REGULAR_DP, Math.max(4, UiTheme.cornerRadiusDp(UiSlot.DIALOG_BORDER) - 4),
+                android.graphics.Color.TRANSPARENT));
+
+        Button close = findViewById(R.id.br_close);
+        close.setText(R.string.br_close);
+        net.pierrox.lightning_launcher.util.UiChrome.applyButton(close);
+        close.setTypeface(UiTheme.typeface(UiSlot.TEXT, Typeface.NORMAL), Typeface.NORMAL);
+        close.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        close.setOnClickListener(v -> onBackPressed());
+
+        TextView listTitle = findViewById(R.id.br_list_title);
+        listTitle.setText(R.string.br_list);
+        listTitle.setTextColor(accent);
+        listTitle.setTypeface(UiTheme.typeface(UiSlot.PREF_TITLE, Typeface.BOLD), Typeface.BOLD);
+        findViewById(R.id.br_list_title_line).setBackgroundColor(accent);
+        ((TextView) findViewById(R.id.br_list_count)).setTextColor(note);
+
+        mListView.setDivider(new android.graphics.drawable.ColorDrawable(
+                UiPills.blend(UiTheme.color(UiSlot.BACKGROUND), accent, 0.35f)));
+        mListView.setDividerHeight(1);
+    }
+
+    private static final java.util.regex.Pattern STAMPED_NAME =
+            java.util.regex.Pattern.compile("(\\d{4}-\\d{2}-\\d{2})[ _](\\d{2})-(\\d{2})(?:-\\d{2})?\\.lla$");
+
+    /**
+     * One row of the list: the archive icon, the date and time in bold with the file name beneath in
+     * dim gold (a file whose name carries no stamp shows its name in bold and its date beneath), a
+     * "newest" mark on the first row, and a › at the right.
+     */
+    private View archiveRow(int position, String[] names, long[] times) {
+        float density = getResources().getDisplayMetrics().density;
+        int text = UiTheme.color(UiSlot.PREF_TITLE);
+        int note = UiTheme.color(UiSlot.NOTE);
+
+        android.widget.LinearLayout row = new android.widget.LinearLayout(this);
+        row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        row.setPadding(Math.round(4 * density), Math.round(7 * density), Math.round(4 * density), Math.round(7 * density));
+
+        View icon = new View(this);
+        icon.setBackground(UiIcons.drawable(this, UiIcons.Icon.ARCHIVE, UiIcons.color(UiIcons.Does.SHARE), 22f));
+        android.widget.LinearLayout.LayoutParams ilp = new android.widget.LinearLayout.LayoutParams(
+                Math.round(22 * density), Math.round(22 * density));
+        ilp.setMarginEnd(Math.round(14 * density));
+        row.addView(icon, ilp);
+
+        String name = names[position] == null ? "" : names[position];
+        java.util.regex.Matcher m = STAMPED_NAME.matcher(name);
+        String stamp = new SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.US).format(new Date(times[position]));
+        boolean stamped = m.find();
+        String main = stamped ? m.group(1) + " " + m.group(2) + ":" + m.group(3) : name;
+        String sub = stamped ? name : stamp;
+
+        android.widget.LinearLayout col = new android.widget.LinearLayout(this);
+        col.setOrientation(android.widget.LinearLayout.VERTICAL);
+
+        android.widget.LinearLayout top = new android.widget.LinearLayout(this);
+        top.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        TextView label = new TextView(this);
+        label.setText(main);
+        label.setTextColor(text);
+        label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        label.setTypeface(stamped ? Typeface.MONOSPACE : UiTheme.typeface(UiSlot.PREF_TITLE, Typeface.BOLD), Typeface.BOLD);
+        label.setMaxLines(2);
+        top.addView(label);
+        if (position == 0 && names.length > 1) {
+            TextView newest = new TextView(this);
+            newest.setText(R.string.br_newest);
+            newest.setTextColor(note);
+            newest.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+            newest.setBackground(UiPills.background(this, note, 1f, 100f, android.graphics.Color.TRANSPARENT));
+            newest.setPadding(Math.round(8 * density), 0, Math.round(8 * density), 0);
+            android.widget.LinearLayout.LayoutParams nlp = new android.widget.LinearLayout.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            nlp.setMarginStart(Math.round(10 * density));
+            top.addView(newest, nlp);
+        }
+        col.addView(top);
+
+        TextView below = new TextView(this);
+        below.setText(sub);
+        below.setTextColor(note);
+        below.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+        below.setMaxLines(2);
+        col.addView(below);
+        row.addView(col, new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView chevron = new TextView(this);
+        chevron.setText("\u203A");
+        chevron.setTextColor(text);
+        chevron.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        chevron.setPadding(Math.round(8 * density), 0, Math.round(4 * density), 0);
+        row.addView(chevron);
+        return row;
     }
 
     @Override
@@ -223,6 +390,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
     private void loadArchivesList() {
         mArchives.clear();
         mArchiveDir = BackupFolder.getDir(this);
+        findViewById(R.id.br_list_head).setVisibility(View.GONE);
 
         if (mArchiveDir == null) {
             // Two different states, and telling them apart is the whole point: never chosen, or
@@ -264,21 +432,20 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
             mEmptyView.setVisibility(View.VISIBLE);
             mListView.setVisibility(View.GONE);
         } else {
-            String[] names = new String[mArchives.size()];
+            final String[] names = new String[mArchives.size()];
+            final long[] times = new long[names.length];
             for (int i = 0; i < names.length; i++) {
                 names[i] = mArchives.get(i).getName();
+                times[i] = mArchives.get(i).lastModified();
             }
-            // each archive with its icon: a full backup is exported state, coloured as such
-            mListView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, names) {
+            mListView.setAdapter(new ArrayAdapter<String>(this, 0, names) {
                 @Override
                 public View getView(int position, View convertView, android.view.ViewGroup parent) {
-                    View v = super.getView(position, convertView, parent);
-                    if (v instanceof TextView) {
-                        UiIcons.onRow((TextView) v, UiIcons.Icon.ARCHIVE, UiIcons.Does.SHARE);
-                    }
-                    return v;
+                    return archiveRow(position, names, times);
                 }
             });
+            ((TextView) findViewById(R.id.br_list_count)).setText(getString(R.string.br_count, names.length));
+            findViewById(R.id.br_list_head).setVisibility(View.VISIBLE);
             mEmptyView.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
         }
