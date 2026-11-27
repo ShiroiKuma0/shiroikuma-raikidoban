@@ -1414,4 +1414,6 @@ Support the developer and help making 白い熊 雷起動盤 the best launcher e
     <string name="br_newest">новейшая</string>
     <string name="import_t">Загрузить внешний файл</string>
     <string name="br_close">Закрыть</string>
+    <string name="br_dir_label">Каталог резервных копий: %1$s</string>
+    <string name="backup_folder_select">Выбрать каталог резервных копий</string>
 </resources>

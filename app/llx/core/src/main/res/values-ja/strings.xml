@@ -1217,4 +1217,6 @@ Mar. 23, 2015 : add translations"</string>
     <string name="br_newest">最新</string>
     <string name="import_t">外部ファイルを読み込む</string>
     <string name="br_close">閉じる</string>
+    <string name="br_dir_label">バックアップ先: %1$s</string>
+    <string name="backup_folder_select">バックアップ先を選択</string>
 </resources>

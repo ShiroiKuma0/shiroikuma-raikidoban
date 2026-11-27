@@ -178,11 +178,12 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         net.pierrox.lightning_launcher.util.UiChrome.applyMainButton((Button) findViewById(R.id.backup));
         net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.export));
         net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.import_));
+        net.pierrox.lightning_launcher.util.UiChrome.applyButton((Button) findViewById(R.id.br_dir));
         net.pierrox.lightning_launcher.util.UiChrome.applyDestructiveButton((Button) findViewById(R.id.prune));
         // Regular pills: the page's text font at 15 sp, not the Buttons font and size of the UI page
         // (白い熊, 2026-11-27) — only the main one is bold. Done HERE because onResume styles the buttons
         // again: set anywhere else, the Buttons font came straight back.
-        int[] ids = {R.id.backup, R.id.export, R.id.import_, R.id.prune};
+        int[] ids = {R.id.backup, R.id.export, R.id.import_, R.id.br_dir, R.id.prune};
         for (int i = 0; i < ids.length; i++) {
             Button b = findViewById(ids[i]);
             int style = i == 0 ? Typeface.BOLD : Typeface.NORMAL;
@@ -213,10 +214,21 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
         FrameLayout host = findViewById(R.id.br_actions);
         UiSectionIndex.Flow flow = new UiSectionIndex.Flow(this, Math.round(8 * density));
-        int[] ids = {R.id.backup, R.id.export, R.id.import_, R.id.prune};
-        UiIcons.Icon[] icons = {UiIcons.Icon.EXPORT, UiIcons.Icon.STORE, UiIcons.Icon.IMPORT, UiIcons.Icon.DELETE};
-        UiIcons.Does[] does = {UiIcons.Does.SHARE, UiIcons.Does.SHARE, UiIcons.Does.CONNECT, UiIcons.Does.DELETE};
-        boolean[] opens = {false, true, true, false};
+        // The backup directory had only an options-menu entry, and this screen has no toolbar to open
+        // a menu from: it is a pill of its own, and the chosen directory is named under the pills.
+        Button dir = findViewById(R.id.br_dir);
+        dir.setText(R.string.backup_folder_select);
+        dir.setOnClickListener(v -> pickFolder(PENDING_NONE));
+        TextView dirPath = findViewById(R.id.br_dir_path);
+        dirPath.setTextColor(note);
+        dirPath.setCompoundDrawablesRelative(
+                UiIcons.drawable(this, UiIcons.Icon.DIRECTORY, note, 16f), null, null, null);
+        dirPath.setCompoundDrawablePadding(Math.round(6 * density));
+
+        int[] ids = {R.id.backup, R.id.export, R.id.import_, R.id.br_dir, R.id.prune};
+        UiIcons.Icon[] icons = {UiIcons.Icon.EXPORT, UiIcons.Icon.STORE, UiIcons.Icon.IMPORT, UiIcons.Icon.DIRECTORY, UiIcons.Icon.DELETE};
+        UiIcons.Does[] does = {UiIcons.Does.SHARE, UiIcons.Does.SHARE, UiIcons.Does.CONNECT, UiIcons.Does.VIEW, UiIcons.Does.DELETE};
+        boolean[] opens = {false, true, true, true, false};
         for (int i = 0; i < ids.length; i++) {
             Button b = findViewById(ids[i]);
             host.removeView(b);
@@ -391,6 +403,14 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         mArchives.clear();
         mArchiveDir = BackupFolder.getDir(this);
         findViewById(R.id.br_list_head).setVisibility(View.GONE);
+        TextView dirPath = findViewById(R.id.br_dir_path);
+        if (mArchiveDir == null) {
+            dirPath.setVisibility(View.GONE);
+        } else {
+            String where = RkbExport.absolutePathOf(mArchiveDir.getUri(), null);
+            dirPath.setText(getString(R.string.br_dir_label, where != null ? where : mArchiveDir.getUri().toString()));
+            dirPath.setVisibility(View.VISIBLE);
+        }
 
         if (mArchiveDir == null) {
             // Two different states, and telling them apart is the whole point: never chosen, or

@@ -1426,4 +1426,6 @@ Oprávnění:
     <string name="br_newest">nejnovější</string>
     <string name="import_t">Načíst externí soubor</string>
     <string name="br_close">Zavřít</string>
+    <string name="br_dir_label">Adresář záloh: %1$s</string>
+    <string name="backup_folder_select">Vybrat adresář pro zálohy</string>
 </resources>
