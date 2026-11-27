@@ -28,11 +28,11 @@ public enum UiSlot {
 
     // --- Icon roles: an icon is coloured by what its row DOES (a menu is read by colour before it is
     // read by word). A row that merely views / opens / configures takes the accent, so it has no slot. ---
-    ICON_CONNECT("llui_icon_connect", UiGroup.ICONS, R.string.llui_icon_connect, false, false, null, 0xFF00FF00),
-    ICON_MESSAGE("llui_icon_message", UiGroup.ICONS, R.string.llui_icon_message, false, false, null, 0xFF4D94FF),
-    ICON_CONTACT("llui_icon_contact", UiGroup.ICONS, R.string.llui_icon_contact, false, false, null, 0xFF00FFFF),
+    ICON_CONNECT("llui_icon_connect", UiGroup.ICONS, R.string.llui_icon_connect, false, false, null, 0xFF00A550),
+    ICON_MESSAGE("llui_icon_message", UiGroup.ICONS, R.string.llui_icon_message, false, false, null, 0xFF0066FF),
+    ICON_CONTACT("llui_icon_contact", UiGroup.ICONS, R.string.llui_icon_contact, false, false, null, 0xFF00B0FF),
     ICON_SHARE("llui_icon_share", UiGroup.ICONS, R.string.llui_icon_share, false, false, null, 0xFFFF8000),
-    ICON_BLOCK("llui_icon_block", UiGroup.ICONS, R.string.llui_icon_block, false, false, null, 0xFFFF00FF),
+    ICON_BLOCK("llui_icon_block", UiGroup.ICONS, R.string.llui_icon_block, false, false, null, 0xFFFF3D7F),
 
     // --- Launcher menus (bubble) ---
     MENU_TEXT("llui_menu_text", UiGroup.MENUS, R.string.llui_menu_text, false, true, "llui_text", 0),
