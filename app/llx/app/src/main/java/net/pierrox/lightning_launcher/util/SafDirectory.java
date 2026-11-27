@@ -30,7 +30,7 @@ import android.content.UriPermission;
 import android.net.Uri;
 
 /**
- * The two halves of a folder picked through the Storage Access Framework, and the one rule that
+ * The two halves of a directory picked through the Storage Access Framework, and the one rule that
  * follows from them.
  *
  * <p>A picked tree is a Uri string — plain app data, ours to keep and to carry inside a backup —
@@ -39,15 +39,15 @@ import android.net.Uri;
  * the grant, and nothing can take one for a Uri the picker never handed to this install
  * ({@code takePersistableUriPermission} throws {@link SecurityException} for anything else).
  *
- * <p>So a folder restored from a backup comes back <i>remembered</i> rather than working: the path
+ * <p>So a directory restored from a backup comes back <i>remembered</i> rather than working: the path
  * is known, it is shown instead of "not set", and it seeds the picker
- * ({@link android.provider.DocumentsContract#EXTRA_INITIAL_URI}) so a single tap in the folder
+ * ({@link android.provider.DocumentsContract#EXTRA_INITIAL_URI}) so a single tap in the directory
  * already on screen turns it back into a granted one. On the same device the grant is usually still
  * there, {@link #reclaim} finds it, and the restore is seamless.
  */
-public final class SafFolder {
+public final class SafDirectory {
 
-    private SafFolder() {
+    private SafDirectory() {
     }
 
     /** True when this install currently holds a persisted read+write grant for {@code uri}. */
@@ -68,7 +68,7 @@ public final class SafFolder {
      * outlived a restore onto the same install.
      *
      * @return whether this install now holds a persisted grant. A Uri that came from another device
-     * simply answers false, which is the caller's cue to keep it as a remembered folder instead of a
+     * simply answers false, which is the caller's cue to keep it as a remembered directory instead of a
      * working one, never to drop it.
      */
     public static boolean reclaim(Context context, Uri uri) {

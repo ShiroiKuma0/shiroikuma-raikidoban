@@ -1233,7 +1233,7 @@ Support the developer and help making 白い熊 雷起動盤 the best launcher e
     <string name="fm_migrate_confirm">Сделать резервную копию и переключиться на нативное управление складыванием? Проверки складывания Tasker при загрузке и вручную настроенные свайпы на каждом рабочем столе будут удалены (можно восстановить из копии). После этого отключите профиль складывания в Tasker.</string>
     <string name="fm_migrating">Перенос…</string>
     <string name="fm_migrated">Нативное управление складыванием включено. Копия сохранена.</string>
-    <string name="fm_need_backup_folder">Сначала выберите папку для резервных копий (Резервное копирование и восстановление).</string>
+    <string name="fm_need_backup_directory">Сначала выберите каталог для резервных копий (Резервное копирование и восстановление).</string>
     <string name="fm_backup_failed">Сбой резервного копирования — перенос прерван.</string>
     <string name="llui_title">白い熊 雷起動盤 UI</string>
     <string name="llui_language">Язык</string>
@@ -1346,13 +1346,13 @@ Support the developer and help making 白い熊 雷起動盤 the best launcher e
     <string name="rkb_eim_entry_desc">Резервное копирование всего настраиваемого в этом лаунчере в один .zip и восстановление.</string>
     <string name="rkb_eim_title">Экспорт / импорт</string>
     <string name="rkb_eim_desc">Отметьте, что перенести, и выгрузите это в один .zip — или загрузите .zip и восстановите только эти части.</string>
-    <string name="rkb_eim_dir">Папка резервных копий</string>
-    <string name="rkb_eim_dir_unset">Не задана — нажмите, чтобы выбрать папку</string>
+    <string name="rkb_eim_dir">Каталог резервных копий</string>
+    <string name="rkb_eim_dir_unset">Не задан — нажмите, чтобы выбрать каталог</string>
     <string name="rkb_eim_dir_regrant">Доступ утрачен вместе с установкой — нажмите, чтобы выбрать заново</string>
-    <string name="rkb_eim_warn_nodir">Папка резервных копий не задана.</string>
-    <string name="rkb_eim_warn_regrant">Папку резервных копий нужно выбрать заново.</string>
-    <string name="backup_folder_regrant">Папка резервных копий: %s\n\nAndroid не переносит доступ к папке в новую установку.\nНажмите здесь, чтобы выбрать её заново.</string>
-    <string name="rkb_eim_warn_none">В этой папке ещё нет резервных копий.</string>
+    <string name="rkb_eim_warn_nodir">Каталог резервных копий не задан.</string>
+    <string name="rkb_eim_warn_regrant">Каталог резервных копий нужно выбрать заново.</string>
+    <string name="backup_directory_regrant">Каталог резервных копий: %s\n\nAndroid не переносит доступ к каталогу в новую установку.\nНажмите здесь, чтобы выбрать его заново.</string>
+    <string name="rkb_eim_warn_none">В этом каталоге ещё нет резервных копий.</string>
     <string name="rkb_eim_last">Последняя копия: %1$s</string>
     <string name="rkb_eim_select_all">Выбрать всё</string>
     <string name="rkb_eim_export">Экспорт</string>
@@ -1415,5 +1415,7 @@ Support the developer and help making 白い熊 雷起動盤 the best launcher e
     <string name="import_t">Загрузить внешний файл</string>
     <string name="br_close">Закрыть</string>
     <string name="br_dir_label">Каталог резервных копий: %1$s</string>
-    <string name="backup_folder_select">Выбрать каталог резервных копий</string>
+    <string name="backup_directory_select">Выбрать каталог резервных копий</string>
+    <string name="backup_directory_none">Каталог резервных копий не выбран.\nНажмите «Выбрать каталог резервных копий» выше, чтобы указать, где хранить копии.</string>
+    <string name="backup_directory_lost">Каталог резервных копий больше недоступен. Выберите его заново.</string>
 </resources>

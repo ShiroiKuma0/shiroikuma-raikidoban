@@ -165,7 +165,7 @@ public class ExportImportPanel {
         mBox.addView(buttonRow());
     }
 
-    /** The folder box: a bordered, clearly-tappable box — small label over the value, red when unset. */
+    /** The directory box: a bordered, clearly-tappable box — small label over the value, red when unset. */
     private View dirBox() {
         LinearLayout box = new LinearLayout(mActivity);
         box.setOrientation(LinearLayout.VERTICAL);
@@ -186,7 +186,7 @@ public class ExportImportPanel {
                 : mActivity.getString(R.string.rkb_eim_dir_unset);
         box.addView(text(shown, 15, label != null ? UiTheme.color(UiSlot.DIALOG_TEXT) : warnColor(), true));
         if (remembered != null) {
-            // Restored from a backup: the folder is known, only the grant is gone. Say which of the
+            // Restored from a backup: the directory is known, only the grant is gone. Say which of the
             // two is missing, because the fix is one tap in a picker that already opens there.
             TextView hint = text(mActivity.getString(R.string.rkb_eim_dir_regrant), 12, warnColor(), false);
             hint.setPadding(0, dp(2), 0, 0);
@@ -220,9 +220,9 @@ public class ExportImportPanel {
     }
 
     /**
-     * The folder a restore brought back but the platform no longer grants — a path we can name and
+     * The directory a restore brought back but the platform no longer grants — a path we can name and
      * open the picker at, never one we can write to. Null when the directory works, or when there
-     * has never been one. See {@code SafFolder} for why the two halves come apart.
+     * has never been one. See {@code SafDirectory} for why the two halves come apart.
      */
     public static String rememberedDirLabel(Context context) {
         if (RkbExport.exportDir(context) != null) {
@@ -332,7 +332,7 @@ public class ExportImportPanel {
         }
         DocumentFile dir = RkbExport.exportDir(mActivity);
         if (dir == null) {
-            mHost.pickExportDir(null); // no folder yet: ask for one instead of failing
+            mHost.pickExportDir(null); // no directory yet: ask for one instead of failing
             return;
         }
         Flash.show(mActivity, R.string.rkb_eim_exporting);
@@ -487,7 +487,7 @@ public class ExportImportPanel {
 
     // ---- the export directory ------------------------------------------------------------------
 
-    /** Called by the host after the SAF folder picker returns. */
+    /** Called by the host after the SAF directory picker returns. */
     public void onDirPicked(Uri uri) {
         if (uri == null) {
             return;
@@ -497,7 +497,7 @@ public class ExportImportPanel {
     }
 
     /**
-     * Persist a folder picked with ACTION_OPEN_DOCUMENT_TREE as the export directory, taking a
+     * Persist a directory picked with ACTION_OPEN_DOCUMENT_TREE as the export directory, taking a
      * persistable read/write grant so it survives reboots. Shared with the UI settings page, whose
      * directory row opens the same picker.
      */
@@ -505,7 +505,7 @@ public class ExportImportPanel {
         if (uri == null) {
             return;
         }
-        SafFolder.reclaim(context, uri);
+        SafDirectory.reclaim(context, uri);
         RkbExport.setExportDirUri(context, uri);
     }
 

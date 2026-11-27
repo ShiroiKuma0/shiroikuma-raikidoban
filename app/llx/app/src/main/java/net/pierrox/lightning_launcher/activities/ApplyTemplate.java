@@ -62,7 +62,7 @@ import androidx.documentfile.provider.DocumentFile;
 import net.pierrox.lightning_launcher.data.BackupRestoreTool;
 import net.pierrox.lightning_launcher.data.FileUtils;
 import net.pierrox.lightning_launcher.data.Item;
-import net.pierrox.lightning_launcher.util.BackupFolder;
+import net.pierrox.lightning_launcher.util.BackupDirectory;
 import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.data.Page;
 import net.pierrox.lightning_launcher.data.PageProcessor;
@@ -424,9 +424,9 @@ public class ApplyTemplate extends ResourceWrapperActivity {
                 if (mBackupFirst) {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm");
                     String backup_name = getString(R.string.backup_d) + "-" + sdf.format(new Date()) + ".lla";
-                    DocumentFile backup_doc = BackupFolder.createDoc(context, backup_name);
+                    DocumentFile backup_doc = BackupDirectory.createDoc(context, backup_name);
 
-                    // Only create the safety backup when a backup folder is configured; without
+                    // Only create the safety backup when a backup directory is configured; without
                     // one there is no writable destination under scoped storage.
                     if (backup_doc != null) {
                         BackupRestoreTool.BackupConfig backup_config = new BackupRestoreTool.BackupConfig();

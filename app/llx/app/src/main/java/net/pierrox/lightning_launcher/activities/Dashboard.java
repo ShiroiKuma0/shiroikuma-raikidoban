@@ -141,7 +141,7 @@ import net.pierrox.lightning_launcher.configuration.FoldGrid;
 import net.pierrox.lightning_launcher.data.BackupRestoreTool;
 import net.pierrox.lightning_launcher.data.LightningIntent;
 import net.pierrox.lightning_launcher.util.ActionsOverviewDialog;
-import net.pierrox.lightning_launcher.util.BackupFolder;
+import net.pierrox.lightning_launcher.util.BackupDirectory;
 import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.UiPills;
 import net.pierrox.lightning_launcher.util.UiIcons;
@@ -1557,8 +1557,8 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
             Flash.show(this, R.string.fm_migrated);
             return;
         }
-        if (BackupFolder.getDir(this) == null) {
-            Flash.show(this, R.string.fm_need_backup_folder);
+        if (BackupDirectory.getDir(this) == null) {
+            Flash.show(this, R.string.fm_need_backup_directory);
             return;
         }
         UiDialogStyler.show(new AlertDialog.Builder(this)
@@ -1584,7 +1584,7 @@ public class Dashboard extends ResourceWrapperActivity implements OnLongClickLis
         try {
             String name = "pre-foldmatrix-"
                     + new java.text.SimpleDateFormat("yyyy-MM-dd HH-mm").format(new java.util.Date()) + ".lla";
-            DocumentFile doc = BackupFolder.createDoc(this, name);
+            DocumentFile doc = BackupDirectory.createDoc(this, name);
             if (doc == null) {
                 return false;
             }

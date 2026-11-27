@@ -1253,7 +1253,7 @@ Oprávnění:
     <string name="fm_migrate_confirm">Zálohovat a přepnout na nativní ovládání složení? Kontroly složení Tasker při načtení a ručně nastavená přejetí na jednotlivých plochách budou odstraněny (lze vrátit ze zálohy). Poté vypněte svůj profil složení v Taskeru.</string>
     <string name="fm_migrating">Migrace…</string>
     <string name="fm_migrated">Nativní ovládání složení je aktivní. Záloha uložena.</string>
-    <string name="fm_need_backup_folder">Nejprve vyberte složku pro zálohy (Záloha a obnovení).</string>
+    <string name="fm_need_backup_directory">Nejprve vyberte adresář pro zálohy (Záloha a obnovení).</string>
     <string name="fm_backup_failed">Záloha selhala — migrace přerušena.</string>
     <string name="llui_title">白い熊 雷起動盤 UI</string>
     <string name="llui_language">Jazyk</string>
@@ -1366,13 +1366,13 @@ Oprávnění:
     <string name="rkb_eim_entry_desc">Zálohuje vše nastavitelné v tomto spouštěči do jednoho .zip a obnoví to.</string>
     <string name="rkb_eim_title">Export / Import</string>
     <string name="rkb_eim_desc">Zaškrtněte, co přenést, a vyexportujte to do jednoho .zip — nebo .zip importujte a obnovte jen tyto části.</string>
-    <string name="rkb_eim_dir">Složka pro zálohy</string>
-    <string name="rkb_eim_dir_unset">Nenastaveno — klepnutím zvolte složku</string>
+    <string name="rkb_eim_dir">Adresář pro zálohy</string>
+    <string name="rkb_eim_dir_unset">Nenastaveno — klepnutím zvolte adresář</string>
     <string name="rkb_eim_dir_regrant">Přístup s instalací zanikl — klepnutím zvolte znovu</string>
-    <string name="rkb_eim_warn_nodir">Není nastavena složka pro zálohy.</string>
-    <string name="rkb_eim_warn_regrant">Složku pro zálohy je třeba zvolit znovu.</string>
-    <string name="backup_folder_regrant">Složka pro zálohy: %s\n\nAndroid nepřenáší přístup ke složce do nové instalace.\nKlepnutím sem ji zvolte znovu.</string>
-    <string name="rkb_eim_warn_none">V této složce zatím není žádná záloha.</string>
+    <string name="rkb_eim_warn_nodir">Není nastaven adresář pro zálohy.</string>
+    <string name="rkb_eim_warn_regrant">Adresář pro zálohy je třeba zvolit znovu.</string>
+    <string name="backup_directory_regrant">Adresář pro zálohy: %s\n\nAndroid nepřenáší přístup k adresáři do nové instalace.\nKlepnutím sem jej zvolte znovu.</string>
+    <string name="rkb_eim_warn_none">V tomto adresáři zatím není žádná záloha.</string>
     <string name="rkb_eim_last">Poslední záloha: %1$s</string>
     <string name="rkb_eim_select_all">Vybrat vše</string>
     <string name="rkb_eim_export">Exportovat</string>
@@ -1427,5 +1427,7 @@ Oprávnění:
     <string name="import_t">Načíst externí soubor</string>
     <string name="br_close">Zavřít</string>
     <string name="br_dir_label">Adresář záloh: %1$s</string>
-    <string name="backup_folder_select">Vybrat adresář pro zálohy</string>
+    <string name="backup_directory_select">Vybrat adresář pro zálohy</string>
+    <string name="backup_directory_none">Není vybrán adresář pro zálohy.\nZvolte nahoře „Vybrat adresář pro zálohy“ a určete, kam se zálohy ukládají.</string>
+    <string name="backup_directory_lost">Adresář pro zálohy už není přístupný. Vyberte jej prosím znovu.</string>
 </resources>

@@ -71,7 +71,7 @@ import net.pierrox.lightning_launcher.data.Folder;
 import net.pierrox.lightning_launcher.data.Item;
 import net.pierrox.lightning_launcher.data.Page;
 import net.pierrox.lightning_launcher.data.RkbExport;
-import net.pierrox.lightning_launcher.util.BackupFolder;
+import net.pierrox.lightning_launcher.util.BackupDirectory;
 import net.pierrox.lightning_launcher.util.Flash;
 import net.pierrox.lightning_launcher.util.ThemedProgressDialog;
 import net.pierrox.lightning_launcher.util.UiDialogStyler;
@@ -100,22 +100,22 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
     private static final int REQUEST_SELECT_PAGES_FOR_EXPORT = 1;
     private static final int REQUEST_SELECT_FILE_TO_IMPORT = 2;
     private static final int REQUEST_SELECT_FILE_TO_LOAD = 3;
-    private static final int REQUEST_PICK_FOLDER = 4;
+    private static final int REQUEST_PICK_DIRECTORY = 4;
 
-    private static final int MENU_PICK_FOLDER = 100;
+    private static final int MENU_PICK_DIRECTORY = 100;
 
     // name dialog modes
     private static final int MODE_BACKUP = 0;
     private static final int MODE_TEMPLATE = 1;
     private static final int MODE_RENAME = 2;
 
-    // value of mPendingExport when no export is waiting for a folder to be picked
+    // value of mPendingExport when no export is waiting for a directory to be picked
     private static final int PENDING_NONE = -1;
 
     private ListView mListView;
     private TextView mEmptyView;
 
-    // The configured backup folder (SAF tree) and its current content. Single source for the list.
+    // The configured backup directory (SAF tree) and its current content. Single source for the list.
     private DocumentFile mArchiveDir;
     private final ArrayList<DocumentFile> mArchives = new ArrayList<>();
 
@@ -123,10 +123,10 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
     private int mPendingExport = PENDING_NONE;
     private String mPendingExportName;
 
-    // currently selected in-folder archive (long press / tap / rename / delete target)
+    // currently selected archive in the directory (long press / tap / rename / delete target)
     private DocumentFile mSelected;
 
-    // ad-hoc restore (file picked outside the configured folder, or opened via ACTION_VIEW)
+    // ad-hoc restore (file picked outside the configured directory, or opened via ACTION_VIEW)
     private Uri mArchiveUri;
     private String mArchiveName;
 
@@ -217,8 +217,8 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         // The backup directory had only an options-menu entry, and this screen has no toolbar to open
         // a menu from: it is a pill of its own, and the chosen directory is named under the pills.
         Button dir = findViewById(R.id.br_dir);
-        dir.setText(R.string.backup_folder_select);
-        dir.setOnClickListener(v -> pickFolder(PENDING_NONE));
+        dir.setText(R.string.backup_directory_select);
+        dir.setOnClickListener(v -> pickDirectory(PENDING_NONE));
         TextView dirPath = findViewById(R.id.br_dir_path);
         dirPath.setTextColor(note);
         dirPath.setCompoundDrawablesRelative(
@@ -357,7 +357,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, MENU_PICK_FOLDER, 0, R.string.backup_folder_select)
+        menu.add(0, MENU_PICK_DIRECTORY, 0, R.string.backup_directory_select)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         net.pierrox.lightning_launcher.util.MenuPills.decorate(this, menu);
         return super.onCreateOptionsMenu(menu);
@@ -365,8 +365,8 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == MENU_PICK_FOLDER) {
-            pickFolder(PENDING_NONE);
+        if (item.getItemId() == MENU_PICK_DIRECTORY) {
+            pickDirectory(PENDING_NONE);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -401,7 +401,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
     private void loadArchivesList() {
         mArchives.clear();
-        mArchiveDir = BackupFolder.getDir(this);
+        mArchiveDir = BackupDirectory.getDir(this);
         findViewById(R.id.br_list_head).setVisibility(View.GONE);
         TextView dirPath = findViewById(R.id.br_dir_path);
         if (mArchiveDir == null) {
@@ -414,17 +414,17 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
         if (mArchiveDir == null) {
             // Two different states, and telling them apart is the whole point: never chosen, or
-            // chosen on a phone that is gone — a backup carries the folder's Uri but no platform can
-            // carry its grant (see SafFolder). The remembered one is named and tappable, and the
+            // chosen on a phone that is gone — a backup carries the directory's Uri but no platform can
+            // carry its grant (see SafDirectory). The remembered one is named and tappable, and the
             // picker opens right there.
-            Uri remembered = BackupFolder.getRememberedUri(this);
+            Uri remembered = BackupDirectory.getRememberedUri(this);
             String path = RkbExport.absolutePathOf(remembered, null);
             if (remembered != null) {
-                mEmptyView.setText(getString(R.string.backup_folder_regrant,
+                mEmptyView.setText(getString(R.string.backup_directory_regrant,
                         path != null ? path : remembered.toString()));
-                mEmptyView.setOnClickListener(v -> pickFolder(PENDING_NONE));
+                mEmptyView.setOnClickListener(v -> pickDirectory(PENDING_NONE));
             } else {
-                mEmptyView.setText(R.string.backup_folder_none);
+                mEmptyView.setText(R.string.backup_directory_none);
                 mEmptyView.setOnClickListener(null);
                 mEmptyView.setClickable(false);
             }
@@ -501,7 +501,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
     @SuppressLint("StaticFieldLeak")
     private void pruneOldBackups() {
         if (mArchiveDir == null) {
-            pickFolder(PENDING_NONE);
+            pickDirectory(PENDING_NONE);
             return;
         }
         // mArchives is sorted newest first, so the first backup found is the one to keep
@@ -617,19 +617,19 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
         return false;
     }
 
-    private void pickFolder(int pendingExport) {
+    private void pickDirectory(int pendingExport) {
         mPendingExport = pendingExport;
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-        // Open at the folder we remember, so re-granting a restored one is a single tap rather than
+        // Open at the directory we remember, so re-granting a restored one is a single tap rather than
         // a walk back down the tree.
-        Uri remembered = BackupFolder.getRememberedUri(this);
+        Uri remembered = BackupDirectory.getRememberedUri(this);
         if (remembered != null) {
             intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, remembered);
         }
-        startActivityForResult(intent, REQUEST_PICK_FOLDER);
+        startActivityForResult(intent, REQUEST_PICK_DIRECTORY);
     }
 
     // 「白い熊 雷起動盤 UI」: give these framework dialogs the themed bordered panel (the yellow
@@ -674,9 +674,9 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                             mPendingExportName = name;
                             selectDesktopsToExport();
                         } else {
-                            DocumentFile doc = BackupFolder.createDoc(BackupRestore.this, name);
+                            DocumentFile doc = BackupDirectory.createDoc(BackupRestore.this, name);
                             if (doc == null) {
-                                Flash.show(BackupRestore.this, getString(R.string.backup_folder_lost), Toast.LENGTH_LONG);
+                                Flash.show(BackupRestore.this, getString(R.string.backup_directory_lost), Toast.LENGTH_LONG);
                             } else {
                                 new BackupTask(doc).execute();
                             }
@@ -740,9 +740,9 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                             switch (i) {
                                 case 0:
                                     // overwrite backup: re-create the document with the same name
-                                    DocumentFile doc = BackupFolder.createDoc(BackupRestore.this, mSelected.getName());
+                                    DocumentFile doc = BackupDirectory.createDoc(BackupRestore.this, mSelected.getName());
                                     if (doc == null) {
-                                        Flash.show(BackupRestore.this, getString(R.string.backup_folder_lost), Toast.LENGTH_LONG);
+                                        Flash.show(BackupRestore.this, getString(R.string.backup_directory_lost), Toast.LENGTH_LONG);
                                     } else {
                                         new BackupTask(doc).execute();
                                     }
@@ -837,10 +837,10 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 all_pages.add(Integer.valueOf(Page.APP_DRAWER_PAGE));
                 all_pages.add(Integer.valueOf(Page.USER_MENU_PAGE));
 
-                DocumentFile target = mPendingExportName == null ? null : BackupFolder.createDoc(this, mPendingExportName);
+                DocumentFile target = mPendingExportName == null ? null : BackupDirectory.createDoc(this, mPendingExportName);
                 mPendingExportName = null;
                 if (target == null) {
-                    Flash.show(this, getString(R.string.backup_folder_lost), Toast.LENGTH_LONG);
+                    Flash.show(this, getString(R.string.backup_directory_lost), Toast.LENGTH_LONG);
                 } else {
                     doExportTemplate(target, all_pages);
                 }
@@ -855,11 +855,11 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
             if (resultCode == RESULT_OK) {
                 confirmRestore(data.getData(), null);
             }
-        } else if (requestCode == REQUEST_PICK_FOLDER) {
+        } else if (requestCode == REQUEST_PICK_DIRECTORY) {
             int pending = mPendingExport;
             mPendingExport = PENDING_NONE;
             if (resultCode == RESULT_OK && data != null && data.getData() != null) {
-                BackupFolder.setTreeUri(this, data.getData());
+                BackupDirectory.setTreeUri(this, data.getData());
                 loadArchivesList();
                 if (pending != PENDING_NONE) {
                     exportArchive(pending);
@@ -883,11 +883,11 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
     /**
      * Start a backup ({@link #MODE_BACKUP}) or a template export ({@link #MODE_TEMPLATE}). If no
-     * backup folder is configured yet, prompt for one first and resume once it has been picked.
+     * backup directory is configured yet, prompt for one first and resume once it has been picked.
      */
     private void exportArchive(int mode) {
-        if (BackupFolder.getDir(this) == null) {
-            pickFolder(mode);
+        if (BackupDirectory.getDir(this) == null) {
+            pickDirectory(mode);
             return;
         }
         mNameDialogMode = mode;
@@ -961,7 +961,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
      * Request the user to pick an external file.
      *
      * @param only_load true to directly restore the file, false to first copy it into the
-     *                  configured backup folder (so it is kept alongside the other archives).
+     *                  configured backup directory (so it is kept alongside the other archives).
      */
     private void selectFileToLoadOrImport(boolean only_load) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -972,8 +972,8 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
 
     @SuppressLint("StaticFieldLeak")
     private void importFile(final Uri uri) {
-        if (BackupFolder.getDir(this) == null) {
-            // no folder to copy into: just restore the picked file directly
+        if (BackupDirectory.getDir(this) == null) {
+            // no directory to copy into: just restore the picked file directly
             confirmRestore(uri, null);
             return;
         }
@@ -992,7 +992,7 @@ public class BackupRestore extends ResourceWrapperActivity implements View.OnCli
                 DocumentFile target = null;
                 try {
                     String name = getNameForUri(uri);
-                    target = BackupFolder.createDoc(BackupRestore.this, name);
+                    target = BackupDirectory.createDoc(BackupRestore.this, name);
                     if (target == null) {
                         return null;
                     }

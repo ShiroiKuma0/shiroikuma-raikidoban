@@ -26,7 +26,7 @@
     <string name="fm_migrate_confirm">バックアップしてからネイティブの折りたたみ制御に切り替えますか？各デスクトップの Tasker 折りたたみチェックと手動スワイプは消去されます（バックアップから復元可能）。完了後、Tasker の折りたたみプロファイルを無効にしてください。</string>
     <string name="fm_migrating">移行中…</string>
     <string name="fm_migrated">ネイティブ折りたたみ制御が有効になりました。バックアップを保存しました。</string>
-    <string name="fm_need_backup_folder">先にバックアップフォルダを選択してください（バックアップと復元）。</string>
+    <string name="fm_need_backup_directory">先にバックアップ先のディレクトリを選択してください（バックアップと復元）。</string>
     <string name="fm_backup_failed">バックアップに失敗しました — 移行を中止しました。</string>
 
     <!-- 「白い熊 雷起動盤 UI」 -->
@@ -1148,13 +1148,13 @@ Mar. 23, 2015 : add translations"</string>
     <string name="rkb_eim_entry_desc">この起動盤で設定できるすべてを 1 つの .zip に保存し、復元します。</string>
     <string name="rkb_eim_title">書き出し・読み込み</string>
     <string name="rkb_eim_desc">持ち出す対象にチェックを入れて 1 つの .zip に書き出す、または .zip を読み込んでその部分だけ復元します。</string>
-    <string name="rkb_eim_dir">保存先フォルダー</string>
-    <string name="rkb_eim_dir_unset">未設定 — タップしてフォルダーを選択</string>
+    <string name="rkb_eim_dir">保存先ディレクトリ</string>
+    <string name="rkb_eim_dir_unset">未設定 — タップしてディレクトリを選択</string>
     <string name="rkb_eim_dir_regrant">アクセス権が失われました — タップして選び直す</string>
-    <string name="rkb_eim_warn_nodir">保存先フォルダーが未設定です。</string>
-    <string name="rkb_eim_warn_regrant">保存先フォルダーを選び直してください。</string>
-    <string name="backup_folder_regrant">保存先フォルダー: %s\n\nAndroid はフォルダーへのアクセス権を新しいインストールへ引き継ぎません。\nここをタップして選び直してください。</string>
-    <string name="rkb_eim_warn_none">このフォルダーにはまだバックアップがありません。</string>
+    <string name="rkb_eim_warn_nodir">保存先ディレクトリが未設定です。</string>
+    <string name="rkb_eim_warn_regrant">保存先ディレクトリを選び直してください。</string>
+    <string name="backup_directory_regrant">保存先ディレクトリ: %s\n\nAndroid はディレクトリへのアクセス権を新しいインストールへ引き継ぎません。\nここをタップして選び直してください。</string>
+    <string name="rkb_eim_warn_none">このディレクトリにはまだバックアップがありません。</string>
     <string name="rkb_eim_last">最終バックアップ: %1$s</string>
     <string name="rkb_eim_select_all">全選択</string>
     <string name="rkb_eim_export">書き出し</string>
@@ -1218,5 +1218,7 @@ Mar. 23, 2015 : add translations"</string>
     <string name="import_t">外部ファイルを読み込む</string>
     <string name="br_close">閉じる</string>
     <string name="br_dir_label">バックアップ先: %1$s</string>
-    <string name="backup_folder_select">バックアップ先を選択</string>
+    <string name="backup_directory_select">バックアップ先を選択</string>
+    <string name="backup_directory_none">バックアップ先が選択されていません。\n上の「バックアップ先を選択」で保存場所を選んでください。</string>
+    <string name="backup_directory_lost">バックアップ先にアクセスできなくなりました。選び直してください。</string>
 </resources>

@@ -36,8 +36,8 @@ import androidx.preference.PreferenceManager;
 import net.pierrox.lightning_launcher.LLApp;
 import net.pierrox.lightning_launcher.configuration.UiConfig;
 import net.pierrox.lightning_launcher.engine.LightningEngine;
-import net.pierrox.lightning_launcher.util.BackupFolder;
-import net.pierrox.lightning_launcher.util.SafFolder;
+import net.pierrox.lightning_launcher.util.BackupDirectory;
+import net.pierrox.lightning_launcher.util.SafDirectory;
 import net.pierrox.lightning_launcher_extreme.R;
 
 import org.json.JSONArray;
@@ -79,9 +79,9 @@ import java.util.zip.ZipOutputStream;
  * under their id, so the importer is a plain "strip the id, write under the base dir" copy.
  *
  * <p>The app's SharedPreferences travel too, as {@code prefs.json} inside {@code settings} — that is
- * where the two backup folders live (the legacy Backup/restore folder and this engine's export
+ * where the two backup directories live (the legacy Backup/restore directory and this engine's export
  * directory), so "all settings" really means all of them. What cannot travel is the SAF <i>grant</i>
- * behind such a folder: see {@link SafFolder}, and {@link #restoreBackupFolder} for the one rule the
+ * behind such a directory: see {@link SafDirectory}, and {@link #restoreBackupDirectory} for the one rule the
  * import follows because of it. The automation token is the deliberate exception — it keeps its own
  * prefs file and never enters a backup, because a backup travels and a secret should not.
  */
@@ -226,7 +226,7 @@ public final class RkbExport {
      * there. {@link #exportDir} is the one that says whether it is usable now.
      */
     public static Uri exportDirUri(Context context) {
-        return SafFolder.parse(eximportPrefs(context).getString(KEY_DIR_URI, null));
+        return SafDirectory.parse(eximportPrefs(context).getString(KEY_DIR_URI, null));
     }
 
     public static void setExportDirUri(Context context, Uri uri) {
@@ -252,7 +252,7 @@ public final class RkbExport {
 
     /**
      * Best-effort real filesystem path of a SAF tree/document, so the panel and the automation reply
-     * can show an absolute path rather than a bare folder label. Only the primary-storage tree can be
+     * can show an absolute path rather than a bare directory label. Only the primary-storage tree can be
      * resolved this way; anything else returns null.
      */
     public static String absolutePathOf(DocumentFile dir, String fileName) {
@@ -260,7 +260,7 @@ public final class RkbExport {
     }
 
     /**
-     * As above from the bare tree Uri, which needs no grant to read — this is how a folder that is
+     * As above from the bare tree Uri, which needs no grant to read — this is how a directory that is
      * only <i>remembered</i> (restored from a backup, not yet re-granted) can still be named on
      * screen instead of showing as unset.
      */
@@ -432,7 +432,7 @@ public final class RkbExport {
                 zipFile(zip, cat.id, base, FileUtils.getStateFile(base), cancel);
                 zipFile(zip, cat.id, base, FileUtils.getStatisticsFile(base), cancel);
                 // Everything the app keeps in SharedPreferences rather than in a config file — the
-                // two backup folders above all, which used to be the one thing a restored install
+                // two backup directories above all, which used to be the one thing a restored install
                 // silently lost.
                 writeEntry(zip, PREFS_ENTRY, dumpAppPrefs(context).getBytes(StandardCharsets.UTF_8));
                 break;
@@ -876,7 +876,7 @@ public final class RkbExport {
         return context.getApplicationContext().getSharedPreferences(UiConfig.PREFS, Context.MODE_PRIVATE);
     }
 
-    /** The app's default prefs file — where the legacy Backup/restore folder and odds and ends live. */
+    /** The app's default prefs file — where the legacy Backup/restore directory and odds and ends live. */
     private static SharedPreferences defaultPrefs(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
     }
@@ -898,9 +898,9 @@ public final class RkbExport {
     }
 
     /**
-     * Merge {@code prefs.json} back in. The two SAF folder Uris are pulled out of the plain merge
-     * and handled by {@link #restoreBackupFolder} / {@link #restoreExportDir}, which know that a
-     * folder is a Uri plus a grant and that only the Uri can travel.
+     * Merge {@code prefs.json} back in. The two SAF directory Uris are pulled out of the plain merge
+     * and handled by {@link #restoreBackupDirectory} / {@link #restoreExportDir}, which know that a
+     * directory is a Uri plus a grant and that only the Uri can travel.
      */
     private static int mergeAppPrefs(Context context, String json) {
         int n = 0;
@@ -908,8 +908,8 @@ public final class RkbExport {
             JSONObject obj = new JSONObject(json);
             JSONObject def = obj.optJSONObject(PREFS_DEFAULT);
             if (def != null) {
-                n += mergePrefs(defaultPrefs(context), def, BackupFolder.PREF_KEY);
-                n += restoreBackupFolder(context, prefString(def, BackupFolder.PREF_KEY));
+                n += mergePrefs(defaultPrefs(context), def, BackupDirectory.PREF_KEY);
+                n += restoreBackupDirectory(context, prefString(def, BackupDirectory.PREF_KEY));
             }
             JSONObject eximport = obj.optJSONObject(PREFS_EXIMPORT);
             if (eximport != null) {
@@ -923,21 +923,21 @@ public final class RkbExport {
     }
 
     /**
-     * Bring back a remembered folder, under the one rule {@link SafFolder} forces on us: take the
-     * grant when the platform still holds one — a restore onto the same install, where the folder
+     * Bring back a remembered directory, under the one rule {@link SafDirectory} forces on us: take the
+     * grant when the platform still holds one — a restore onto the same install, where the directory
      * then simply works again — and otherwise keep the Uri <b>only when nothing usable is configured
-     * here</b>. A pointer carried from another device must never evict a folder that works: landing
-     * on a new phone where a folder has already been chosen, the archive's dead Uri would break the
-     * very next export. When it is kept, it is kept as a remembered folder — named on screen, and
+     * here</b>. A pointer carried from another device must never evict a directory that works: landing
+     * on a new phone where a directory has already been chosen, the archive's dead Uri would break the
+     * very next export. When it is kept, it is kept as a remembered directory — named on screen, and
      * seeding the picker so one tap re-grants it.
      */
-    private static int restoreBackupFolder(Context context, String stored) {
-        Uri uri = SafFolder.parse(stored);
+    private static int restoreBackupDirectory(Context context, String stored) {
+        Uri uri = SafDirectory.parse(stored);
         if (uri == null) {
             return 0;
         }
-        if (SafFolder.reclaim(context, uri) || BackupFolder.getTreeUri(context) == null) {
-            BackupFolder.remember(context, uri);
+        if (SafDirectory.reclaim(context, uri) || BackupDirectory.getTreeUri(context) == null) {
+            BackupDirectory.remember(context, uri);
             return 1;
         }
         return 0;
@@ -945,11 +945,11 @@ public final class RkbExport {
 
     /** As above for this engine's own export directory. */
     private static int restoreExportDir(Context context, String stored) {
-        Uri uri = SafFolder.parse(stored);
+        Uri uri = SafDirectory.parse(stored);
         if (uri == null) {
             return 0;
         }
-        if (SafFolder.reclaim(context, uri) || exportDir(context) == null) {
+        if (SafDirectory.reclaim(context, uri) || exportDir(context) == null) {
             setExportDirUri(context, uri);
             return 1;
         }
@@ -1004,7 +1004,7 @@ public final class RkbExport {
 
     /**
      * As above from a parsed dump, optionally holding one key back for the caller to write itself —
-     * that is how the SAF folder Uris skip the blind merge and go through their own rule.
+     * that is how the SAF directory Uris skip the blind merge and go through their own rule.
      */
     private static int mergePrefs(SharedPreferences sp, JSONObject obj, String skipKey) {
         int n = 0;

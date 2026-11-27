@@ -31,12 +31,12 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
 /**
- * Stores and resolves the user-chosen backup folder, granted through the Storage Access
- * Framework (ACTION_OPEN_DOCUMENT_TREE). The folder is the single source for the backup
+ * Stores and resolves the user-chosen backup directory, granted through the Storage Access
+ * Framework (ACTION_OPEN_DOCUMENT_TREE). The directory is the single source for the backup
  * archive list, and the target for new backups. This avoids the legacy WRITE_EXTERNAL_STORAGE
  * path which no longer works under scoped storage (targetSdk 30+).
  */
-public final class BackupFolder {
+public final class BackupDirectory {
 
     /** MIME type used when creating backup documents. */
     public static final String MIME_TYPE = "application/octet-stream";
@@ -44,11 +44,11 @@ public final class BackupFolder {
     /**
      * Where the chosen tree Uri is remembered — in the app's default preferences, and therefore part
      * of what a backup carries (see {@code RkbExport}'s {@code prefs.json}). The grant that makes it
-     * usable is not: see {@link SafFolder}.
+     * usable is not: see {@link SafDirectory}.
      */
     public static final String PREF_KEY = "backup_folder_uri";
 
-    private BackupFolder() {
+    private BackupDirectory() {
     }
 
     /**
@@ -57,16 +57,16 @@ public final class BackupFolder {
      */
     public static Uri getTreeUri(Context context) {
         Uri uri = getRememberedUri(context);
-        return SafFolder.hasGrant(context, uri) ? uri : null;
+        return SafDirectory.hasGrant(context, uri) ? uri : null;
     }
 
     /**
-     * The folder the user last chose, grant or no grant — what a restored backup brings back, and
-     * what the screen shows instead of "no folder selected" so the picker can open right there.
-     * Never use it to write: {@link #getDir} is the only thing that says a folder is usable.
+     * The directory the user last chose, grant or no grant — what a restored backup brings back, and
+     * what the screen shows instead of "no directory selected" so the picker can open right there.
+     * Never use it to write: {@link #getDir} is the only thing that says a directory is usable.
      */
     public static Uri getRememberedUri(Context context) {
-        return SafFolder.parse(PreferenceManager.getDefaultSharedPreferences(context)
+        return SafDirectory.parse(PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(PREF_KEY, null));
     }
 
@@ -75,13 +75,13 @@ public final class BackupFolder {
      * read/write permission so it survives reboots.
      */
     public static void setTreeUri(Context context, Uri treeUri) {
-        SafFolder.reclaim(context, treeUri);
+        SafDirectory.reclaim(context, treeUri);
         remember(context, treeUri);
     }
 
     /**
-     * Write down the folder without asking for a grant — for a Uri restored from a backup, where
-     * asking would throw. {@link SafFolder#reclaim} has already had its chance by then.
+     * Write down the directory without asking for a grant — for a Uri restored from a backup, where
+     * asking would throw. {@link SafDirectory#reclaim} has already had its chance by then.
      */
     public static void remember(Context context, Uri treeUri) {
         PreferenceManager.getDefaultSharedPreferences(context)
@@ -91,8 +91,8 @@ public final class BackupFolder {
     }
 
     /**
-     * @return a writable {@link DocumentFile} for the configured backup folder, or null if no
-     * folder is configured or it is no longer accessible.
+     * @return a writable {@link DocumentFile} for the configured backup directory, or null if no
+     * directory is configured or it is no longer accessible.
      */
     public static DocumentFile getDir(Context context) {
         Uri uri = getTreeUri(context);
@@ -107,10 +107,10 @@ public final class BackupFolder {
     }
 
     /**
-     * Create a new backup document with the given display name in the configured folder,
+     * Create a new backup document with the given display name in the configured directory,
      * replacing any existing file with the same name.
      *
-     * @return the created document, or null if no folder is configured/accessible.
+     * @return the created document, or null if no directory is configured/accessible.
      */
     public static DocumentFile createDoc(Context context, String name) {
         DocumentFile dir = getDir(context);

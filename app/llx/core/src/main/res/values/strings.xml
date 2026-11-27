@@ -503,9 +503,9 @@
 <string name="backup_done">Backup saved to:\n%s</string>
 <string name="backup_error">Backup error, please check that there is enough storage space on the sdcard</string>
 <string name="restore_error">Restore error, please check that the backup archive is valid and can be read</string>
-<string name="backup_folder_select">Select backup directory</string>
-<string name="backup_folder_none">No backup folder selected.\nUse the menu to choose where backups are stored.</string>
-<string name="backup_folder_lost">The backup folder is no longer accessible. Please select it again.</string>
+<string name="backup_directory_select">Select backup directory</string>
+<string name="backup_directory_none">No backup directory selected.\nUse “Select backup directory” above to choose where backups are stored.</string>
+<string name="backup_directory_lost">The backup directory is no longer accessible. Please select it again.</string>
 
 <string name="confirm_delete">Do you really want to delete this desktop?\nThis cannot be undone.</string>
 
@@ -1160,7 +1160,7 @@
     <string name="fm_migrate_confirm">Back up, then switch to native fold control? Your per-desktop Tasker on-load fold checks and hand-wired swipes will be cleared (reversible from the backup). Afterwards, disable your Tasker fold profile.</string>
     <string name="fm_migrating">Migrating…</string>
     <string name="fm_migrated">Native fold control active. Backup saved.</string>
-    <string name="fm_need_backup_folder">Choose a backup folder first (Backup &amp; restore).</string>
+    <string name="fm_need_backup_directory">Choose a backup directory first (Backup &amp; restore).</string>
     <string name="fm_backup_failed">Backup failed — migration aborted.</string>
 
     <!-- 「白い熊 雷起動盤 UI」: launcher appearance (fonts + colours) -->
@@ -1512,11 +1512,11 @@
     <string name="rkb_eim_title">Export / Import</string>
     <string name="rkb_eim_desc">Tick what to carry, then export it as a single .zip — or import one and restore just those parts.</string>
     <string name="rkb_eim_dir">Backup directory</string>
-    <string name="rkb_eim_dir_unset">Not set — tap to choose a folder</string>
+    <string name="rkb_eim_dir_unset">Not set — tap to choose a directory</string>
     <string name="rkb_eim_dir_regrant">Access lost with the install — tap to choose it again</string>
     <string name="rkb_eim_warn_nodir">No backup directory set.</string>
     <string name="rkb_eim_warn_regrant">The backup directory has to be chosen again.</string>
-    <string name="backup_folder_regrant">Backup folder: %s\n\nAndroid does not carry folder access over to a new install.\nTap here to choose it again.</string>
+    <string name="backup_directory_regrant">Backup directory: %s\n\nAndroid does not carry directory access over to a new install.\nTap here to choose it again.</string>
     <string name="rkb_eim_warn_none">No backup in this directory yet.</string>
     <string name="rkb_eim_last">Last backup: %1$s</string>
     <string name="rkb_eim_select_all">Select all</string>
