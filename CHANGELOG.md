@@ -11,6 +11,31 @@ Lightning Launcher eXtreme 14.3.
 
 ---
 
+## 白い熊 雷起動盤 14.3.7+023 — 2026-11-27
+
+The backup-directory texts say **directory**, and two of them are no longer English-only.
+
+**Still the release key from `14.3.7+003`**, so it installs over `+021`. Build `+022` was a test
+build and was not released.
+
+### Backup screen and Export / Import
+
+- The texts about the backup directory say “directory” in English — none selected, no longer
+  accessible, “choose one first”, “Not set — tap to choose a directory”, and the re-grant text —
+  and the matching word in Japanese (ディレクトリ), Czech (adresář) and Russian (каталог), the
+  Export / Import panel's directory texts included.
+- “No backup directory selected” no longer says “Use the menu”: it points at the
+  “Select backup directory” pill on the screen.
+- The “none selected” and “no longer accessible” texts now have Japanese, Czech and Russian.
+
+### Under the hood
+
+- `BackupFolder` and `SafFolder` are renamed `BackupDirectory` and `SafDirectory`, together with
+  their methods, constants and string names. The stored preference key keeps its value, so the
+  chosen backup directory survives the update and older backups restore as before.
+
+---
+
 ## 白い熊 雷起動盤 14.3.7+021 — 2026-11-27
 
 The backup dialog gets a pill to **choose the backup directory**, and names the directory in use.
