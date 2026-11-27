@@ -11,6 +11,58 @@ Lightning Launcher eXtreme 14.3.
 
 ---
 
+## 白い熊 雷起動盤 14.3.7+020 — 2026-11-27
+
+The **“Select an action”** chooser becomes a folding list with a chip index, and the **backup
+screen** becomes a framed dialog with its list in a box of its own.
+
+**Still the release key from `14.3.7+003`**, so it installs over `+016`. Builds `+017` to `+019` were
+test builds and were not released.
+
+### Select an action (「動作を選択」)
+
+- The one long flat list is now **folding groups under a chip index**: a wrapping row of small
+  chips on top, one per group, each with the group's icon; a tap on a chip unfolds its group and
+  scrolls to it. The chips are not draggable here.
+- “Nothing” and 「貼り付け」 stay above the groups; then the seven groups — launch and apps,
+  navigation, menu and status bar, folders, edition, external, advanced — each with a bold,
+  underlined heading, its icon, and › when folded or ⌄ when open.
+- Every group starts folded. The fold state is remembered between openings, in the UI page's own
+  preferences, so it travels in the export.
+- **Every action has its own icon, coloured by what it does**, in place of one icon per group; the
+  icons stand in one column at the dialog's edge and the labels share one edge. The empty gutter of
+  the old preference-row layout is gone.
+- A **Cancel** pill at the bottom of the dialog.
+- The group names now have Japanese and Russian, and “Show app shortcuts” has Japanese, Russian and
+  Czech.
+
+### Backup screen
+
+- The screen is an **almost-screen-size dialog**: a panel in the configurable dialog frame, with
+  the dimmed launcher around it. A tap outside the panel, the Back key and a new **Close** pill
+  close it.
+- A heading, 「バックアップと復元」, with its icon.
+- The four actions are **regular pills that hug their label**, in a wrapping row, each with a
+  role-coloured icon inside and a › where it opens something. They use the regular text font at
+  15 sp — no longer the Buttons font and size of the UI page, which made them fill half the screen
+  and cut their labels. “Create a backup” is the thick, bold one; “Prune old backups” stays red.
+- An explanation line under the pills, in dim gold with a left rule.
+- The list of backups has its own heading with the count, and sits in a **framed box that scrolls
+  by itself**; everything above it stays in place.
+- Each backup is one row: date and time in bold, the file name beneath in dim gold, a › at the
+  right, and a “newest” mark on the first. A file whose name carries no date stamp shows its name
+  in bold and its date beneath.
+- “Load an external file” now has Japanese, Czech and Russian.
+
+### Colours
+
+- The defaults of four menu-icon roles move to the values the black-yellow look settled on
+  2026-11-23: connect **heavy green** `#00A550` (was pure green), message **heavy blue** `#0066FF`,
+  contact **light blue** `#00B0FF` (was cyan), block **rose** `#FF3D7F` (was magenta). A colour set
+  on the UI page is kept.
+
+---
+
 ## 白い熊 雷起動盤 14.3.7+016 — 2026-11-20
 
 The settings bubble gains a row that opens the **「白い熊 雷起動盤 UI」** page directly.
