@@ -11,6 +11,24 @@ Lightning Launcher eXtreme 14.3.
 
 ---
 
+## 白い熊 雷起動盤 14.3.7+021 — 2026-11-27
+
+The backup dialog gets a pill to **choose the backup directory**, and names the directory in use.
+
+**Still the release key from `14.3.7+003`**, so it installs over `+020`.
+
+### Backup screen
+
+- A fifth regular pill in the top row, **“Select backup directory”** (「バックアップ先を選択」),
+  opens the directory picker. Until now that entry existed only in the screen's options menu, and
+  the screen has no toolbar to open a menu from — the directory could be chosen only through the
+  prompt shown while none was set.
+- Under the pills a dim-gold line with a directory icon names the backup directory in use
+  (「バックアップ先: …」). It is hidden while none is set.
+- The string now has Japanese, Czech and Russian, and the English one says “directory”.
+
+---
+
 ## 白い熊 雷起動盤 14.3.7+020 — 2026-11-27
 
 The **“Select an action”** chooser becomes a folding list with a chip index, and the **backup
